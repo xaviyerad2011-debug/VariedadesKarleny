@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,19 +13,27 @@
 <body>
 
     <header class="barra">
-        <div class="logo">🛍️ Variedades Karleny</div>
+
+        <div class="logo">
+            🛍️ Variedades Karleny
+        </div>
 
         <button class="boton-menu" onclick="mostrarMensaje()">
             Entrar
         </button>
+
     </header>
+
 
     <main>
 
         <section class="inicio">
+
             <div class="contenido">
 
-                <p class="pequeno">✨ Bienvenido</p>
+                <p class="pequeno">
+                    ✨ Bienvenido
+                </p>
 
                 <h1>
                     Todo lo que buscas,
@@ -41,39 +50,69 @@
                 </button>
 
             </div>
+
         </section>
 
-    <section id="productos" class="productos">
 
-    <h2>🛍️ Nuestros productos</h2>
+        <section id="productos" class="productos">
 
-    <p>Descubre todo lo que tenemos para ti.</p>
+            <h2>
+                🛍️ Nuestros productos
+            </h2>
 
-    <div class="producto">
+            <p>
+                Descubre todo lo que tenemos para ti.
+            </p>
 
-        <img src="imagenes/labial.jpg" alt="Labial">
 
-        <h3>Labial</h3>
+            <!-- LABIAL -->
 
-        <p class="precio">$15.000</p>
+            <div class="producto">
 
-    </div>
-    <div class="producto">
+                <img src="imagenes/labial.jpg" alt="Labial">
 
-        <img src="imagenes/peluche.jpg" alt="peluche">
+                <h3>
+                    Labial
+                </h3>
 
-        <h3>peluche</h3>
+                <p class="precio">
+                    $15.000
+                </p>
 
-        <p class="precio">$25.000</p>
-        <button onclick="comprarWhatsApp('Peluche', '25000')">
-        📲 Comprar por WhatsApp
-    </button>
+                <button onclick="comprarWhatsApp('Labial', '15000')">
+                    📲 Comprar por WhatsApp
+                </button>
 
-    </div>
+            </div>
 
-</section></main>
+
+            <!-- PELUCHE -->
+
+            <div class="producto">
+
+                <img src="imagenes/peluche.jpg" alt="Peluche">
+
+                <h3>
+                    Peluche
+                </h3>
+
+                <p class="precio">
+                    $25.000
+                </p>
+
+                <button onclick="comprarWhatsApp('Peluche', '25000')">
+                    📲 Comprar por WhatsApp
+                </button>
+
+            </div>
+
+        </section>
+
+    </main>
+
 
     <script src="script.js"></script>
 
 </body>
+
 </html>
