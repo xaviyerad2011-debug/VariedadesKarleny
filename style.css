@@ -304,3 +304,232 @@ h1 span {
         grid-template-columns: 1fr;
     }
 }
+/* ==========================================
+   CARRITO
+========================================== */
+
+#ventanaCarrito {
+
+    position: fixed;
+
+    inset: 0;
+
+    background: rgba(0, 0, 0, 0.55);
+
+    display: none;
+
+    justify-content: center;
+
+    align-items: center;
+
+    z-index: 9999;
+
+}
+
+
+.carrito {
+
+    background: white;
+
+    width: 90%;
+
+    max-width: 650px;
+
+    max-height: 85vh;
+
+    overflow-y: auto;
+
+    border-radius: 22px;
+
+    padding: 25px;
+
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+
+}
+
+
+.carrito-cabeza {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-bottom: 20px;
+
+}
+
+
+.carrito-cabeza h2 {
+
+    margin: 0;
+
+}
+
+
+.carrito-cabeza button {
+
+    border: none;
+
+    background: transparent;
+
+    font-size: 22px;
+
+    cursor: pointer;
+
+}
+
+
+.item-carrito {
+
+    display: grid;
+
+    grid-template-columns: 1fr auto auto;
+
+    gap: 15px;
+
+    align-items: center;
+
+    padding: 15px 0;
+
+    border-bottom: 1px solid #eee;
+
+}
+
+
+.item-info {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 5px;
+
+}
+
+
+.cantidad {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+}
+
+
+.cantidad button {
+
+    width: 32px;
+
+    height: 32px;
+
+    border: none;
+
+    border-radius: 8px;
+
+    cursor: pointer;
+
+    font-size: 18px;
+
+}
+
+
+.subtotal {
+
+    font-weight: bold;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+}
+
+
+.eliminar {
+
+    border: none;
+
+    background: transparent;
+
+    cursor: pointer;
+
+}
+
+
+.carrito-total {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    font-size: 21px;
+
+    margin-top: 20px;
+
+    padding-top: 20px;
+
+    border-top: 2px solid #eee;
+
+}
+
+
+.carrito-botones {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 10px;
+
+    margin-top: 20px;
+
+}
+
+
+.carrito-botones button {
+
+    border: none;
+
+    border-radius: 12px;
+
+    padding: 13px;
+
+    cursor: pointer;
+
+    font-size: 15px;
+
+}
+
+
+.boton-comprar {
+
+    background: #25D366;
+
+    color: white;
+
+    font-weight: bold;
+
+}
+
+
+.carrito-vacio {
+
+    text-align: center;
+
+    padding: 40px 10px;
+
+    font-size: 18px;
+
+}
+
+
+.boton-carrito {
+
+    cursor: pointer;
+
+}
