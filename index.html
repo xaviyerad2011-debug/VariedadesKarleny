@@ -2,136 +2,294 @@
 <html lang="es">
 
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Variedades Karleny</title>
 
     <link rel="stylesheet" href="style.css">
+
 </head>
+
 
 <body>
 
-    <header class="barra">
 
-        <div class="logo">
-            🛍️ Variedades Karleny
-        </div>
+<header class="barra">
 
-        <button class="boton-menu" onclick="mostrarMensaje()">
-            Entrar
-        </button>
-
-    </header>
+    <div class="logo">
+        🛍️ Variedades Karleny
+    </div>
 
 
-    <main>
-
-        <section class="inicio">
-
-            <div class="contenido">
-
-                <p class="pequeno">
-                    ✨ Bienvenido
-                </p>
-
-                <h1>
-                    Todo lo que buscas,
-                    <span>en un solo lugar.</span>
-                </h1>
-
-                <p class="descripcion">
-                    Descubre nuestros productos y encuentra
-                    algo especial para ti.
-                </p>
-
-                <button class="boton-principal" onclick="mostrarMensaje()">
-                    🛍️ Ver productos
-                </button>
-
-            </div>
-
-        </section>
+    <button class="boton-menu" onclick="mostrarMensaje()">
+        Entrar
+    </button>
 
 
-        <section id="productos" class="productos">
+    <button class="boton-carrito" onclick="abrirCarrito()">
+        🛒 Carrito (<span id="cantidadCarrito">0</span>)
+    </button>
 
-            <h2>
-                🛍️ Nuestros productos
-            </h2>
+</header>
 
-            <p>
-                Descubre todo lo que tenemos para ti.
+
+
+<main>
+
+
+    <!-- INICIO -->
+
+    <section class="inicio">
+
+        <div class="contenido">
+
+            <p class="pequeno">
+                ✨ Bienvenido
             </p>
 
 
-            <!-- LABIAL -->
+            <h1>
 
-            <div class="producto">
+                Todo lo que buscas,
 
-                <img src="imagenes/labial.jpg" alt="Labial">
+                <span>
+                    en un solo lugar.
+                </span>
 
-                <h3>
-                    Labial
-                </h3>
-
-                <p class="precio">
-                    $15.000
-                </p>
-
-                <button onclick="comprarWhatsApp('Labial', '15000')">
-                    📲 Comprar por WhatsApp
-                </button>
-
-            </div>
+            </h1>
 
 
-            <!-- PELUCHE -->
+            <p class="descripcion">
 
-            <div class="producto">
+                Descubre nuestros productos y encuentra
+                algo especial para ti.
 
-                <img src="imagenes/peluche.jpg" alt="Peluche">
-
-                <h3>
-                    Peluche
-                </h3>
-
-                <p class="precio">
-                    $25.000
-                </p>
-
-                <button onclick="comprarWhatsApp('Peluche', '25000')">
-                    📲 Comprar por WhatsApp
-                </button>
-
-            </div>
-
-            <!-- karite -->
-
-            <div class="producto">
-
-                <img src="imagenes/karite.jpg" alt="jabon karite">
-
-                <h3>
-                    24k
-                </h3>
-
-                <p class="precio">
-                    $7.000
-                </p>
-
-                <button onclick="comprarWhatsApp('jabon 24k', '7000')">
-                    📲 Comprar por WhatsApp
-                </button>
-
-            </div>
-
-        </section>
-
-    </main>
+            </p>
 
 
-    <script src="script.js"></script>
+            <button
+                class="boton-principal"
+                onclick="mostrarMensaje()">
+
+                🛍️ Ver productos
+
+            </button>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- PRODUCTOS -->
+
+    <section id="productos" class="productos">
+
+
+        <h2>
+            🛍️ Nuestros productos
+        </h2>
+
+
+        <p>
+            Descubre todo lo que tenemos para ti.
+        </p>
+
+
+
+        <!-- LABIAL -->
+
+        <div class="producto">
+
+            <img
+                src="imagenes/labial.jpg"
+                alt="Labial">
+
+
+            <h3>
+                Labial
+            </h3>
+
+
+            <p class="precio">
+                $15.000
+            </p>
+
+
+            <button
+                onclick="agregarAlCarrito('Labial', 15000)">
+
+                🛒 Agregar al carrito
+
+            </button>
+
+        </div>
+
+
+
+        <!-- PELUCHE -->
+
+        <div class="producto">
+
+            <img
+                src="imagenes/peluche.jpg"
+                alt="Peluche">
+
+
+            <h3>
+                Peluche
+            </h3>
+
+
+            <p class="precio">
+                $25.000
+            </p>
+
+
+            <button
+                onclick="agregarAlCarrito('Peluche', 25000)">
+
+                🛒 Agregar al carrito
+
+            </button>
+
+        </div>
+
+
+
+        <!-- JABÓN 24K -->
+
+        <div class="producto">
+
+            <img
+                src="imagenes/karite.jpg"
+                alt="Jabón 24k">
+
+
+            <h3>
+                24k
+            </h3>
+
+
+            <p class="precio">
+                $7.000
+            </p>
+
+
+            <button
+                onclick="agregarAlCarrito('Jabón 24k', 7000)">
+
+                🛒 Agregar al carrito
+
+            </button>
+
+        </div>
+
+
+    </section>
+
+
+</main>
+
+
+
+<!-- CARRITO -->
+
+<div id="ventanaCarrito">
+
+
+    <div class="carrito">
+
+
+        <!-- CABECERA -->
+
+        <div class="carrito-cabeza">
+
+            <h2>
+                🛒 Mi carrito
+            </h2>
+
+
+            <button onclick="cerrarCarrito()">
+
+                ✕
+
+            </button>
+
+        </div>
+
+
+
+        <!-- PRODUCTOS DEL CARRITO -->
+
+        <div id="listaCarrito">
+
+        </div>
+
+
+
+        <!-- TOTAL -->
+
+        <div class="carrito-total">
+
+            <strong>
+                Total:
+            </strong>
+
+
+            <span id="totalCarrito">
+                $0
+            </span>
+
+        </div>
+
+
+
+        <!-- BOTONES -->
+
+        <div class="carrito-botones">
+
+
+            <button onclick="cerrarCarrito()">
+
+                🛍️ Seguir comprando
+
+            </button>
+
+
+            <button onclick="vaciarCarrito()">
+
+                🗑️ Vaciar carrito
+
+            </button>
+
+
+            <button
+                class="boton-comprar"
+                onclick="comprarCarritoWhatsApp()">
+
+                📲 Comprar por WhatsApp
+
+            </button>
+
+
+        </div>
+
+
+    </div>
+
+
+</div>
+
+
+
+<!-- JAVASCRIPT -->
+
+<script src="script.js"></script>
+
 
 </body>
 
