@@ -85,6 +85,45 @@
 
 
     <!-- PRODUCTOS -->
+    <!-- ==========================================
+     PANEL DEL DUEÑO 👑
+========================================== -->
+
+<div id="panelAdmin" style="display: none;">
+
+    <h2>👑 Panel del dueño</h2>
+
+    <input type="file" id="fotoProducto" accept="image/*">
+
+    <input
+        type="text"
+        id="nombreProducto"
+        placeholder="Nombre del producto"
+    >
+
+    <input
+        type="number"
+        id="precioProducto"
+        placeholder="Precio"
+    >
+
+    <input
+        type="text"
+        id="descripcionProducto"
+        placeholder="Descripción"
+    >
+
+    <button onclick="agregarProducto()">
+        ➕ Agregar producto
+    </button>
+
+    <button onclick="cerrarSesion()">
+        🚪 Cerrar sesión
+    </button>
+
+    <p id="mensajeProducto"></p>
+
+</div>
 
     <section id="productos" class="productos">
 
