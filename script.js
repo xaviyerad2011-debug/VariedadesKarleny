@@ -39,10 +39,22 @@ const db = getFirestore(app);
 const UID_DUENO = "vKixdwAJz9MfApZV81FPOiPybFr2";
 
 onAuthStateChanged(auth, (usuario) => {
-    if (usuario) {
-        console.log("Usuario conectado:", usuario.uid);
+
+    const panel = document.getElementById("panelAdmin");
+
+    if (usuario && usuario.uid === UID_DUENO) {
+        console.log("Dueño conectado:", usuario.uid);
+
+        if (panel) {
+            panel.style.display = "block";
+        }
+
     } else {
-        console.log("No hay usuario conectado");
+        console.log("No hay dueño conectado");
+
+        if (panel) {
+            panel.style.display = "none";
+        }
     }
 });
 
