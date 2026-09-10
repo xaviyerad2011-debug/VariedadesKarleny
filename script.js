@@ -92,7 +92,6 @@ async function iniciarSesion() {
         mensaje.textContent = "✅ ¡Bienvenido!";
         cerrarLogin();
 
-        mostrarPanelAdmin();
 
     } catch (error) {
         console.error(error);
@@ -531,5 +530,133 @@ function comprarCarritoWhatsApp() {
 
 
     window.location.href = enlace;
+    // ==========================================
+// AGREGAR PRODUCTO 👑🛍️
+// ==========================================
+
+async function agregarProducto() {
+
+    const foto = document.getElementById("fotoProducto").files[0];
+    const nombre = document.getElementById("nombreProducto").value.trim();
+    const precio = Number(document.getElementById("precioProducto").value);
+    const descripcion = document.getElementById("descripcionProducto").value.trim();
+    const mensaje = document.getElementById("mensajeProducto");
+
+    if (!foto || !nombre || !precio) {
+        mensaje.textContent = "⚠️ Completa la foto, nombre y precio.";
+        return;
+    }
+
+    if (!auth.currentUser || auth.currentUser.uid !== UID_DUENO) {
+        mensaje.textContent = "❌ No tienes permiso.";
+        return;
+    }
+
+    try {
+
+        mensaje.textContent = "📸 Subiendo imagen...";
+
+        // Subir imagen a Cloudinary
+        const datos = new FormData();
+        datos.append("file", foto);
+        datos.append("upload_preset", "productos");
+
+        const respuesta = await fetch(
+            "https://api.cloudinary.com/v1_1/ktxu8h5o/image/upload",
+            {
+                method: "POST",
+                body: datos
+            }
+        );
+
+        const imagen = await respuesta.json();
+
+        if (!imagen.secure_url) {
+            throw new Error("No se pudo subir la imagen.");
+        }
+
+        mensaje.textContent = "🗄️ Guardando producto...";
+
+        // Guardar producto en Firestore
+        await addDoc(collection(db, "productos"), {
+            nombre: nombre,
+            precio: precio,
+            descripcion: descripcion,
+            imagen: imagen.secure_url,
+            creado: new Date()
+        });
+
+        mensaje.textContent = "✅ ¡Producto agregado correctamente!";
+
+        // Limpiar formulario
+        document.getElementById("fotoProducto").value = "";
+        document.getElementById("nombreProducto").value = "";
+        document.getElementById("precioProducto").value = "";
+        document.getElementById("descripcionProducto").value = "";
+
+        // Actualizar productos
+        cargarProductos();
+
+    } catch (error) {
+
+        console.error(error);
+        mensaje.textContent = "❌ Ocurrió un error al agregar el producto.";
+
+    }
+}
+
+
+// ==========================================
+// CARGAR PRODUCTOS DE FIRESTORE 🛍️
+// ==========================================
+
+async function cargarProductos() {
+
+    const seccion = document.getElementById("productos");
+
+    if (!seccion) return;
+
+    try {
+
+        const consulta = await getDocs(
+            collection(db, "productos")
+        );
+
+        consulta.forEach((documento) => {
+
+            const producto = documento.data();
+
+            const tarjeta = document.createElement("div");
+            tarjeta.className = "producto producto-firebase";
+
+            tarjeta.innerHTML = `
+                <img src="${producto.imagen}" alt="${producto.nombre}">
+
+                <h3>${producto.nombre}</h3>
+
+                <p>${producto.descripcion || ""}</p>
+
+                <p class="precio">
+                    $${Number(producto.precio).toLocaleString("es-CO")}
+                </p>
+
+                <button onclick="agregarAlCarrito('${producto.nombre.replace(/'/g, "\\'")}', ${producto.precio})">
+                    🛒 Agregar al carrito
+                </button>
+            `;
+
+            seccion.appendChild(tarjeta);
+        });
+
+    } catch (error) {
+
+        console.error("Error cargando productos:", error);
+
+    }
+}
+
+
+// Cargar productos al abrir la página
+cargarProductos();
 
 }
