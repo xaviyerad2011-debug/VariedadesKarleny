@@ -9,7 +9,9 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
 import {
     getAuth,
-    onAuthStateChanged
+    onAuthStateChanged,
+    signInWithEmailAndPassword,
+    signOut
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 import {
     getFirestore,
@@ -50,7 +52,45 @@ onAuthStateChanged(auth, (usuario) => {
 // ==========================================
 
 let carrito = [];
+// ==========================================
+// LOGIN DEL DUEÑO 🔐
+// ==========================================
 
+function abrirLogin() {
+    document.getElementById("ventanaLogin").style.display = "flex";
+}
+
+function cerrarLogin() {
+    document.getElementById("ventanaLogin").style.display = "none";
+}
+
+async function iniciarSesion() {
+    const correo = document.getElementById("correoLogin").value;
+    const contrasena = document.getElementById("contrasenaLogin").value;
+    const mensaje = document.getElementById("mensajeLogin");
+
+    if (!correo || !contrasena) {
+        mensaje.textContent = "⚠️ Escribe tu correo y contraseña.";
+        return;
+    }
+
+    try {
+        await signInWithEmailAndPassword(auth, correo, contrasena);
+
+        mensaje.textContent = "✅ ¡Bienvenido!";
+        cerrarLogin();
+
+        mostrarPanelAdmin();
+
+    } catch (error) {
+        console.error(error);
+        mensaje.textContent = "❌ Correo o contraseña incorrectos.";
+    }
+}
+
+function cerrarSesion() {
+    signOut(auth);
+}
 
 // ------------------------------------------
 // IR A LOS PRODUCTOS
