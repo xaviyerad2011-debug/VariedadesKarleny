@@ -2,114 +2,265 @@
 // VARIEDADES KARLENY 🛍️
 // ==========================================
 
+
 // ==========================================
-// FIREBASE 🔥
+// FIREBASE
 // ==========================================
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+import {
+    initializeApp
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+
+
 import {
     getAuth,
     onAuthStateChanged,
     signInWithEmailAndPassword,
     signOut
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+
+
 import {
     getFirestore,
     collection,
     addDoc,
-    getDocs,
-    deleteDoc,
-    doc
+    getDocs
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
+
+// ==========================================
+// CONFIGURACIÓN FIREBASE
+// ==========================================
+
 const firebaseConfig = {
+
     apiKey: "AIzaSyBzTvF-Af08z8jsjpa6L2mGEQQ7IxZZqAI",
+
     authDomain: "variedades-karleny.firebaseapp.com",
+
     projectId: "variedades-karleny",
+
     storageBucket: "variedades-karleny.firebasestorage.app",
+
     messagingSenderId: "117661003844",
+
     appId: "1:117661003844:web:2ba3db02e3fdf6e6278c11"
+
 };
 
+
+// ==========================================
+// INICIAR FIREBASE
+// ==========================================
+
 const app = initializeApp(firebaseConfig);
+
 const auth = getAuth(app);
+
 const db = getFirestore(app);
 
+
+// ==========================================
 // UID DEL DUEÑO
-const UID_DUENO = "vKixdwAJz9MfApZV81FPOiPybFr2";
+// ==========================================
+
+const UID_DUENO =
+    "vKixdwAJz9MfApZV81FPOiPybFr2";
+
+
+// ==========================================
+// ESTADO DEL USUARIO
+// ==========================================
 
 onAuthStateChanged(auth, (usuario) => {
 
-    const panel = document.getElementById("panelAdmin");
+    const panel =
+        document.getElementById("panelAdmin");
 
-    if (usuario && usuario.uid === UID_DUENO) {
-        console.log("Dueño conectado:", usuario.uid);
+
+    if (
+        usuario &&
+        usuario.uid === UID_DUENO
+    ) {
+
+        console.log(
+            "Dueño conectado:",
+            usuario.uid
+        );
+
 
         if (panel) {
+
             panel.style.display = "block";
+
         }
 
     } else {
-        console.log("No hay dueño conectado");
+
+        console.log(
+            "No hay dueño conectado"
+        );
+
 
         if (panel) {
+
             panel.style.display = "none";
+
         }
+
     }
+
 });
 
 
 // ==========================================
-// CARRITO 🛒
+// CARRITO
 // ==========================================
 
 let carrito = [];
+
+
 // ==========================================
-// LOGIN DEL DUEÑO 🔐
+// LOGIN
 // ==========================================
 
 function abrirLogin() {
-    document.getElementById("ventanaLogin").style.display = "flex";
-}
 
-function cerrarLogin() {
-    document.getElementById("ventanaLogin").style.display = "none";
-}
+    const ventana =
+        document.getElementById("ventanaLogin");
 
-async function iniciarSesion() {
-    const correo = document.getElementById("correoLogin").value;
-    const contrasena = document.getElementById("contrasenaLogin").value;
-    const mensaje = document.getElementById("mensajeLogin");
+    if (ventana) {
 
-    if (!correo || !contrasena) {
-        mensaje.textContent = "⚠️ Escribe tu correo y contraseña.";
-        return;
+        ventana.style.display = "flex";
+
     }
 
-    try {
-        await signInWithEmailAndPassword(auth, correo, contrasena);
+}
 
-        mensaje.textContent = "✅ ¡Bienvenido!";
+
+function cerrarLogin() {
+
+    const ventana =
+        document.getElementById("ventanaLogin");
+
+    if (ventana) {
+
+        ventana.style.display = "none";
+
+    }
+
+}
+
+
+async function iniciarSesion() {
+
+    const correo =
+        document
+            .getElementById("correoLogin")
+            .value
+            .trim();
+
+
+    const contrasena =
+        document
+            .getElementById("contrasenaLogin")
+            .value;
+
+
+    const mensaje =
+        document.getElementById("mensajeLogin");
+
+
+    if (!correo || !contrasena) {
+
+        mensaje.textContent =
+            "⚠️ Escribe tu correo y contraseña.";
+
+        return;
+
+    }
+
+
+    try {
+
+        mensaje.textContent =
+            "🔄 Iniciando sesión...";
+
+
+        const resultado =
+            await signInWithEmailAndPassword(
+                auth,
+                correo,
+                contrasena
+            );
+
+
+        if (
+            resultado.user.uid !==
+            UID_DUENO
+        ) {
+
+            await signOut(auth);
+
+            mensaje.textContent =
+                "❌ Esta cuenta no es la cuenta del dueño.";
+
+            return;
+
+        }
+
+
+        mensaje.textContent =
+            "✅ ¡Bienvenido!";
+
+
         cerrarLogin();
 
 
     } catch (error) {
-        console.error(error);
-        mensaje.textContent = "❌ Correo o contraseña incorrectos.";
+
+        console.error(
+            "Error de inicio de sesión:",
+            error
+        );
+
+
+        mensaje.textContent =
+            "❌ Correo o contraseña incorrectos.";
+
     }
+
 }
 
-function cerrarSesion() {
-    signOut(auth);
+
+async function cerrarSesion() {
+
+    try {
+
+        await signOut(auth);
+
+        alert(
+            "👋 Sesión cerrada correctamente."
+        );
+
+    } catch (error) {
+
+        console.error(error);
+
+    }
+
 }
 
-// ------------------------------------------
-// IR A LOS PRODUCTOS
-// ------------------------------------------
+
+// ==========================================
+// IR A PRODUCTOS
+// ==========================================
 
 function mostrarMensaje() {
 
-    const productos = document.getElementById("productos");
+    const productos =
+        document.getElementById("productos");
+
 
     if (productos) {
 
@@ -122,15 +273,21 @@ function mostrarMensaje() {
 }
 
 
-// ------------------------------------------
-// AGREGAR PRODUCTO AL CARRITO
-// ------------------------------------------
+// ==========================================
+// AGREGAR AL CARRITO
+// ==========================================
 
-function agregarAlCarrito(nombre, precio) {
+function agregarAlCarrito(
+    nombre,
+    precio
+) {
 
-    const productoExistente = carrito.find(
-        producto => producto.nombre === nombre
-    );
+    const productoExistente =
+        carrito.find(
+            producto =>
+                producto.nombre === nombre
+        );
+
 
     if (productoExistente) {
 
@@ -139,71 +296,96 @@ function agregarAlCarrito(nombre, precio) {
     } else {
 
         carrito.push({
+
             nombre: nombre,
+
             precio: precio,
+
             cantidad: 1
+
         });
 
     }
 
+
     actualizarCarrito();
 
-    alert("🛒 " + nombre + " agregado al carrito");
+
+    alert(
+        "🛒 " +
+        nombre +
+        " agregado al carrito"
+    );
 
 }
 
 
-// ------------------------------------------
-// ACTUALIZAR CANTIDAD DEL ICONO
-// ------------------------------------------
+// ==========================================
+// ACTUALIZAR CANTIDAD
+// ==========================================
 
 function actualizarCarrito() {
 
-    const contador = document.getElementById("cantidadCarrito");
+    const contador =
+        document.getElementById(
+            "cantidadCarrito"
+        );
+
 
     if (!contador) return;
 
+
     let cantidadTotal = 0;
 
+
     carrito.forEach(producto => {
-        cantidadTotal += producto.cantidad;
+
+        cantidadTotal +=
+            producto.cantidad;
+
     });
 
-    contador.textContent = cantidadTotal;
+
+    contador.textContent =
+        cantidadTotal;
 
 }
 
 
-// ------------------------------------------
+// ==========================================
 // ABRIR CARRITO
-// ------------------------------------------
+// ==========================================
 
 function abrirCarrito() {
 
-    let ventana = document.getElementById("ventanaCarrito");
+    const ventana =
+        document.getElementById(
+            "ventanaCarrito"
+        );
 
-    if (!ventana) {
 
-        crearCarrito();
+    if (!ventana) return;
 
-        ventana = document.getElementById("ventanaCarrito");
-
-    }
 
     mostrarProductosCarrito();
+
 
     ventana.style.display = "flex";
 
 }
 
 
-// ------------------------------------------
+// ==========================================
 // CERRAR CARRITO
-// ------------------------------------------
+// ==========================================
 
 function cerrarCarrito() {
 
-    const ventana = document.getElementById("ventanaCarrito");
+    const ventana =
+        document.getElementById(
+            "ventanaCarrito"
+        );
+
 
     if (ventana) {
 
@@ -214,82 +396,23 @@ function cerrarCarrito() {
 }
 
 
-// ------------------------------------------
-// CREAR VENTANA DEL CARRITO
-// ------------------------------------------
-
-function crearCarrito() {
-
-    const ventana = document.createElement("div");
-
-    ventana.id = "ventanaCarrito";
-
-    ventana.innerHTML = `
-
-        <div class="carrito">
-
-            <div class="carrito-cabeza">
-
-                <h2>🛒 Mi carrito</h2>
-
-                <button onclick="cerrarCarrito()">
-                    ✕
-                </button>
-
-            </div>
-
-            <div id="listaCarrito"></div>
-
-            <div class="carrito-total">
-
-                <strong>
-                    Total:
-                </strong>
-
-                <span id="totalCarrito">
-                    $0
-                </span>
-
-            </div>
-
-            <div class="carrito-botones">
-
-                <button onclick="cerrarCarrito()">
-                    🛍️ Seguir comprando
-                </button>
-
-                <button onclick="vaciarCarrito()">
-                    🗑️ Vaciar carrito
-                </button>
-
-                <button
-                    class="boton-comprar"
-                    onclick="comprarCarritoWhatsApp()">
-
-                    📲 Comprar por WhatsApp
-
-                </button>
-
-            </div>
-
-        </div>
-
-    `;
-
-    document.body.appendChild(ventana);
-
-}
-
-
-// ------------------------------------------
-// MOSTRAR PRODUCTOS
-// ------------------------------------------
+// ==========================================
+// MOSTRAR CARRITO
+// ==========================================
 
 function mostrarProductosCarrito() {
 
-    const lista = document.getElementById("listaCarrito");
+    const lista =
+        document.getElementById(
+            "listaCarrito"
+        );
 
-    const totalElemento = document.getElementById("totalCarrito");
+
+    const totalElemento =
+        document.getElementById(
+            "totalCarrito"
+        );
+
 
     if (!lista) return;
 
@@ -302,9 +425,14 @@ function mostrarProductosCarrito() {
             </div>
         `;
 
+
         if (totalElemento) {
-            totalElemento.textContent = "$0";
+
+            totalElemento.textContent =
+                "$0";
+
         }
+
 
         return;
 
@@ -313,156 +441,201 @@ function mostrarProductosCarrito() {
 
     lista.innerHTML = "";
 
+
     let total = 0;
 
 
-    carrito.forEach((producto, indice) => {
+    carrito.forEach(
+        (producto, indice) => {
 
-        const subtotal =
-            producto.precio * producto.cantidad;
-
-        total += subtotal;
-
-
-        const item = document.createElement("div");
-
-        item.className = "item-carrito";
+            const subtotal =
+                producto.precio *
+                producto.cantidad;
 
 
-        item.innerHTML = `
-
-            <div class="item-info">
-
-                <strong>
-                    ${producto.nombre}
-                </strong>
-
-                <span>
-                    $${producto.precio.toLocaleString("es-CO")}
-                </span>
-
-            </div>
+            total += subtotal;
 
 
-            <div class="cantidad">
-
-                <button onclick="disminuirCantidad(${indice})">
-                    −
-                </button>
-
-                <span>
-                    ${producto.cantidad}
-                </span>
-
-                <button onclick="aumentarCantidad(${indice})">
-                    +
-                </button>
-
-            </div>
+            const item =
+                document.createElement(
+                    "div"
+                );
 
 
-            <div class="subtotal">
-
-                $${subtotal.toLocaleString("es-CO")}
-
-                <button
-                    class="eliminar"
-                    onclick="eliminarProducto(${indice})">
-
-                    🗑️
-
-                </button>
-
-            </div>
-
-        `;
+            item.className =
+                "item-carrito";
 
 
-        lista.appendChild(item);
+            item.innerHTML = `
 
-    });
+                <div class="item-info">
+
+                    <strong>
+                        ${producto.nombre}
+                    </strong>
+
+                    <span>
+                        $${producto.precio.toLocaleString("es-CO")}
+                    </span>
+
+                </div>
+
+
+                <div class="cantidad">
+
+                    <button
+                        onclick="disminuirCantidad(${indice})">
+
+                        −
+
+                    </button>
+
+                    <span>
+                        ${producto.cantidad}
+                    </span>
+
+                    <button
+                        onclick="aumentarCantidad(${indice})">
+
+                        +
+
+                    </button>
+
+                </div>
+
+
+                <div class="subtotal">
+
+                    $${subtotal.toLocaleString("es-CO")}
+
+                    <button
+                        class="eliminar"
+                        onclick="eliminarProducto(${indice})">
+
+                        🗑️
+
+                    </button>
+
+                </div>
+
+            `;
+
+
+            lista.appendChild(item);
+
+        }
+    );
 
 
     if (totalElemento) {
 
         totalElemento.textContent =
-            "$" + total.toLocaleString("es-CO");
+            "$" +
+            total.toLocaleString("es-CO");
 
     }
 
 }
 
 
-// ------------------------------------------
-// AUMENTAR CANTIDAD
-// ------------------------------------------
+// ==========================================
+// AUMENTAR
+// ==========================================
 
 function aumentarCantidad(indice) {
 
+    if (!carrito[indice]) return;
+
+
     carrito[indice].cantidad++;
 
+
     actualizarCarrito();
+
 
     mostrarProductosCarrito();
 
 }
 
 
-// ------------------------------------------
-// DISMINUIR CANTIDAD
-// ------------------------------------------
+// ==========================================
+// DISMINUIR
+// ==========================================
 
 function disminuirCantidad(indice) {
 
+    if (!carrito[indice]) return;
+
+
     carrito[indice].cantidad--;
 
-    if (carrito[indice].cantidad <= 0) {
 
-        carrito.splice(indice, 1);
+    if (
+        carrito[indice].cantidad <= 0
+    ) {
+
+        carrito.splice(
+            indice,
+            1
+        );
 
     }
 
+
     actualizarCarrito();
+
 
     mostrarProductosCarrito();
 
 }
 
 
-// ------------------------------------------
-// ELIMINAR PRODUCTO
-// ------------------------------------------
+// ==========================================
+// ELIMINAR
+// ==========================================
 
 function eliminarProducto(indice) {
 
-    carrito.splice(indice, 1);
+    carrito.splice(
+        indice,
+        1
+    );
+
 
     actualizarCarrito();
+
 
     mostrarProductosCarrito();
 
 }
 
 
-// ------------------------------------------
+// ==========================================
 // VACIAR CARRITO
-// ------------------------------------------
+// ==========================================
 
 function vaciarCarrito() {
 
-    if (carrito.length === 0) return;
+    if (carrito.length === 0) {
+
+        return;
+
+    }
 
 
-    const confirmar = confirm(
-        "¿Seguro que quieres vaciar el carrito?"
-    );
+    const confirmar =
+        confirm(
+            "¿Seguro que quieres vaciar el carrito?"
+        );
 
 
     if (confirmar) {
 
         carrito = [];
 
+
         actualizarCarrito();
+
 
         mostrarProductosCarrito();
 
@@ -471,26 +644,29 @@ function vaciarCarrito() {
 }
 
 
-// ------------------------------------------
-// COMPRAR TODO POR WHATSAPP
-// ------------------------------------------
+// ==========================================
+// WHATSAPP
+// ==========================================
 
 function comprarCarritoWhatsApp() {
 
     if (carrito.length === 0) {
 
-        alert("🛒 Tu carrito está vacío.");
+        alert(
+            "🛒 Tu carrito está vacío."
+        );
 
         return;
 
     }
 
 
-    const numero = "573202104423";
+    const numero =
+        "573202104423";
 
 
     let mensaje =
-        "Hola 👋, quiero hacer el siguiente pedido:%0A%0A";
+        "Hola 👋, quiero hacer el siguiente pedido:\n\n";
 
 
     let total = 0;
@@ -499,7 +675,8 @@ function comprarCarritoWhatsApp() {
     carrito.forEach(producto => {
 
         const subtotal =
-            producto.precio * producto.cantidad;
+            producto.precio *
+            producto.cantidad;
 
 
         total += subtotal;
@@ -512,13 +689,13 @@ function comprarCarritoWhatsApp() {
             producto.cantidad +
             " — $" +
             subtotal.toLocaleString("es-CO") +
-            "%0A";
+            "\n";
 
     });
 
 
     mensaje +=
-        "%0A💰 TOTAL: $" +
+        "\n💰 TOTAL: $" +
         total.toLocaleString("es-CO");
 
 
@@ -526,137 +703,410 @@ function comprarCarritoWhatsApp() {
         "https://wa.me/" +
         numero +
         "?text=" +
-        mensaje;
+        encodeURIComponent(mensaje);
 
 
-    window.location.href = enlace;
-    // ==========================================
-// AGREGAR PRODUCTO 👑🛍️
+    window.location.href =
+        enlace;
+
+}
+
+
+// ==========================================
+// AGREGAR PRODUCTO
 // ==========================================
 
 async function agregarProducto() {
 
-    const foto = document.getElementById("fotoProducto").files[0];
-    const nombre = document.getElementById("nombreProducto").value.trim();
-    const precio = Number(document.getElementById("precioProducto").value);
-    const descripcion = document.getElementById("descripcionProducto").value.trim();
-    const mensaje = document.getElementById("mensajeProducto");
+    const foto =
+        document
+            .getElementById("fotoProducto")
+            .files[0];
 
-    if (!foto || !nombre || !precio) {
-        mensaje.textContent = "⚠️ Completa la foto, nombre y precio.";
+
+    const nombre =
+        document
+            .getElementById("nombreProducto")
+            .value
+            .trim();
+
+
+    const precio =
+        Number(
+            document
+                .getElementById("precioProducto")
+                .value
+        );
+
+
+    const descripcion =
+        document
+            .getElementById("descripcionProducto")
+            .value
+            .trim();
+
+
+    const mensaje =
+        document.getElementById(
+            "mensajeProducto"
+        );
+
+
+    if (
+        !foto ||
+        !nombre ||
+        !precio
+    ) {
+
+        mensaje.textContent =
+            "⚠️ Completa la foto, nombre y precio.";
+
         return;
+
     }
 
-    if (!auth.currentUser || auth.currentUser.uid !== UID_DUENO) {
-        mensaje.textContent = "❌ No tienes permiso.";
+
+    if (
+        !auth.currentUser ||
+        auth.currentUser.uid !== UID_DUENO
+    ) {
+
+        mensaje.textContent =
+            "❌ No tienes permiso para agregar productos.";
+
         return;
+
     }
+
 
     try {
 
-        mensaje.textContent = "📸 Subiendo imagen...";
+        mensaje.textContent =
+            "📸 Subiendo imagen...";
 
-        // Subir imagen a Cloudinary
-        const datos = new FormData();
-        datos.append("file", foto);
-        datos.append("upload_preset", "productos");
 
-        const respuesta = await fetch(
-            "https://api.cloudinary.com/v1_1/ktxu8h5o/image/upload",
+        // ==========================================
+        // CLOUDINARY
+        // ==========================================
+
+        const datos =
+            new FormData();
+
+
+        datos.append(
+            "file",
+            foto
+        );
+
+
+        datos.append(
+            "upload_preset",
+            "productos"
+        );
+
+
+        const respuesta =
+            await fetch(
+                "https://api.cloudinary.com/v1_1/ktxu8h5o/image/upload",
+                {
+                    method: "POST",
+                    body: datos
+                }
+            );
+
+
+        if (!respuesta.ok) {
+
+            throw new Error(
+                "Cloudinary rechazó la imagen."
+            );
+
+        }
+
+
+        const imagen =
+            await respuesta.json();
+
+
+        if (!imagen.secure_url) {
+
+            throw new Error(
+                "Cloudinary no devolvió la imagen."
+            );
+
+        }
+
+
+        mensaje.textContent =
+            "🗄️ Guardando producto...";
+
+
+        // ==========================================
+        // FIRESTORE
+        // ==========================================
+
+        await addDoc(
+            collection(
+                db,
+                "productos"
+            ),
             {
-                method: "POST",
-                body: datos
+
+                nombre: nombre,
+
+                precio: precio,
+
+                descripcion: descripcion,
+
+                imagen: imagen.secure_url,
+
+                creado:
+                    new Date()
+
             }
         );
 
-        const imagen = await respuesta.json();
 
-        if (!imagen.secure_url) {
-            throw new Error("No se pudo subir la imagen.");
-        }
+        mensaje.textContent =
+            "✅ ¡Producto agregado correctamente!";
 
-        mensaje.textContent = "🗄️ Guardando producto...";
 
-        // Guardar producto en Firestore
-        await addDoc(collection(db, "productos"), {
-            nombre: nombre,
-            precio: precio,
-            descripcion: descripcion,
-            imagen: imagen.secure_url,
-            creado: new Date()
-        });
+        // ==========================================
+        // LIMPIAR FORMULARIO
+        // ==========================================
 
-        mensaje.textContent = "✅ ¡Producto agregado correctamente!";
+        document
+            .getElementById("fotoProducto")
+            .value = "";
 
-        // Limpiar formulario
-        document.getElementById("fotoProducto").value = "";
-        document.getElementById("nombreProducto").value = "";
-        document.getElementById("precioProducto").value = "";
-        document.getElementById("descripcionProducto").value = "";
 
-        // Actualizar productos
+        document
+            .getElementById("nombreProducto")
+            .value = "";
+
+
+        document
+            .getElementById("precioProducto")
+            .value = "";
+
+
+        document
+            .getElementById("descripcionProducto")
+            .value = "";
+
+
+        // Cargar el nuevo producto
         cargarProductos();
+
 
     } catch (error) {
 
-        console.error(error);
-        mensaje.textContent = "❌ Ocurrió un error al agregar el producto.";
+        console.error(
+            "Error agregando producto:",
+            error
+        );
+
+
+        mensaje.textContent =
+            "❌ No se pudo agregar el producto.";
 
     }
+
 }
 
 
 // ==========================================
-// CARGAR PRODUCTOS DE FIRESTORE 🛍️
+// CARGAR PRODUCTOS DE FIRESTORE
 // ==========================================
 
 async function cargarProductos() {
 
-    const seccion = document.getElementById("productos");
+    const seccion =
+        document.getElementById(
+            "productos"
+        );
+
 
     if (!seccion) return;
 
+
     try {
 
-        const consulta = await getDocs(
-            collection(db, "productos")
+        const consulta =
+            await getDocs(
+                collection(
+                    db,
+                    "productos"
+                )
+            );
+
+
+        consulta.forEach(
+            documento => {
+
+                const producto =
+                    documento.data();
+
+
+                // Evitar duplicados
+                if (
+                    document.querySelector(
+                        `[data-producto-id="${documento.id}"]`
+                    )
+                ) {
+
+                    return;
+
+                }
+
+
+                const tarjeta =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                tarjeta.className =
+                    "producto producto-firebase";
+
+
+                tarjeta.setAttribute(
+                    "data-producto-id",
+                    documento.id
+                );
+
+
+                const nombreSeguro =
+                    String(
+                        producto.nombre || ""
+                    );
+
+
+                const descripcionSegura =
+                    String(
+                        producto.descripcion || ""
+                    );
+
+
+                const precioSeguro =
+                    Number(
+                        producto.precio || 0
+                    );
+
+
+                tarjeta.innerHTML = `
+
+                    <img
+                        src="${producto.imagen}"
+                        alt="${nombreSeguro}">
+
+
+                    <h3>
+                        ${nombreSeguro}
+                    </h3>
+
+
+                    <p class="descripcion-producto">
+                        ${descripcionSegura}
+                    </p>
+
+
+                    <p class="precio">
+                        $${precioSeguro.toLocaleString("es-CO")}
+                    </p>
+
+
+                    <button
+                        onclick="agregarAlCarrito(
+                            '${nombreSeguro.replace(/'/g, "\\'")}',
+                            ${precioSeguro}
+                        )">
+
+                        🛒 Agregar al carrito
+
+                    </button>
+
+                `;
+
+
+                seccion.appendChild(
+                    tarjeta
+                );
+
+            }
         );
 
-        consulta.forEach((documento) => {
-
-            const producto = documento.data();
-
-            const tarjeta = document.createElement("div");
-            tarjeta.className = "producto producto-firebase";
-
-            tarjeta.innerHTML = `
-                <img src="${producto.imagen}" alt="${producto.nombre}">
-
-                <h3>${producto.nombre}</h3>
-
-                <p>${producto.descripcion || ""}</p>
-
-                <p class="precio">
-                    $${Number(producto.precio).toLocaleString("es-CO")}
-                </p>
-
-                <button onclick="agregarAlCarrito('${producto.nombre.replace(/'/g, "\\'")}', ${producto.precio})">
-                    🛒 Agregar al carrito
-                </button>
-            `;
-
-            seccion.appendChild(tarjeta);
-        });
 
     } catch (error) {
 
-        console.error("Error cargando productos:", error);
+        console.error(
+            "Error cargando productos:",
+            error
+        );
 
     }
+
 }
 
 
-// Cargar productos al abrir la página
+// ==========================================
+// HACER FUNCIONES GLOBALES
+// ==========================================
+// Esto es necesario porque usamos
+// <script type="module"> y el HTML utiliza
+// onclick="...".
+
+window.abrirLogin =
+    abrirLogin;
+
+window.cerrarLogin =
+    cerrarLogin;
+
+window.iniciarSesion =
+    iniciarSesion;
+
+window.cerrarSesion =
+    cerrarSesion;
+
+window.mostrarMensaje =
+    mostrarMensaje;
+
+window.agregarAlCarrito =
+    agregarAlCarrito;
+
+window.actualizarCarrito =
+    actualizarCarrito;
+
+window.abrirCarrito =
+    abrirCarrito;
+
+window.cerrarCarrito =
+    cerrarCarrito;
+
+window.mostrarProductosCarrito =
+    mostrarProductosCarrito;
+
+window.aumentarCantidad =
+    aumentarCantidad;
+
+window.disminuirCantidad =
+    disminuirCantidad;
+
+window.eliminarProducto =
+    eliminarProducto;
+
+window.vaciarCarrito =
+    vaciarCarrito;
+
+window.comprarCarritoWhatsApp =
+    comprarCarritoWhatsApp;
+
+window.agregarProducto =
+    agregarProducto;
+
+
+// ==========================================
+// CARGAR PRODUCTOS AL ABRIR LA PÁGINA
+// ==========================================
+
 cargarProductos();
-
-}
