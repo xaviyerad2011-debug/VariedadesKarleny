@@ -2,6 +2,53 @@
 // VARIEDADES KARLENY 🛍️
 // ==========================================
 
+// ==========================================
+// FIREBASE 🔥
+// ==========================================
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+import {
+    getAuth,
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+import {
+    getFirestore,
+    collection,
+    addDoc,
+    getDocs,
+    deleteDoc,
+    doc
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyBzTvF-Af08z8jsjpa6L2mGEQQ7IxZZqAI",
+    authDomain: "variedades-karleny.firebaseapp.com",
+    projectId: "variedades-karleny",
+    storageBucket: "variedades-karleny.firebasestorage.app",
+    messagingSenderId: "117661003844",
+    appId: "1:117661003844:web:2ba3db02e3fdf6e6278c11"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// UID DEL DUEÑO
+const UID_DUENO = "vKixdwAJz9MfApZV81FPOiPybFr2";
+
+onAuthStateChanged(auth, (usuario) => {
+    if (usuario) {
+        console.log("Usuario conectado:", usuario.uid);
+    } else {
+        console.log("No hay usuario conectado");
+    }
+});
+
+
+// ==========================================
+// CARRITO 🛒
+// ==========================================
+
 let carrito = [];
 
 
