@@ -2,20 +2,15 @@
 <html lang="es">
 
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Variedades Karleny</title>
 
     <link rel="stylesheet" href="style.css">
-
 </head>
 
-
 <body>
-
 
 <header class="barra">
 
@@ -23,11 +18,9 @@
         🛍️ Variedades Karleny
     </div>
 
-
     <button class="boton-menu" onclick="abrirLogin()">
-    Entrar
-</button>
-
+        Entrar
+    </button>
 
     <button class="boton-carrito" onclick="abrirCarrito()">
         🛒 Carrito (<span id="cantidadCarrito">0</span>)
@@ -36,11 +29,11 @@
 </header>
 
 
-
 <main>
 
-
-    <!-- INICIO -->
+    <!-- ==========================================
+         INICIO
+    ========================================== -->
 
     <section class="inicio">
 
@@ -50,25 +43,15 @@
                 ✨ Bienvenido
             </p>
 
-
             <h1>
-
                 Todo lo que buscas,
-
-                <span>
-                    en un solo lugar.
-                </span>
-
+                <span>en un solo lugar.</span>
             </h1>
 
-
             <p class="descripcion">
-
                 Descubre nuestros productos y encuentra
                 algo especial para ti.
-
             </p>
-
 
             <button
                 class="boton-principal"
@@ -83,60 +66,96 @@
     </section>
 
 
-
-    <!-- PRODUCTOS -->
     <!-- ==========================================
-     PANEL DEL DUEÑO 👑
-========================================== -->
+         PANEL DEL DUEÑO
+    ========================================== -->
 
-<div id="panelAdmin" style="display: none;">
+    <div id="panelAdmin" style="display: none;">
 
-    <h2>👑 Panel del dueño</h2>
+        <div class="admin-contenido">
 
-    <input type="file" id="fotoProducto" accept="image/*">
+            <div class="admin-titulo">
+                <span>👑</span>
 
-    <input
-        type="text"
-        id="nombreProducto"
-        placeholder="Nombre del producto"
-    >
+                <div>
+                    <h2>Panel del dueño</h2>
+                    <p>Agrega nuevos productos a tu tienda</p>
+                </div>
+            </div>
 
-    <input
-        type="number"
-        id="precioProducto"
-        placeholder="Precio"
-    >
 
-    <input
-        type="text"
-        id="descripcionProducto"
-        placeholder="Descripción"
-    >
+            <div class="admin-formulario">
 
-    <button onclick="agregarProducto()">
-        ➕ Agregar producto
-    </button>
+                <label class="foto-label">
+                    📸
+                    <span>Seleccionar foto</span>
 
-    <button onclick="cerrarSesion()">
-        🚪 Cerrar sesión
-    </button>
+                    <input
+                        type="file"
+                        id="fotoProducto"
+                        accept="image/*">
+                </label>
 
-    <p id="mensajeProducto"></p>
 
-</div>
+                <input
+                    type="text"
+                    id="nombreProducto"
+                    placeholder="🏷️ Nombre del producto">
+
+
+                <input
+                    type="number"
+                    id="precioProducto"
+                    placeholder="💰 Precio"
+                    min="0">
+
+
+                <input
+                    type="text"
+                    id="descripcionProducto"
+                    placeholder="📝 Descripción">
+
+
+                <button
+                    class="boton-agregar-producto"
+                    onclick="agregarProducto()">
+
+                    ➕ Agregar producto
+
+                </button>
+
+
+                <button
+                    class="boton-cerrar-sesion"
+                    onclick="cerrarSesion()">
+
+                    🚪 Cerrar sesión
+
+                </button>
+
+
+                <p id="mensajeProducto"></p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ==========================================
+         PRODUCTOS
+    ========================================== -->
 
     <section id="productos" class="productos">
-
 
         <h2>
             🛍️ Nuestros productos
         </h2>
 
-
         <p>
             Descubre todo lo que tenemos para ti.
         </p>
-
 
 
         <!-- LABIAL -->
@@ -147,16 +166,13 @@
                 src="imagenes/labial.jpg"
                 alt="Labial">
 
-
             <h3>
                 Labial
             </h3>
 
-
             <p class="precio">
                 $15.000
             </p>
-
 
             <button
                 onclick="agregarAlCarrito('Labial', 15000)">
@@ -168,7 +184,6 @@
         </div>
 
 
-
         <!-- PELUCHE -->
 
         <div class="producto">
@@ -177,16 +192,13 @@
                 src="imagenes/peluche.jpg"
                 alt="Peluche">
 
-
             <h3>
                 Peluche
             </h3>
 
-
             <p class="precio">
                 $25.000
             </p>
-
 
             <button
                 onclick="agregarAlCarrito('Peluche', 25000)">
@@ -198,7 +210,6 @@
         </div>
 
 
-
         <!-- JABÓN 24K -->
 
         <div class="producto">
@@ -207,16 +218,13 @@
                 src="imagenes/karite.jpg"
                 alt="Jabón 24k">
 
-
             <h3>
                 24k
             </h3>
 
-
             <p class="precio">
                 $7.000
             </p>
-
 
             <button
                 onclick="agregarAlCarrito('Jabón 24k', 7000)">
@@ -227,24 +235,22 @@
 
         </div>
 
-        <!-- lissia -->
+
+        <!-- LISSIA -->
 
         <div class="producto">
 
             <img
                 src="imagenes/lissia.jpg"
-                alt="lissia">
-
+                alt="Lissia">
 
             <h3>
                 consulta color
             </h3>
 
-
             <p class="precio">
                 $10.000
             </p>
-
 
             <button
                 onclick="agregarAlCarrito('Lissia', 10000)">
@@ -255,24 +261,22 @@
 
         </div>
 
-        <!-- thyms -->
+
+        <!-- THYMS -->
 
         <div class="producto">
 
             <img
                 src="imagenes/thyms.jpg"
-                alt="thyms">
-
+                alt="Thyms">
 
             <h3>
                 consulta color
             </h3>
 
-
             <p class="precio">
                 $15.000
             </p>
-
 
             <button
                 onclick="agregarAlCarrito('thyms', 15000)">
@@ -283,24 +287,22 @@
 
         </div>
 
-        <!-- posillo -->
+
+        <!-- POSILLOS -->
 
         <div class="producto">
 
             <img
                 src="imagenes/posillo.jpg"
-                alt="posillo">
-
+                alt="Posillo">
 
             <h3>
                 posillos
             </h3>
 
-
             <p class="precio">
                 $5.000
             </p>
-
 
             <button
                 onclick="agregarAlCarrito('posillo', 5000)">
@@ -311,24 +313,22 @@
 
         </div>
 
-        <!-- globos -->
+
+        <!-- GLOBOS -->
 
         <div class="producto">
 
             <img
                 src="imagenes/globos.jpg"
-                alt="globos">
-
+                alt="Globos">
 
             <h3>
                 consulta color y precio
             </h3>
 
-
             <p class="precio">
                 $10.000
             </p>
-
 
             <button
                 onclick="agregarAlCarrito('globos', 10000)">
@@ -339,24 +339,22 @@
 
         </div>
 
-        <!-- keraton -->
+
+        <!-- KERATON -->
 
         <div class="producto">
 
             <img
                 src="imagenes/keraton.jpg"
-                alt="keraton">
-
+                alt="Keraton">
 
             <h3>
                 consulta color
             </h3>
 
-
             <p class="precio">
                 $10.000
             </p>
-
 
             <button
                 onclick="agregarAlCarrito('keraton', 10000)">
@@ -367,40 +365,78 @@
 
         </div>
 
-
     </section>
-
 
 </main>
 
 
-<!-- LOGIN DEL DUEÑO 🔐 -->
-<div id="ventanaLogin" class="ventana-login">
+<!-- ==========================================
+     LOGIN DEL DUEÑO
+========================================== -->
+
+<div
+    id="ventanaLogin"
+    class="ventana-login">
+
     <div class="login">
-        <button class="cerrar-login" onclick="cerrarLogin()">✕</button>
 
-        <h2>🔐 Entrar</h2>
-        <p>Acceso exclusivo del dueño</p>
+        <button
+            class="cerrar-login"
+            onclick="cerrarLogin()">
 
-        <input type="email" id="correoLogin" placeholder="Correo">
-        <input type="password" id="contrasenaLogin" placeholder="Contraseña">
+            ✕
 
-        <button onclick="iniciarSesion()">Entrar</button>
+        </button>
+
+
+        <div class="login-icono">
+            🔐
+        </div>
+
+        <h2>
+            Acceso del dueño
+        </h2>
+
+        <p class="login-subtitulo">
+            Inicia sesión para administrar la tienda
+        </p>
+
+
+        <input
+            type="email"
+            id="correoLogin"
+            placeholder="Correo electrónico">
+
+
+        <input
+            type="password"
+            id="contrasenaLogin"
+            placeholder="Contraseña">
+
+
+        <button
+            class="boton-login"
+            onclick="iniciarSesion()">
+
+            🔑 Entrar
+
+        </button>
+
 
         <p id="mensajeLogin"></p>
+
     </div>
+
 </div>
 
-<div id="ventanaCarrito">
-<!-- CARRITO -->
+
+<!-- ==========================================
+     CARRITO
+========================================== -->
 
 <div id="ventanaCarrito">
-
 
     <div class="carrito">
-
-
-        <!-- CABECERA -->
 
         <div class="carrito-cabeza">
 
@@ -408,33 +444,21 @@
                 🛒 Mi carrito
             </h2>
 
-
             <button onclick="cerrarCarrito()">
-
                 ✕
-
             </button>
 
         </div>
 
 
+        <div id="listaCarrito"></div>
 
-        <!-- PRODUCTOS DEL CARRITO -->
-
-        <div id="listaCarrito">
-
-        </div>
-
-
-
-        <!-- TOTAL -->
 
         <div class="carrito-total">
 
             <strong>
                 Total:
             </strong>
-
 
             <span id="totalCarrito">
                 $0
@@ -443,25 +467,15 @@
         </div>
 
 
-
-        <!-- BOTONES -->
-
         <div class="carrito-botones">
 
-
             <button onclick="cerrarCarrito()">
-
                 🛍️ Seguir comprando
-
             </button>
-
 
             <button onclick="vaciarCarrito()">
-
                 🗑️ Vaciar carrito
-
             </button>
-
 
             <button
                 class="boton-comprar"
@@ -471,21 +485,19 @@
 
             </button>
 
-
         </div>
 
-
     </div>
-
 
 </div>
 
 
-
 <!-- JAVASCRIPT -->
 
-<script type="module" src="script.js"></script>
-
+<script
+    type="module"
+    src="script.js">
+</script>
 
 </body>
 
