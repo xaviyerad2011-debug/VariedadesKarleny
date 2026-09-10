@@ -335,7 +335,24 @@
 </main>
 
 
+<!-- LOGIN DEL DUEÑO 🔐 -->
+<div id="ventanaLogin" class="ventana-login">
+    <div class="login">
+        <button class="cerrar-login" onclick="cerrarLogin()">✕</button>
 
+        <h2>🔐 Entrar</h2>
+        <p>Acceso exclusivo del dueño</p>
+
+        <input type="email" id="correoLogin" placeholder="Correo">
+        <input type="password" id="contrasenaLogin" placeholder="Contraseña">
+
+        <button onclick="iniciarSesion()">Entrar</button>
+
+        <p id="mensajeLogin"></p>
+    </div>
+</div>
+
+<div id="ventanaCarrito">
 <!-- CARRITO -->
 
 <div id="ventanaCarrito">
