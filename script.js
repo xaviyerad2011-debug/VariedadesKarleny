@@ -1,8 +1,6 @@
-// =====================================================
-// FIREBASE
-// =====================================================
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+import {
+  initializeApp
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
 
 import {
   getAuth,
@@ -17,13 +15,15 @@ import {
   addDoc,
   getDocs,
   deleteDoc,
-  doc
+  doc,
+  setDoc,
+  getDoc
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
 
-// =====================================================
-// CONFIGURACIÓN FIREBASE
-// =====================================================
+/* =========================================================
+   FIREBASE
+========================================================= */
 
 const firebaseConfig = {
   apiKey: "AIzaSyBzTvF-Af08z8jsjpa6L2mGEQQ7IxZZqAI",
@@ -31,234 +31,431 @@ const firebaseConfig = {
   projectId: "variedades-karleny",
   storageBucket: "variedades-karleny.firebasestorage.app",
   messagingSenderId: "117661003844",
-  appId: "1:117661003844:web:2ba3db02e3fdf6e6278c11",
+  appId: "1:117661003844:web:2ba3db02e3df6e6278c11",
   measurementId: "G-80VJK2V1FB"
 };
 
 
-// =====================================================
-// INICIALIZAR FIREBASE
-// =====================================================
+/* =========================================================
+   INICIALIZACIÓN
+========================================================= */
 
 const app = initializeApp(firebaseConfig);
-
 const auth = getAuth(app);
-
 const db = getFirestore(app);
 
 
-// =====================================================
-// UID DEL DUEÑO
-// =====================================================
+/* =========================================================
+   CONFIGURACIÓN
+========================================================= */
 
-const UID_DUENO = "vKixdwAJz9MfApZV81FPOiPybFr2";
+const UID_DUENO =
+  "vKixdwAJz9MfApZV81FPOiPybFr2";
 
+const CLOUDINARY_CLOUD_NAME =
+  "ktxu8h5o";
 
-// =====================================================
-// CLOUDINARY
-// =====================================================
+const CLOUDINARY_UPLOAD_PRESET =
+  "productos";
 
-const CLOUDINARY_CLOUD_NAME = "ktxu8h5o";
+const NUMERO_WHATSAPP =
+  "573202104423";
 
-const CLOUDINARY_UPLOAD_PRESET = "productos";
-
-
-// =====================================================
-// CARRITO
-// =====================================================
 
 let carrito = [];
 
 
-// =====================================================
-// PANTALLA DE INICIO
-// =====================================================
+
+/* =========================================================
+   PRODUCTOS BASE
+   Estos son los productos que antes estaban escritos
+   directamente en index.html.
+
+   Ahora se guardan automáticamente en Firestore.
+   De esta forma el ADMIN TAMBIÉN LOS PUEDE BORRAR.
+========================================================= */
+
+const PRODUCTOS_BASE = [
+
+  {
+    id: "base-labial",
+    nombre: "Labial",
+    precio: 15000,
+    descripcion: "Labial para complementar tu estilo.",
+    imagen: "imagenes/labial.jpg"
+  },
+
+  {
+    id: "base-peluche",
+    nombre: "Peluche",
+    precio: 25000,
+    descripcion: "Un detalle bonito para regalar o decorar.",
+    imagen: "imagenes/peluche.jpg"
+  },
+
+  {
+    id: "base-jabon-24k",
+    nombre: "Jabón 24k",
+    precio: 7000,
+    descripcion: "Jabón 24k disponible en nuestra tienda.",
+    imagen: "imagenes/karite.jpg"
+  },
+
+  {
+    id: "base-lissia",
+    nombre: "Lissia",
+    precio: 10000,
+    descripcion: "Producto Lissia disponible.",
+    imagen: "imagenes/lissia.jpg"
+  },
+
+  {
+    id: "base-thyms",
+    nombre: "Thyms",
+    precio: 15000,
+    descripcion: "Producto Thyms disponible.",
+    imagen: "imagenes/thyms.jpg"
+  },
+
+  {
+    id: "base-posillo",
+    nombre: "Posillo",
+    precio: 5000,
+    descripcion: "Posillo disponible en nuestra tienda.",
+    imagen: "imagenes/posillo.jpg"
+  },
+
+  {
+    id: "base-globos",
+    nombre: "Globos",
+    precio: 10000,
+    descripcion: "Globos para tus momentos especiales.",
+    imagen: "imagenes/globos.jpg"
+  },
+
+  {
+    id: "base-keraton",
+    nombre: "Keraton",
+    precio: 10000,
+    descripcion: "Producto Keraton disponible.",
+    imagen: "imagenes/keraton.jpg"
+  }
+
+];
+
+
+
+/* =========================================================
+   UTILIDADES
+========================================================= */
+
+function usuarioEsAdmin() {
+
+  const usuario = auth.currentUser;
+
+  return !!usuario &&
+    usuario.uid === UID_DUENO;
+
+}
+
+
+function escaparTexto(valor) {
+
+  return String(valor ?? "");
+
+}
+
+
+function formatearPrecio(precio) {
+
+  return new Intl.NumberFormat("es-CO", {
+
+    style: "currency",
+
+    currency: "COP",
+
+    minimumFractionDigits: 0,
+
+    maximumFractionDigits: 0
+
+  }).format(Number(precio) || 0);
+
+}
+
+
+function mostrarToast(
+  mensaje,
+  tipo = "normal"
+) {
+
+  const contenedor =
+    document.getElementById("contenedorToast");
+
+  if (!contenedor) return;
+
+
+  const toast =
+    document.createElement("div");
+
+  toast.className =
+    `toast toast-${tipo}`;
+
+
+  const icono =
+    tipo === "exito"
+      ? "✓"
+      : tipo === "error"
+        ? "!"
+        : "i";
+
+
+  toast.innerHTML = `
+    <span class="toast-icono">${icono}</span>
+    <span class="toast-texto">${escaparTexto(mensaje)}</span>
+    <button class="toast-cerrar">×</button>
+  `;
+
+
+  const botonCerrar =
+    toast.querySelector(".toast-cerrar");
+
+  botonCerrar.addEventListener(
+    "click",
+    () => cerrarToast(toast)
+  );
+
+
+  contenedor.appendChild(toast);
+
+
+  requestAnimationFrame(() => {
+
+    toast.classList.add("mostrar");
+
+  });
+
+
+  setTimeout(() => {
+
+    cerrarToast(toast);
+
+  }, 4000);
+
+}
+
+
+function cerrarToast(toast) {
+
+  if (!toast) return;
+
+  toast.classList.remove("mostrar");
+
+  setTimeout(() => {
+
+    toast.remove();
+
+  }, 300);
+
+}
+
+
+
+/* =========================================================
+   CAMBIAR PANTALLA
+========================================================= */
 
 window.mostrarProductos = function () {
 
-  const inicio = document.getElementById("pantallaInicio");
+  const inicio =
+    document.getElementById("pantallaInicio");
 
-  const productos = document.getElementById("pantallaProductos");
+  const productos =
+    document.getElementById("pantallaProductos");
+
 
   if (inicio) {
-    inicio.style.display = "none";
+
+    inicio.classList.add("ocultar");
+
+    setTimeout(() => {
+
+      inicio.style.display = "none";
+
+    }, 350);
+
   }
+
 
   if (productos) {
-    productos.classList.add("activa");
+
     productos.style.display = "block";
+
+    requestAnimationFrame(() => {
+
+      productos.classList.add("activa");
+
+    });
+
   }
 
+
   window.scrollTo({
+
     top: 0,
+
     behavior: "smooth"
+
   });
+
 };
 
-
-// =====================================================
-// VOLVER AL INICIO
-// =====================================================
 
 window.volverInicio = function () {
 
-  const inicio = document.getElementById("pantallaInicio");
+  const inicio =
+    document.getElementById("pantallaInicio");
 
-  const productos = document.getElementById("pantallaProductos");
+  const productos =
+    document.getElementById("pantallaProductos");
+
 
   if (productos) {
+
     productos.classList.remove("activa");
-    productos.style.display = "none";
+
+    setTimeout(() => {
+
+      productos.style.display = "none";
+
+    }, 300);
+
   }
+
 
   if (inicio) {
+
     inicio.style.display = "flex";
+
+    requestAnimationFrame(() => {
+
+      inicio.classList.remove("ocultar");
+
+    });
+
   }
 
+
   window.scrollTo({
+
     top: 0,
+
     behavior: "smooth"
+
   });
+
 };
 
 
-// =====================================================
-// ESTADO DE AUTENTICACIÓN
-// =====================================================
 
-onAuthStateChanged(auth, async (usuario) => {
-
-  const panelAdmin = document.getElementById("panelAdmin");
-
-  const estadoSesion = document.getElementById("estadoSesion");
-
-  if (!usuario) {
-
-    if (panelAdmin) {
-      panelAdmin.style.display = "none";
-    }
-
-    actualizarBotonesAdministrador();
-
-    return;
-  }
-
-
-  // ===================================================
-  // COMPROBAR QUE SEA EL DUEÑO
-  // ===================================================
-
-  if (usuario.uid !== UID_DUENO) {
-
-    await signOut(auth);
-
-    if (panelAdmin) {
-      panelAdmin.style.display = "none";
-    }
-
-    alert("No tienes permiso para entrar como administrador.");
-
-    return;
-  }
-
-
-  // ===================================================
-  // USUARIO ES EL DUEÑO
-  // ===================================================
-
-  if (panelAdmin) {
-    panelAdmin.style.display = "block";
-  }
-
-  if (estadoSesion) {
-    estadoSesion.textContent =
-      "Sesión iniciada como administrador";
-  }
-
-  actualizarBotonesAdministrador();
-
-  // Mostrar productos automáticamente al entrar
-  mostrarProductos();
-
-});
-
-
-// =====================================================
-// ABRIR LOGIN
-// =====================================================
+/* =========================================================
+   LOGIN
+========================================================= */
 
 window.abrirLogin = function () {
 
-  const ventana = document.getElementById("ventanaLogin");
+  const ventana =
+    document.getElementById("ventanaLogin");
 
   if (!ventana) return;
 
+
   ventana.classList.add("mostrar");
 
-  const correo = document.getElementById("correoLogin");
+
+  const correo =
+    document.getElementById("correoLogin");
+
 
   if (correo) {
-    setTimeout(() => correo.focus(), 100);
+
+    setTimeout(() => {
+
+      correo.focus();
+
+    }, 250);
+
   }
+
 };
 
-
-// =====================================================
-// CERRAR LOGIN
-// =====================================================
 
 window.cerrarLogin = function () {
 
-  const ventana = document.getElementById("ventanaLogin");
+  const ventana =
+    document.getElementById("ventanaLogin");
 
   if (ventana) {
+
     ventana.classList.remove("mostrar");
+
   }
 
-  const mensaje = document.getElementById("mensajeLogin");
+
+  const mensaje =
+    document.getElementById("mensajeLogin");
 
   if (mensaje) {
+
     mensaje.textContent = "";
+
   }
+
 };
 
 
-// =====================================================
-// INICIAR SESIÓN
-// =====================================================
-
 window.iniciarSesion = async function () {
 
-  const correo = document.getElementById("correoLogin");
+  const correo =
+    document.getElementById("correoLogin");
 
-  const password = document.getElementById("passwordLogin");
+  const password =
+    document.getElementById("passwordLogin");
 
-  const mensaje = document.getElementById("mensajeLogin");
+  const mensaje =
+    document.getElementById("mensajeLogin");
 
 
   if (!correo || !password) return;
 
 
-  const email = correo.value.trim();
+  const email =
+    correo.value.trim();
 
-  const clave = password.value;
+  const clave =
+    password.value;
 
 
   if (!email || !clave) {
 
     if (mensaje) {
+
       mensaje.textContent =
         "Escribe el correo y la contraseña.";
+
     }
 
     return;
+
   }
 
 
   try {
 
     if (mensaje) {
-      mensaje.textContent = "Iniciando sesión...";
+
+      mensaje.textContent =
+        "Iniciando sesión...";
+
     }
 
 
@@ -270,32 +467,39 @@ window.iniciarSesion = async function () {
       );
 
 
-    // =================================================
-    // COMPROBAR UID
-    // =================================================
-
     if (resultado.user.uid !== UID_DUENO) {
 
       await signOut(auth);
 
       if (mensaje) {
+
         mensaje.textContent =
           "Este usuario no tiene permisos de administrador.";
+
       }
 
       return;
+
     }
 
 
     if (mensaje) {
+
       mensaje.textContent =
-        "¡Sesión iniciada correctamente!";
+        "✓ ¡Sesión iniciada!";
+
     }
+
+
+    mostrarToast(
+      "Sesión iniciada correctamente.",
+      "exito"
+    );
 
 
     setTimeout(() => {
 
-      cerrarLogin();
+      window.cerrarLogin();
 
     }, 700);
 
@@ -304,45 +508,54 @@ window.iniciarSesion = async function () {
 
     console.error(error);
 
+
+    let texto =
+      "No se pudo iniciar sesión.";
+
+
+    if (
+      error.code ===
+      "auth/invalid-credential"
+    ) {
+
+      texto =
+        "Correo o contraseña incorrectos.";
+
+    } else if (
+      error.code ===
+      "auth/user-not-found"
+    ) {
+
+      texto =
+        "No existe una cuenta con ese correo.";
+
+    } else if (
+      error.code ===
+      "auth/wrong-password"
+    ) {
+
+      texto =
+        "La contraseña es incorrecta.";
+
+    }
+
+
     if (mensaje) {
 
-      if (
-        error.code ===
-        "auth/invalid-credential"
-      ) {
+      mensaje.textContent =
+        texto;
 
-        mensaje.textContent =
-          "Correo o contraseña incorrectos.";
-
-      } else if (
-        error.code ===
-        "auth/user-not-found"
-      ) {
-
-        mensaje.textContent =
-          "No existe una cuenta con ese correo.";
-
-      } else if (
-        error.code ===
-        "auth/wrong-password"
-      ) {
-
-        mensaje.textContent =
-          "La contraseña es incorrecta.";
-
-      } else {
-
-        mensaje.textContent =
-          "No se pudo iniciar sesión.";
-      }
     }
+
   }
+
 };
 
 
-// =====================================================
-// CERRAR SESIÓN
-// =====================================================
+
+/* =========================================================
+   SESIÓN ADMIN
+========================================================= */
 
 window.cerrarSesion = async function () {
 
@@ -350,22 +563,138 @@ window.cerrarSesion = async function () {
 
     await signOut(auth);
 
-    alert("Sesión cerrada correctamente.");
+    mostrarToast(
+      "Sesión cerrada correctamente.",
+      "exito"
+    );
 
-    window.volverInicio();
+
+    setTimeout(() => {
+
+      window.volverInicio();
+
+    }, 400);
+
 
   } catch (error) {
 
     console.error(error);
 
-    alert("No se pudo cerrar la sesión.");
+    mostrarToast(
+      "No se pudo cerrar la sesión.",
+      "error"
+    );
+
   }
+
 };
 
 
-// =====================================================
-// VISTA PREVIA DE FOTO
-// =====================================================
+
+/* =========================================================
+   AUTH STATE
+========================================================= */
+
+onAuthStateChanged(
+  auth,
+  async (usuario) => {
+
+    const panelAdmin =
+      document.getElementById("panelAdmin");
+
+    const estadoSesion =
+      document.getElementById("estadoSesion");
+
+    const estadoMiniAdmin =
+      document.getElementById("estadoMiniAdmin");
+
+
+    if (!usuario) {
+
+      if (panelAdmin) {
+
+        panelAdmin.style.display =
+          "none";
+
+      }
+
+
+      if (estadoMiniAdmin) {
+
+        estadoMiniAdmin.style.display =
+          "none";
+
+      }
+
+
+      cargarProductos();
+
+      return;
+
+    }
+
+
+    if (usuario.uid !== UID_DUENO) {
+
+      await signOut(auth);
+
+      if (panelAdmin) {
+
+        panelAdmin.style.display =
+          "none";
+
+      }
+
+
+      mostrarToast(
+        "No tienes permisos de administrador.",
+        "error"
+      );
+
+
+      return;
+
+    }
+
+
+    if (panelAdmin) {
+
+      panelAdmin.style.display =
+        "block";
+
+    }
+
+
+    if (estadoSesion) {
+
+      estadoSesion.textContent =
+        "Sesión iniciada como administrador";
+
+    }
+
+
+    if (estadoMiniAdmin) {
+
+      estadoMiniAdmin.style.display =
+        "flex";
+
+    }
+
+
+    actualizarBotonesAdministrador();
+
+    window.mostrarProductos();
+
+    cargarProductos();
+
+  }
+);
+
+
+
+/* =========================================================
+   FOTO PREVIA
+========================================================= */
 
 const inputFoto =
   document.getElementById("fotoProducto");
@@ -373,56 +702,72 @@ const inputFoto =
 
 if (inputFoto) {
 
-  inputFoto.addEventListener("change", function () {
+  inputFoto.addEventListener(
+    "change",
+    function () {
 
-    const archivo = this.files[0];
+      const archivo =
+        this.files[0];
 
-    const vistaPrevia =
-      document.getElementById("vistaPrevia");
-
-
-    if (!vistaPrevia) return;
-
-
-    vistaPrevia.innerHTML = "";
+      const vistaPrevia =
+        document.getElementById("vistaPrevia");
 
 
-    if (!archivo) {
-      return;
+      if (!vistaPrevia) return;
+
+
+      vistaPrevia.innerHTML = "";
+
+
+      if (!archivo) return;
+
+
+      if (
+        !archivo.type.startsWith("image/")
+      ) {
+
+        mostrarToast(
+          "Selecciona una imagen válida.",
+          "error"
+        );
+
+        this.value = "";
+
+        return;
+
+      }
+
+
+      const imagen =
+        document.createElement("img");
+
+
+      imagen.src =
+        URL.createObjectURL(archivo);
+
+      imagen.alt =
+        "Vista previa del producto";
+
+
+      vistaPrevia.appendChild(imagen);
+
+
+      vistaPrevia.classList.add("visible");
+
     }
+  );
 
-
-    if (!archivo.type.startsWith("image/")) {
-
-      alert("Selecciona una imagen válida.");
-
-      this.value = "";
-
-      return;
-    }
-
-
-    const imagen =
-      document.createElement("img");
-
-    imagen.src =
-      URL.createObjectURL(archivo);
-
-    imagen.alt =
-      "Vista previa del producto";
-
-
-    vistaPrevia.appendChild(imagen);
-
-  });
 }
 
 
-// =====================================================
-// SUBIR FOTO A CLOUDINARY
-// =====================================================
 
-async function subirImagenCloudinary(archivo) {
+/* =========================================================
+   SUBIR CLOUDINARY
+========================================================= */
+
+async function subirImagenCloudinary(
+  archivo
+) {
 
   const url =
     `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
@@ -459,6 +804,7 @@ async function subirImagenCloudinary(archivo) {
     throw new Error(
       "No se pudo subir la imagen."
     );
+
   }
 
 
@@ -466,34 +812,36 @@ async function subirImagenCloudinary(archivo) {
     await respuesta.json();
 
 
+  if (!resultado.secure_url) {
+
+    throw new Error(
+      "Cloudinary no devolvió la imagen."
+    );
+
+  }
+
+
   return resultado.secure_url;
+
 }
 
 
-// =====================================================
-// AGREGAR PRODUCTO
-// =====================================================
+
+/* =========================================================
+   CREAR PRODUCTO
+========================================================= */
 
 window.agregarProducto = async function () {
 
-  const usuario =
-    auth.currentUser;
+  if (!usuarioEsAdmin()) {
 
-
-  // ===================================================
-  // SEGURIDAD
-  // ===================================================
-
-  if (
-    !usuario ||
-    usuario.uid !== UID_DUENO
-  ) {
-
-    alert(
-      "No tienes permiso para publicar productos."
+    mostrarToast(
+      "No tienes permiso para publicar productos.",
+      "error"
     );
 
     return;
+
   }
 
 
@@ -507,7 +855,9 @@ window.agregarProducto = async function () {
     document.getElementById("precioProducto");
 
   const inputDescripcion =
-    document.getElementById("descripcionProducto");
+    document.getElementById(
+      "descripcionProducto"
+    );
 
 
   if (
@@ -517,11 +867,13 @@ window.agregarProducto = async function () {
     !inputDescripcion
   ) {
 
-    alert(
-      "No se encontraron todos los campos."
+    mostrarToast(
+      "No se encontraron todos los campos.",
+      "error"
     );
 
     return;
+
   }
 
 
@@ -538,27 +890,27 @@ window.agregarProducto = async function () {
     inputDescripcion.value.trim();
 
 
-  // ===================================================
-  // VALIDACIONES
-  // ===================================================
-
   if (!archivo) {
 
-    alert(
-      "Selecciona una foto del producto."
+    mostrarToast(
+      "Selecciona una foto del producto.",
+      "error"
     );
 
     return;
+
   }
 
 
   if (!nombre) {
 
-    alert(
-      "Escribe el nombre del producto."
+    mostrarToast(
+      "Escribe el nombre del producto.",
+      "error"
     );
 
     return;
+
   }
 
 
@@ -567,21 +919,25 @@ window.agregarProducto = async function () {
     precio < 0
   ) {
 
-    alert(
-      "Escribe un precio válido."
+    mostrarToast(
+      "Escribe un precio válido.",
+      "error"
     );
 
     return;
+
   }
 
 
   if (!descripcion) {
 
-    alert(
-      "Escribe una descripción."
+    mostrarToast(
+      "Escribe una descripción.",
+      "error"
     );
 
     return;
+
   }
 
 
@@ -595,16 +951,14 @@ window.agregarProducto = async function () {
 
     if (boton) {
 
-      boton.disabled = true;
+      boton.disabled =
+        true;
 
-      boton.textContent =
-        "⏳ Publicando...";
+      boton.innerHTML =
+        `<span class="spinner"></span> Publicando...`;
+
     }
 
-
-    // =================================================
-    // SUBIR IMAGEN
-    // =================================================
 
     const urlImagen =
       await subirImagenCloudinary(
@@ -612,35 +966,36 @@ window.agregarProducto = async function () {
       );
 
 
-    // =================================================
-    // GUARDAR EN FIRESTORE
-    // =================================================
-
     await addDoc(
       collection(
         db,
         "productos"
       ),
       {
-        nombre: nombre,
-        precio: precio,
-        descripcion: descripcion,
-        imagen: urlImagen,
-        creado: new Date()
+        nombre:
+          nombre,
+
+        precio:
+          precio,
+
+        descripcion:
+          descripcion,
+
+        imagen:
+          urlImagen,
+
+        tipo:
+          "creado",
+
+        creado:
+          new Date()
       }
     );
 
 
-    // =================================================
-    // LIMPIAR FORMULARIO
-    // =================================================
-
     inputFoto.value = "";
-
     inputNombre.value = "";
-
     inputPrecio.value = "";
-
     inputDescripcion.value = "";
 
 
@@ -651,12 +1006,19 @@ window.agregarProducto = async function () {
 
 
     if (vistaPrevia) {
+
       vistaPrevia.innerHTML = "";
+
+      vistaPrevia.classList.remove(
+        "visible"
+      );
+
     }
 
 
-    alert(
-      "✅ Producto publicado correctamente."
+    mostrarToast(
+      "Producto publicado correctamente.",
+      "exito"
     );
 
 
@@ -666,14 +1028,14 @@ window.agregarProducto = async function () {
   } catch (error) {
 
     console.error(
-      "Error publicando producto:",
+      "Error publicando:",
       error
     );
 
 
-    alert(
-      "❌ No se pudo publicar el producto.\n\n" +
-      error.message
+    mostrarToast(
+      "No se pudo publicar el producto.",
+      "error"
     );
 
 
@@ -681,18 +1043,94 @@ window.agregarProducto = async function () {
 
     if (boton) {
 
-      boton.disabled = false;
+      boton.disabled =
+        false;
 
-      boton.textContent =
-        "🚀 Publicar producto";
+      boton.innerHTML =
+        `<span>🚀</span> Publicar producto`;
+
     }
+
   }
+
 };
 
 
-// =====================================================
-// CARGAR PRODUCTOS DE FIREBASE
-// =====================================================
+
+/* =========================================================
+   ASEGURAR PRODUCTOS BASE EN FIRESTORE
+========================================================= */
+
+async function asegurarProductosBase() {
+
+  for (
+    const producto of PRODUCTOS_BASE
+  ) {
+
+    try {
+
+      const referencia =
+        doc(
+          db,
+          "productos",
+          producto.id
+        );
+
+
+      const existe =
+        await getDoc(
+          referencia
+        );
+
+
+      if (!existe.exists()) {
+
+        await setDoc(
+          referencia,
+          {
+            nombre:
+              producto.nombre,
+
+            precio:
+              producto.precio,
+
+            descripcion:
+              producto.descripcion,
+
+            imagen:
+              producto.imagen,
+
+            tipo:
+              "base",
+
+            codigoBase:
+              producto.id,
+
+            creado:
+              new Date()
+          }
+        );
+
+      }
+
+    } catch (error) {
+
+      console.error(
+        "Error creando producto base:",
+        error
+      );
+
+    }
+
+  }
+
+}
+
+
+
+/* =========================================================
+   CARGAR PRODUCTOS
+========================================================= */
 
 async function cargarProductos() {
 
@@ -705,10 +1143,18 @@ async function cargarProductos() {
   if (!contenedor) return;
 
 
-  contenedor.innerHTML = "";
+  contenedor.innerHTML = `
+    <div class="cargando-productos">
+      <div class="spinner-grande"></div>
+      <p>Cargando productos...</p>
+    </div>
+  `;
 
 
   try {
+
+    await asegurarProductosBase();
+
 
     const consulta =
       await getDocs(
@@ -719,24 +1165,89 @@ async function cargarProductos() {
       );
 
 
-    const usuario =
-      auth.currentUser;
+    contenedor.innerHTML = "";
 
 
-    consulta.forEach((documento) => {
-
-      const producto =
-        documento.data();
+    const productos = [];
 
 
-      crearTarjetaProducto(
-        contenedor,
-        documento.id,
-        producto,
-        usuario
-      );
+    consulta.forEach(
+      (documento) => {
 
-    });
+        const producto =
+          documento.data();
+
+
+        productos.push({
+
+          id:
+            documento.id,
+
+          ...producto
+
+        });
+
+      }
+    );
+
+
+    productos.sort(
+      (a, b) => {
+
+        if (
+          a.tipo === "base" &&
+          b.tipo !== "base"
+        ) {
+
+          return -1;
+
+        }
+
+        if (
+          a.tipo !== "base" &&
+          b.tipo === "base"
+        ) {
+
+          return 1;
+
+        }
+
+
+        return String(
+          a.nombre || ""
+        ).localeCompare(
+          String(
+            b.nombre || ""
+          )
+        );
+
+      }
+    );
+
+
+    if (productos.length === 0) {
+
+      actualizarTextoResultados(0);
+
+      aplicarFiltros();
+
+      return;
+
+    }
+
+
+    productos.forEach(
+      (producto, indice) => {
+
+        crearTarjetaProducto(
+          contenedor,
+          producto.id,
+          producto,
+          indice
+        );
+
+      }
+    );
 
 
     actualizarBotonesAdministrador();
@@ -752,23 +1263,32 @@ async function cargarProductos() {
     );
 
 
-    contenedor.innerHTML =
-      `<p class="error-productos">
-        No se pudieron cargar los productos.
-      </p>`;
+    contenedor.innerHTML = `
+      <div class="error-productos">
+        <div>⚠️</div>
+        <h3>No se pudieron cargar los productos</h3>
+        <p>Revisa tu conexión e inténtalo nuevamente.</p>
+        <button onclick="cargarProductos()">
+          Reintentar
+        </button>
+      </div>
+    `;
+
   }
+
 }
 
 
-// =====================================================
-// CREAR TARJETA DE PRODUCTO
-// =====================================================
+
+/* =========================================================
+   CREAR TARJETA
+========================================================= */
 
 function crearTarjetaProducto(
   contenedor,
   id,
   producto,
-  usuario
+  indice
 ) {
 
   const tarjeta =
@@ -778,24 +1298,30 @@ function crearTarjetaProducto(
 
 
   tarjeta.className =
-    "producto";
+    "producto tarjeta-entrada";
+
+
+  tarjeta.style.setProperty(
+    "--delay",
+    `${Math.min(indice * 0.06, 0.4)}s`
+  );
 
 
   tarjeta.dataset.nombre =
-    String(
-      producto.nombre || ""
+    escaparTexto(
+      producto.nombre
     );
 
 
   tarjeta.dataset.precio =
     String(
-      Number(producto.precio) || 0
+      Number(
+        producto.precio
+      ) || 0
     );
 
 
-  // ===================================================
-  // IMAGEN
-  // ===================================================
+  /* IMAGEN */
 
   const contenedorImagen =
     document.createElement(
@@ -826,11 +1352,41 @@ function crearTarjetaProducto(
     "lazy";
 
 
-  imagen.onerror = function () {
+  imagen.addEventListener(
+    "click",
+    () => {
 
-    this.style.display =
-      "none";
-  };
+      if (producto.imagen) {
+
+        abrirVisorImagen(
+          producto.imagen,
+          producto.nombre
+        );
+
+      }
+
+    }
+  );
+
+
+  imagen.addEventListener(
+    "error",
+    function () {
+
+      this.style.display =
+        "none";
+
+      contenedorImagen.classList.add(
+        "imagen-error"
+      );
+
+      contenedorImagen.insertAdjacentHTML(
+        "beforeend",
+        `<span>🖼️</span>`
+      );
+
+    }
+  );
 
 
   contenedorImagen.appendChild(
@@ -838,9 +1394,30 @@ function crearTarjetaProducto(
   );
 
 
-  // ===================================================
-  // INFORMACIÓN
-  // ===================================================
+  /* ETIQUETA */
+
+  const etiqueta =
+    document.createElement(
+      "span"
+    );
+
+
+  etiqueta.className =
+    "etiqueta-producto";
+
+
+  etiqueta.textContent =
+    producto.tipo === "base"
+      ? "Disponible"
+      : "Nuevo";
+
+
+  contenedorImagen.appendChild(
+    etiqueta
+  );
+
+
+  /* INFO */
 
   const informacion =
     document.createElement(
@@ -875,7 +1452,7 @@ function crearTarjetaProducto(
 
   descripcion.textContent =
     producto.descripcion ||
-    "";
+    "Producto disponible en nuestra tienda.";
 
 
   const precio =
@@ -890,13 +1467,11 @@ function crearTarjetaProducto(
 
   precio.textContent =
     formatearPrecio(
-      Number(producto.precio) || 0
+      Number(
+        producto.precio
+      ) || 0
     );
 
-
-  // ===================================================
-  // BOTÓN CARRITO
-  // ===================================================
 
   const botonCarrito =
     document.createElement(
@@ -908,17 +1483,19 @@ function crearTarjetaProducto(
     "boton-agregar";
 
 
-  botonCarrito.textContent =
-    "🛒 Agregar al carrito";
+  botonCarrito.innerHTML =
+    `<span>🛒</span> Agregar al carrito`;
 
 
   botonCarrito.addEventListener(
     "click",
-    function () {
+    () => {
 
-      agregarAlCarrito(
+      window.agregarAlCarrito(
         producto.nombre,
-        Number(producto.precio) || 0
+        Number(
+          producto.precio
+        ) || 0
       );
 
     }
@@ -929,36 +1506,22 @@ function crearTarjetaProducto(
     titulo
   );
 
-
-  if (
-    producto.descripcion
-  ) {
-
-    informacion.appendChild(
-      descripcion
-    );
-  }
-
+  informacion.appendChild(
+    descripcion
+  );
 
   informacion.appendChild(
     precio
   );
-
 
   informacion.appendChild(
     botonCarrito
   );
 
 
-  // ===================================================
-  // BOTÓN ELIMINAR
-  // SOLO PARA EL DUEÑO
-  // ===================================================
+  /* BORRAR: SOLO ADMIN */
 
-  if (
-    usuario &&
-    usuario.uid === UID_DUENO
-  ) {
+  if (usuarioEsAdmin()) {
 
     const botonEliminar =
       document.createElement(
@@ -970,8 +1533,8 @@ function crearTarjetaProducto(
       "boton-eliminar-producto";
 
 
-    botonEliminar.textContent =
-      "🗑️ Borrar artículo";
+    botonEliminar.innerHTML =
+      `<span>🗑️</span> Borrar artículo`;
 
 
     botonEliminar.dataset.productoId =
@@ -980,10 +1543,11 @@ function crearTarjetaProducto(
 
     botonEliminar.addEventListener(
       "click",
-      function () {
+      () => {
 
         eliminarProductoFirebase(
-          id
+          id,
+          producto.nombre
         );
 
       }
@@ -993,6 +1557,7 @@ function crearTarjetaProducto(
     informacion.appendChild(
       botonEliminar
     );
+
   }
 
 
@@ -1009,17 +1574,19 @@ function crearTarjetaProducto(
   contenedor.appendChild(
     tarjeta
   );
+
 }
 
 
-// =====================================================
-// ACTUALIZAR VISIBILIDAD DE BOTONES ADMIN
-// =====================================================
+
+/* =========================================================
+   MOSTRAR/OCULTAR BORRAR
+========================================================= */
 
 function actualizarBotonesAdministrador() {
 
-  const usuario =
-    auth.currentUser;
+  const esAdmin =
+    usuarioEsAdmin();
 
 
   const botones =
@@ -1031,63 +1598,46 @@ function actualizarBotonesAdministrador() {
   botones.forEach(
     (boton) => {
 
-      if (
-        usuario &&
-        usuario.uid === UID_DUENO
-      ) {
-
-        boton.style.display =
-          "block";
-
-      } else {
-
-        boton.style.display =
-          "none";
-      }
+      boton.style.display =
+        esAdmin
+          ? "flex"
+          : "none";
 
     }
   );
+
 }
 
 
-// =====================================================
-// ELIMINAR PRODUCTO
-// =====================================================
+
+/* =========================================================
+   ELIMINAR PRODUCTO
+========================================================= */
 
 async function eliminarProductoFirebase(
-  id
+  id,
+  nombre = "este artículo"
 ) {
 
-  const usuario =
-    auth.currentUser;
+  if (!usuarioEsAdmin()) {
 
-
-  // ===================================================
-  // SEGURIDAD
-  // ===================================================
-
-  if (
-    !usuario ||
-    usuario.uid !== UID_DUENO
-  ) {
-
-    alert(
-      "No tienes permiso para borrar productos."
+    mostrarToast(
+      "No tienes permiso para borrar productos.",
+      "error"
     );
 
     return;
+
   }
 
 
   const confirmar =
-    confirm(
-      "¿Seguro que quieres borrar este artículo?"
+    window.confirm(
+      `¿Seguro que quieres borrar "${nombre}"?`
     );
 
 
-  if (!confirmar) {
-    return;
-  }
+  if (!confirmar) return;
 
 
   try {
@@ -1101,8 +1651,9 @@ async function eliminarProductoFirebase(
     );
 
 
-    alert(
-      "🗑️ Producto eliminado correctamente."
+    mostrarToast(
+      "Artículo eliminado correctamente.",
+      "exito"
     );
 
 
@@ -1117,36 +1668,20 @@ async function eliminarProductoFirebase(
     );
 
 
-    alert(
-      "❌ No se pudo eliminar el producto."
+    mostrarToast(
+      "No se pudo eliminar el artículo.",
+      "error"
     );
+
   }
+
 }
 
 
-// =====================================================
-// FORMATEAR PRECIO
-// =====================================================
 
-function formatearPrecio(
-  precio
-) {
-
-  return new Intl.NumberFormat(
-    "es-CO",
-    {
-      style: "currency",
-      currency: "COP",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }
-  ).format(precio);
-}
-
-
-// =====================================================
-// FILTROS
-// =====================================================
+/* =========================================================
+   FILTROS
+========================================================= */
 
 const buscador =
   document.getElementById(
@@ -1172,6 +1707,7 @@ if (buscador) {
     "input",
     aplicarFiltros
   );
+
 }
 
 
@@ -1187,19 +1723,21 @@ if (rangoPrecio) {
 
     }
   );
+
 }
 
 
-// =====================================================
-// ACTUALIZAR TEXTO DEL PRECIO
-// =====================================================
 
 function actualizarTextoPrecio() {
 
   if (
     !rangoPrecio ||
     !valorPrecio
-  ) return;
+  ) {
+
+    return;
+
+  }
 
 
   const valor =
@@ -1216,6 +1754,7 @@ function actualizarTextoPrecio() {
       "$100.000+";
 
     return;
+
   }
 
 
@@ -1223,20 +1762,18 @@ function actualizarTextoPrecio() {
     formatearPrecio(
       valor
     );
+
 }
 
 
-// =====================================================
-// APLICAR FILTROS
-// =====================================================
 
 function aplicarFiltros() {
 
   const texto =
     buscador
       ? buscador.value
-          .trim()
-          .toLowerCase()
+        .trim()
+        .toLowerCase()
       : "";
 
 
@@ -1254,7 +1791,8 @@ function aplicarFiltros() {
     );
 
 
-  let encontrados = 0;
+  let encontrados =
+    0;
 
 
   productos.forEach(
@@ -1264,7 +1802,8 @@ function aplicarFiltros() {
         (
           producto.dataset.nombre ||
           ""
-        ).toLowerCase();
+        )
+        .toLowerCase();
 
 
       const precio =
@@ -1276,14 +1815,8 @@ function aplicarFiltros() {
 
       const coincideNombre =
         !texto ||
-        nombre.includes(
-          texto
-        );
+        nombre.includes(texto);
 
-
-      // =================================================
-      // 100.000+ = SIN LÍMITE
-      // =================================================
 
       const coincidePrecio =
         maximo >= 100000
@@ -1305,6 +1838,7 @@ function aplicarFiltros() {
 
         producto.style.display =
           "none";
+
       }
 
     }
@@ -1323,13 +1857,49 @@ function aplicarFiltros() {
       encontrados === 0
         ? "block"
         : "none";
+
   }
+
+
+  actualizarTextoResultados(
+    encontrados
+  );
+
 }
 
 
-// =====================================================
-// ABRIR / CERRAR FILTROS
-// =====================================================
+
+function actualizarTextoResultados(
+  cantidad
+) {
+
+  const contador =
+    document.getElementById(
+      "contadorResultados"
+    );
+
+
+  if (!contador) return;
+
+
+  if (cantidad === 0) {
+
+    contador.textContent =
+      "Sin productos";
+
+    return;
+
+  }
+
+
+  contador.textContent =
+    cantidad === 1
+      ? "1 producto disponible"
+      : `${cantidad} productos disponibles`;
+
+}
+
+
 
 window.alternarFiltros = function () {
 
@@ -1339,78 +1909,132 @@ window.alternarFiltros = function () {
     );
 
 
+  const icono =
+    document.getElementById(
+      "iconoFiltros"
+    );
+
+
   if (!panel) return;
 
 
   panel.classList.toggle(
     "mostrar"
   );
+
+
+  if (icono) {
+
+    icono.classList.toggle(
+      "abierto"
+    );
+
+  }
+
 };
 
 
-// =====================================================
-// LIMPIAR FILTROS
-// =====================================================
 
 window.limpiarFiltros = function () {
 
   if (buscador) {
-    buscador.value = "";
+
+    buscador.value =
+      "";
+
   }
 
 
   if (rangoPrecio) {
+
     rangoPrecio.value =
       "100000";
+
   }
 
 
   actualizarTextoPrecio();
 
   aplicarFiltros();
+
 };
 
 
-// =====================================================
-// CARRITO
-// =====================================================
 
-window.agregarAlCarrito = function (
-  nombre,
-  precio
-) {
+window.limpiarBusqueda = function () {
 
-  const productoExistente =
-    carrito.find(
-      (producto) =>
-        producto.nombre === nombre
-    );
+  if (buscador) {
 
+    buscador.value =
+      "";
 
-  if (productoExistente) {
-
-    productoExistente.cantidad++;
-
-  } else {
-
-    carrito.push({
-      nombre: nombre,
-      precio: precio,
-      cantidad: 1
-    });
+    buscador.focus();
 
   }
 
 
-  actualizarCarrito();
+  aplicarFiltros();
 
-  abrirCarrito();
 };
 
 
-// =====================================================
-// ACTUALIZAR CARRITO
-// =====================================================
+
+/* =========================================================
+   CARRITO
+========================================================= */
+
+window.agregarAlCarrito =
+  function (
+    nombre,
+    precio
+  ) {
+
+    const productoExistente =
+      carrito.find(
+        producto =>
+          producto.nombre === nombre
+      );
+
+
+    if (productoExistente) {
+
+      productoExistente.cantidad++;
+
+    } else {
+
+      carrito.push({
+
+        nombre:
+          nombre,
+
+        precio:
+          Number(precio) || 0,
+
+        cantidad:
+          1
+
+      });
+
+    }
+
+
+    actualizarCarrito();
+
+    mostrarToast(
+      `${nombre} agregado al carrito.`,
+      "exito"
+    );
+
+
+    setTimeout(() => {
+
+      abrirCarrito();
+
+    }, 180);
+
+  };
+
+
 
 function actualizarCarrito() {
 
@@ -1435,46 +2059,68 @@ function actualizarCarrito() {
   if (!lista) return;
 
 
-  lista.innerHTML = "";
+  lista.innerHTML =
+    "";
 
 
-  let cantidadTotal = 0;
+  let cantidadTotal =
+    0;
 
-  let precioTotal = 0;
 
+  let precioTotal =
+    0;
 
-  // ===================================================
-  // CARRITO VACÍO
-  // ===================================================
 
   if (carrito.length === 0) {
 
-    lista.innerHTML =
-      `<div class="carrito-vacio">
-        <div>🛒</div>
-        <p>Tu carrito está vacío.</p>
-      </div>`;
+    lista.innerHTML = `
+
+      <div class="carrito-vacio">
+
+        <div class="carrito-vacio-icono">
+          🛒
+        </div>
+
+        <h3>
+          Tu carrito está vacío
+        </h3>
+
+        <p>
+          Agrega algunos productos
+          para comenzar tu pedido.
+        </p>
+
+        <button
+          onclick="cerrarCarrito()"
+        >
+          Seguir comprando
+        </button>
+
+      </div>
+
+    `;
 
 
     if (total) {
+
       total.textContent =
         "Total: $0";
+
     }
 
 
     if (contador) {
+
       contador.textContent =
         "0";
+
     }
 
 
     return;
+
   }
 
-
-  // ===================================================
-  // PRODUCTOS
-  // ===================================================
 
   carrito.forEach(
     (producto, indice) => {
@@ -1544,10 +2190,6 @@ function actualizarCarrito() {
       );
 
 
-      // =================================================
-      // CONTROLES
-      // =================================================
-
       const controles =
         document.createElement(
           "div"
@@ -1570,7 +2212,7 @@ function actualizarCarrito() {
 
       menos.addEventListener(
         "click",
-        function () {
+        () => {
 
           cambiarCantidadCarrito(
             indice,
@@ -1603,7 +2245,7 @@ function actualizarCarrito() {
 
       mas.addEventListener(
         "click",
-        function () {
+        () => {
 
           cambiarCantidadCarrito(
             indice,
@@ -1630,7 +2272,7 @@ function actualizarCarrito() {
 
       eliminar.addEventListener(
         "click",
-        function () {
+        () => {
 
           eliminarDelCarrito(
             indice
@@ -1644,16 +2286,13 @@ function actualizarCarrito() {
         menos
       );
 
-
       controles.appendChild(
         cantidad
       );
 
-
       controles.appendChild(
         mas
       );
-
 
       controles.appendChild(
         eliminar
@@ -1663,7 +2302,6 @@ function actualizarCarrito() {
       item.appendChild(
         informacion
       );
-
 
       item.appendChild(
         controles
@@ -1694,22 +2332,19 @@ function actualizarCarrito() {
       String(
         cantidadTotal
       );
+
   }
+
 }
 
 
-// =====================================================
-// CAMBIAR CANTIDAD
-// =====================================================
 
 function cambiarCantidadCarrito(
   indice,
   cambio
 ) {
 
-  if (
-    !carrito[indice]
-  ) return;
+  if (!carrito[indice]) return;
 
 
   carrito[indice].cantidad +=
@@ -1724,24 +2359,21 @@ function cambiarCantidadCarrito(
       indice,
       1
     );
+
   }
 
 
   actualizarCarrito();
+
 }
 
 
-// =====================================================
-// ELIMINAR DEL CARRITO
-// =====================================================
 
 function eliminarDelCarrito(
   indice
 ) {
 
-  if (
-    !carrito[indice]
-  ) return;
+  if (!carrito[indice]) return;
 
 
   carrito.splice(
@@ -1751,12 +2383,10 @@ function eliminarDelCarrito(
 
 
   actualizarCarrito();
+
 }
 
 
-// =====================================================
-// ABRIR CARRITO
-// =====================================================
 
 window.abrirCarrito = function () {
 
@@ -1771,16 +2401,12 @@ window.abrirCarrito = function () {
 
   actualizarCarrito();
 
-
   ventana.classList.add(
     "mostrar"
   );
+
 };
 
-
-// =====================================================
-// CERRAR CARRITO
-// =====================================================
 
 window.cerrarCarrito = function () {
 
@@ -1795,77 +2421,161 @@ window.cerrarCarrito = function () {
     ventana.classList.remove(
       "mostrar"
     );
+
   }
+
 };
 
 
-// =====================================================
-// COMPRAR POR WHATSAPP
-// =====================================================
 
-window.comprarPorWhatsApp = function () {
+/* =========================================================
+   WHATSAPP
+========================================================= */
 
-  if (
-    carrito.length === 0
-  ) {
+window.comprarPorWhatsApp =
+  function () {
 
-    alert(
-      "Tu carrito está vacío."
-    );
+    if (
+      carrito.length === 0
+    ) {
 
-    return;
-  }
+      mostrarToast(
+        "Tu carrito está vacío.",
+        "error"
+      );
 
-
-  const numero =
-    "573202104423";
-
-
-  let mensaje =
-    "Hola, quiero realizar este pedido:%0A%0A";
-
-
-  let total =
-    0;
-
-
-  carrito.forEach(
-    (producto) => {
-
-      const subtotal =
-        producto.precio *
-        producto.cantidad;
-
-
-      total +=
-        subtotal;
-
-
-      mensaje +=
-        `• ${producto.nombre} x${producto.cantidad} - ${formatearPrecio(subtotal)}%0A`;
+      return;
 
     }
-  );
 
 
-  mensaje +=
-    `%0A*Total: ${formatearPrecio(total)}*`;
+    let mensaje =
+      "Hola, quiero realizar este pedido:%0A%0A";
 
 
-  const url =
-    `https://wa.me/${numero}?text=${mensaje}`;
+    let total =
+      0;
 
 
-  window.open(
+    carrito.forEach(
+      producto => {
+
+        const subtotal =
+          producto.precio *
+          producto.cantidad;
+
+
+        total +=
+          subtotal;
+
+
+        mensaje +=
+          `• ${encodeURIComponent(
+            producto.nombre
+          )} x${producto.cantidad} - ${encodeURIComponent(
+            formatearPrecio(subtotal)
+          )}%0A`;
+
+      }
+    );
+
+
+    mensaje +=
+      `%0A*Total: ${encodeURIComponent(
+        formatearPrecio(total)
+      )}*`;
+
+
+    const url =
+      `https://wa.me/${NUMERO_WHATSAPP}?text=${mensaje}`;
+
+
+    window.open(
+      url,
+      "_blank"
+    );
+
+  };
+
+
+
+/* =========================================================
+   VISOR DE IMÁGENES
+========================================================= */
+
+window.abrirVisorImagen =
+  function (
     url,
-    "_blank"
-  );
-};
+    nombre = "Producto"
+  ) {
+
+    const visor =
+      document.getElementById(
+        "visorImagen"
+      );
 
 
-// =====================================================
-// CERRAR MODALES AL HACER CLICK AFUERA
-// =====================================================
+    const imagen =
+      document.getElementById(
+        "imagenGrande"
+      );
+
+
+    if (
+      !visor ||
+      !imagen
+    ) return;
+
+
+    imagen.src =
+      url;
+
+
+    imagen.alt =
+      nombre;
+
+
+    visor.classList.add(
+      "mostrar"
+    );
+
+
+    document.body.classList.add(
+      "sin-scroll"
+    );
+
+  };
+
+
+window.cerrarVisorImagen =
+  function () {
+
+    const visor =
+      document.getElementById(
+        "visorImagen"
+      );
+
+
+    if (visor) {
+
+      visor.classList.remove(
+        "mostrar"
+      );
+
+    }
+
+
+    document.body.classList.remove(
+      "sin-scroll"
+    );
+
+  };
+
+
+
+/* =========================================================
+   CERRAR MODALES
+========================================================= */
 
 window.addEventListener(
   "click",
@@ -1884,48 +2594,58 @@ window.addEventListener(
 
 
     if (
-      event.target === login
+      event.target ===
+      login
     ) {
 
       cerrarLogin();
+
     }
 
 
     if (
-      event.target === carritoVentana
+      event.target ===
+      carritoVentana
     ) {
 
       cerrarCarrito();
+
     }
 
   }
 );
 
 
-// =====================================================
-// TECLA ESC
-// =====================================================
+
+/* =========================================================
+   ESC
+========================================================= */
 
 window.addEventListener(
   "keydown",
   function (event) {
 
     if (
-      event.key === "Escape"
+      event.key ===
+      "Escape"
     ) {
 
       cerrarLogin();
 
       cerrarCarrito();
+
+      cerrarVisorImagen();
+
     }
 
   }
 );
 
 
-// =====================================================
-// ENTER EN LOGIN
-// =====================================================
+
+/* =========================================================
+   ENTER LOGIN
+========================================================= */
 
 const passwordLogin =
   document.getElementById(
@@ -1940,20 +2660,24 @@ if (passwordLogin) {
     function (event) {
 
       if (
-        event.key === "Enter"
+        event.key ===
+        "Enter"
       ) {
 
         iniciarSesion();
+
       }
 
     }
   );
+
 }
 
 
-// =====================================================
-// INICIALIZAR
-// =====================================================
+
+/* =========================================================
+   INICIO
+========================================================= */
 
 actualizarTextoPrecio();
 
