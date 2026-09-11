@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+  <meta name="description" content="Variedades Karleny - Productos y variedades para todos.">
   <title>Variedades Karleny</title>
 
   <link rel="stylesheet" href="style.css">
@@ -11,758 +11,770 @@
 
 <body>
 
-  <!-- ==================== BARRA SUPERIOR ==================== -->
+  <!-- =====================================================
+       PANTALLA 1 - INICIO
+       ===================================================== -->
+  <section id="pantallaInicio" class="pantalla-inicio">
 
-  <header class="barra">
+    <div class="decoracion decoracion-1"></div>
+    <div class="decoracion decoracion-2"></div>
+    <div class="decoracion decoracion-3"></div>
 
-    <div class="logo">
-      🛍️ Variedades Karleny
-    </div>
+    <div class="contenido-inicio">
 
-    <div class="acciones-barra">
+      <div class="badge-bienvenida">
+        ✨ BIENVENIDO
+      </div>
 
-      <button class="boton-login" onclick="abrirLogin()">
-        🔐 Entrar
-      </button>
+      <div class="icono-tienda">
+        🛍️
+      </div>
 
-      <button class="boton-carrito" onclick="abrirCarrito()">
-        🛒 Carrito
-        <span id="cantidadCarrito">0</span>
-      </button>
-
-    </div>
-
-  </header>
-
-
-  <!-- ==================== INICIO ==================== -->
-
-  <section class="inicio">
-
-    <div class="inicio-contenido">
-
-      <span class="etiqueta-inicio">
-        ✨ Bienvenido
-      </span>
-
-      <h1>
-        Variedades <span>Karleny</span>
-      </h1>
+      <h1>Variedades Karleny</h1>
 
       <p>
-        Encuentra productos increíbles, variedad y buenos precios
+        Encuentra productos increíbles, novedades y mucho más
         en un solo lugar.
       </p>
 
-      <button class="boton-ver-productos" onclick="mostrarMensaje()">
-        🛍️ Ver productos
-      </button>
-
-    </div>
-
-  </section>
-
-
-  <!-- ==================== PANEL DEL DUEÑO ==================== -->
-
-  <section id="panelAdmin" style="display: none;">
-
-    <div class="admin-cabezera">
-
-      <div>
-        <span class="admin-etiqueta">
-          👑 ADMINISTRADOR
-        </span>
-
-        <h2>
-          Panel del dueño
-        </h2>
-
-        <p>
-          Agrega y administra tus productos.
-        </p>
-
-        <p id="estadoAdmin"></p>
-      </div>
-
-      <button
-        class="boton-cerrar-sesion"
-        onclick="cerrarSesion()"
-      >
-        🚪 Cerrar sesión
-      </button>
-
-    </div>
-
-
-    <div class="admin-formulario">
-
-      <div class="campo-admin">
-
-        <label for="fotoProducto">
-          📷 Foto del producto
-        </label>
-
-        <input
-          type="file"
-          id="fotoProducto"
-          accept="image/*"
-          capture="environment"
-        >
-
-        <div class="preview-contenedor">
-          <img
-            id="vistaPreviaProducto"
-            alt="Vista previa"
-          >
-        </div>
-
-      </div>
-
-
-      <div class="campo-admin">
-
-        <label for="nombreProducto">
-          🏷️ Nombre
-        </label>
-
-        <input
-          type="text"
-          id="nombreProducto"
-          placeholder="Ej: Labial rojo"
-          maxlength="100"
-        >
-
-      </div>
-
-
-      <div class="campo-admin">
-
-        <label for="precioProducto">
-          💰 Precio
-        </label>
-
-        <input
-          type="number"
-          id="precioProducto"
-          placeholder="Ej: 15000"
-          min="0"
-        >
-
-      </div>
-
-
-      <div class="campo-admin">
-
-        <label for="descripcionProducto">
-          📝 Descripción
-        </label>
-
-        <textarea
-          id="descripcionProducto"
-          placeholder="Describe el producto..."
-          maxlength="300"
-        ></textarea>
-
-      </div>
-
-
-      <button
-        class="boton-agregar-admin"
-        onclick="agregarProducto()"
-      >
-        ➕ Publicar producto
-      </button>
-
-      <p id="mensajeProducto"></p>
-
-    </div>
-
-  </section>
-
-
-  <!-- ==================== PRODUCTOS ==================== -->
-
-  <main id="seccionProductos">
-
-    <div class="titulo-productos">
-
-      <span>
-        🛍️ NUESTRA TIENDA
-      </span>
-
-      <h2>
-        Productos
-      </h2>
-
-      <p>
-        Explora nuestros productos y encuentra lo que buscas.
-      </p>
-
-    </div>
-
-
-    <!-- ==================== BUSCADOR Y FILTROS ==================== -->
-
-    <div class="filtros-tienda">
-
-      <div class="buscador-contenedor">
-
-        <span class="icono-busqueda">
-          🔎
-        </span>
-
-        <input
-          type="text"
-          id="buscadorProductos"
-          placeholder="Buscar productos..."
-          autocomplete="off"
-        >
+      <div class="botones-inicio">
 
         <button
-          id="botonLimpiarBusqueda"
-          onclick="limpiarBusqueda()"
-          title="Limpiar búsqueda"
-        >
-          ✕
+          class="boton-principal"
+          onclick="mostrarProductos()">
+          🛍️ Ver productos
+        </button>
+
+        <button
+          class="boton-secundario"
+          onclick="abrirLogin()">
+          🔐 Entrar
         </button>
 
       </div>
 
+    </div>
 
-      <div class="filtro-precio">
+  </section>
 
-        <div class="filtro-titulo">
-          💰 Filtrar por precio
+
+  <!-- =====================================================
+       PANTALLA 2 - PRODUCTOS
+       ===================================================== -->
+  <section id="pantallaProductos" class="pantalla-productos">
+
+    <!-- BARRA SUPERIOR -->
+    <header class="barra">
+
+      <button
+        class="boton-volver"
+        onclick="volverInicio()"
+        aria-label="Volver al inicio">
+        ←
+      </button>
+
+      <div class="logo">
+        Variedades Karleny
+      </div>
+
+      <button
+        class="boton-carrito"
+        onclick="abrirCarrito()">
+        🛒
+        <span id="contadorCarrito">0</span>
+      </button>
+
+    </header>
+
+
+    <!-- =================================================
+         PANEL DEL ADMINISTRADOR
+         ================================================= -->
+    <section
+      id="panelAdmin"
+      class="panel-admin"
+      style="display: none;">
+
+      <div class="admin-cabecera">
+        <div>
+          <h2>⚙️ Panel del administrador</h2>
+          <p id="estadoSesion">
+            Sesión no iniciada
+          </p>
         </div>
 
-        <div class="precios-inputs">
+        <button
+          class="boton-cerrar-sesion"
+          onclick="cerrarSesion()">
+          Cerrar sesión
+        </button>
+      </div>
 
-          <div>
-            <label for="precioMinimo">
-              Desde
-            </label>
 
-            <input
-              type="number"
-              id="precioMinimo"
-              min="0"
-              value="0"
-              placeholder="$0"
-            >
+      <div class="admin-formulario">
+
+        <!-- FOTO -->
+        <div class="campo-admin">
+
+          <label for="fotoProducto">
+            📷 Foto del producto
+          </label>
+
+          <input
+            type="file"
+            id="fotoProducto"
+            accept="image/*"
+            capture="environment">
+
+          <div
+            id="vistaPrevia"
+            class="vista-previa">
           </div>
 
+        </div>
 
-          <span class="separador-precio">
-            —
+
+        <!-- NOMBRE -->
+        <div class="campo-admin">
+
+          <label for="nombreProducto">
+            🏷️ Nombre del producto
+          </label>
+
+          <input
+            type="text"
+            id="nombreProducto"
+            placeholder="Ej: Labial rojo"
+            autocomplete="off">
+
+        </div>
+
+
+        <!-- PRECIO -->
+        <div class="campo-admin">
+
+          <label for="precioProducto">
+            💰 Precio
+          </label>
+
+          <input
+            type="number"
+            id="precioProducto"
+            placeholder="Ej: 15000"
+            min="0"
+            inputmode="numeric">
+
+        </div>
+
+
+        <!-- DESCRIPCIÓN -->
+        <div class="campo-admin">
+
+          <label for="descripcionProducto">
+            📝 Descripción
+          </label>
+
+          <textarea
+            id="descripcionProducto"
+            placeholder="Escribe una descripción del producto..."
+            rows="4"></textarea>
+
+        </div>
+
+
+        <!-- PUBLICAR -->
+        <button
+          class="boton-publicar"
+          onclick="agregarProducto()">
+          🚀 Publicar producto
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================
+         SECCIÓN DE PRODUCTOS
+         ================================================= -->
+    <main id="seccionProductos" class="seccion-productos">
+
+      <div class="encabezado-productos">
+
+        <div>
+          <span class="mini-titulo">
+            ✨ NUESTRA TIENDA
           </span>
 
+          <h2>
+            Productos
+          </h2>
 
-          <div>
-            <label for="precioMaximo">
-              Hasta
-            </label>
+          <p>
+            Descubre nuestras variedades disponibles.
+          </p>
+        </div>
+
+
+        <!-- BOTÓN ÚNICO DE BUSCAR/FILTRAR -->
+        <button
+          class="boton-filtros"
+          onclick="alternarFiltros()">
+          🔎 Buscar / Filtrar
+        </button>
+
+      </div>
+
+
+      <!-- =================================================
+           FILTROS
+           ================================================= -->
+      <div
+        id="panelFiltros"
+        class="panel-filtros">
+
+        <div class="campo-busqueda">
+
+          <label for="buscadorProductos">
+            🔎 Buscar producto
+          </label>
+
+          <input
+            type="text"
+            id="buscadorProductos"
+            placeholder="Escribe el nombre del producto..."
+            autocomplete="off">
+
+        </div>
+
+
+        <!-- FILTRO DE PRECIO -->
+        <div class="filtro-precio">
+
+          <div class="encabezado-precio">
+
+            <span>
+              💰 Precio máximo
+            </span>
+
+            <strong id="valorPrecio">
+              $100.000+
+            </strong>
+
+          </div>
+
+
+          <div class="linea-precio">
+
+            <span>$0</span>
 
             <input
-              type="number"
-              id="precioMaximo"
+              type="range"
+              id="rangoPrecio"
               min="0"
-              placeholder="$100.000+"
-            >
+              max="100000"
+              step="5000"
+              value="100000">
+
+            <span>$100.000+</span>
+
           </div>
 
         </div>
 
 
-        <div class="botones-precio">
+        <button
+          class="boton-limpiar-filtros"
+          onclick="limpiarFiltros()">
+          ↻ Limpiar filtros
+        </button>
 
-          <button onclick="establecerPrecio(0, 10000)">
-            $0 - $10K
-          </button>
+      </div>
 
-          <button onclick="establecerPrecio(10000, 30000)">
-            $10K - $30K
-          </button>
 
-          <button onclick="establecerPrecio(30000, 100000)">
-            $30K - $100K
-          </button>
+      <!-- =================================================
+           GRID DE PRODUCTOS
+           ================================================= -->
+      <div
+        id="contenedorProductos"
+        class="contenedor-productos">
 
-          <button onclick="establecerPrecio(100000, null)">
-            $100K+
-          </button>
+
+        <!-- PRODUCTOS ESTÁTICOS -->
+
+        <article
+          class="producto"
+          data-nombre="Labial"
+          data-precio="15000">
+
+          <div class="imagen-producto">
+
+            <img
+              src="imagenes/labial.jpg"
+              alt="Labial"
+              loading="lazy">
+
+          </div>
+
+          <div class="informacion-producto">
+
+            <h3>
+              Labial
+            </h3>
+
+            <p class="precio">
+              $15.000
+            </p>
+
+            <button
+              class="boton-agregar"
+              onclick="agregarAlCarrito('Labial', 15000)">
+              🛒 Agregar al carrito
+            </button>
+
+          </div>
+
+        </article>
+
+
+
+        <article
+          class="producto"
+          data-nombre="Peluche"
+          data-precio="25000">
+
+          <div class="imagen-producto">
+
+            <img
+              src="imagenes/peluche.jpg"
+              alt="Peluche"
+              loading="lazy">
+
+          </div>
+
+          <div class="informacion-producto">
+
+            <h3>
+              Peluche
+            </h3>
+
+            <p class="precio">
+              $25.000
+            </p>
+
+            <button
+              class="boton-agregar"
+              onclick="agregarAlCarrito('Peluche', 25000)">
+              🛒 Agregar al carrito
+            </button>
+
+          </div>
+
+        </article>
+
+
+
+        <article
+          class="producto"
+          data-nombre="Jabón 24k"
+          data-precio="7000">
+
+          <div class="imagen-producto">
+
+            <img
+              src="imagenes/karite.jpg"
+              alt="Jabón 24k"
+              loading="lazy">
+
+          </div>
+
+          <div class="informacion-producto">
+
+            <h3>
+              Jabón 24k
+            </h3>
+
+            <p class="precio">
+              $7.000
+            </p>
+
+            <button
+              class="boton-agregar"
+              onclick="agregarAlCarrito('Jabón 24k', 7000)">
+              🛒 Agregar al carrito
+            </button>
+
+          </div>
+
+        </article>
+
+
+
+        <article
+          class="producto"
+          data-nombre="Lissia"
+          data-precio="10000">
+
+          <div class="imagen-producto">
+
+            <img
+              src="imagenes/lissia.jpg"
+              alt="Lissia"
+              loading="lazy">
+
+          </div>
+
+          <div class="informacion-producto">
+
+            <h3>
+              Lissia
+            </h3>
+
+            <p class="precio">
+              $10.000
+            </p>
+
+            <button
+              class="boton-agregar"
+              onclick="agregarAlCarrito('Lissia', 10000)">
+              🛒 Agregar al carrito
+            </button>
+
+          </div>
+
+        </article>
+
+
+
+        <article
+          class="producto"
+          data-nombre="Thyms"
+          data-precio="15000">
+
+          <div class="imagen-producto">
+
+            <img
+              src="imagenes/thyms.jpg"
+              alt="Thyms"
+              loading="lazy">
+
+          </div>
+
+          <div class="informacion-producto">
+
+            <h3>
+              Thyms
+            </h3>
+
+            <p class="precio">
+              $15.000
+            </p>
+
+            <button
+              class="boton-agregar"
+              onclick="agregarAlCarrito('Thyms', 15000)">
+              🛒 Agregar al carrito
+            </button>
+
+          </div>
+
+        </article>
+
+
+
+        <article
+          class="producto"
+          data-nombre="Posillo"
+          data-precio="5000">
+
+          <div class="imagen-producto">
+
+            <img
+              src="imagenes/posillo.jpg"
+              alt="Posillo"
+              loading="lazy">
+
+          </div>
+
+          <div class="informacion-producto">
+
+            <h3>
+              Posillo
+            </h3>
+
+            <p class="precio">
+              $5.000
+            </p>
+
+            <button
+              class="boton-agregar"
+              onclick="agregarAlCarrito('Posillo', 5000)">
+              🛒 Agregar al carrito
+            </button>
+
+          </div>
+
+        </article>
+
+
+
+        <article
+          class="producto"
+          data-nombre="Globos"
+          data-precio="10000">
+
+          <div class="imagen-producto">
+
+            <img
+              src="imagenes/globos.jpg"
+              alt="Globos"
+              loading="lazy">
+
+          </div>
+
+          <div class="informacion-producto">
+
+            <h3>
+              Globos
+            </h3>
+
+            <p class="precio">
+              $10.000
+            </p>
+
+            <button
+              class="boton-agregar"
+              onclick="agregarAlCarrito('Globos', 10000)">
+              🛒 Agregar al carrito
+            </button>
+
+          </div>
+
+        </article>
+
+
+
+        <article
+          class="producto"
+          data-nombre="Keraton"
+          data-precio="10000">
+
+          <div class="imagen-producto">
+
+            <img
+              src="imagenes/keraton.jpg"
+              alt="Keraton"
+              loading="lazy">
+
+          </div>
+
+          <div class="informacion-producto">
+
+            <h3>
+              Keraton
+            </h3>
+
+            <p class="precio">
+              $10.000
+            </p>
+
+            <button
+              class="boton-agregar"
+              onclick="agregarAlCarrito('Keraton', 10000)">
+              🛒 Agregar al carrito
+            </button>
+
+          </div>
+
+        </article>
+
+
+        <!-- =================================================
+             PRODUCTOS DE FIREBASE
+             ================================================= -->
+        <div
+          id="productosDinamicos"
+          class="productos-dinamicos">
+        </div>
+
+
+        <!-- MENSAJE SIN RESULTADOS -->
+        <div
+          id="sinResultados"
+          class="sin-resultados"
+          style="display: none;">
+
+          <div class="icono-sin-resultados">
+            🔍
+          </div>
+
+          <h3>
+            No encontramos productos
+          </h3>
+
+          <p>
+            Intenta buscar otro nombre o cambiar el filtro de precio.
+          </p>
 
         </div>
 
       </div>
 
+    </main>
 
-      <button
-        class="boton-reset-filtros"
-        onclick="limpiarFiltros()"
-      >
-        🔄 Limpiar filtros
-      </button>
 
-    </div>
+    <!-- =================================================
+         FOOTER
+         ================================================= -->
+    <footer class="footer">
 
+      <h3>
+        Variedades Karleny
+      </h3>
 
-    <div
-      id="contadorResultados"
-      class="contador-resultados"
-    >
-      Mostrando productos
-    </div>
+      <p>
+        Gracias por visitar nuestra tienda 💕
+      </p>
 
+      <p class="copyright">
+        © 2026 Variedades Karleny
+      </p>
 
-    <!-- PRODUCTOS -->
+    </footer>
 
-    <div id="productos" class="productos">
+  </section>
 
-      <!-- PRODUCTOS ESTÁTICOS -->
 
-      <div
-        class="producto producto-estatico"
-        data-nombre="labial"
-        data-precio="15000"
-      >
-
-        <img
-          src="imagenes/labial.jpg"
-          alt="Labial"
-        >
-
-        <h3>
-          Labial
-        </h3>
-
-        <p class="precio">
-          $15.000
-        </p>
-
-        <p>
-          Labial de excelente calidad.
-        </p>
-
-        <button
-          onclick="agregarAlCarrito('Labial', 15000)"
-        >
-          🛒 Agregar al carrito
-        </button>
-
-      </div>
-
-
-      <div
-        class="producto producto-estatico"
-        data-nombre="peluche"
-        data-precio="25000"
-      >
-
-        <img
-          src="imagenes/peluche.jpg"
-          alt="Peluche"
-        >
-
-        <h3>
-          Peluche
-        </h3>
-
-        <p class="precio">
-          $25.000
-        </p>
-
-        <p>
-          Bonito peluche para regalar.
-        </p>
-
-        <button
-          onclick="agregarAlCarrito('Peluche', 25000)"
-        >
-          🛒 Agregar al carrito
-        </button>
-
-      </div>
-
-
-      <div
-        class="producto producto-estatico"
-        data-nombre="jabon 24k 24k"
-        data-precio="7000"
-      >
-
-        <img
-          src="imagenes/karite.jpg"
-          alt="Jabón 24k"
-        >
-
-        <h3>
-          24k
-        </h3>
-
-        <p class="precio">
-          $7.000
-        </p>
-
-        <p>
-          Jabón 24k.
-        </p>
-
-        <button
-          onclick="agregarAlCarrito('Jabón 24k', 7000)"
-        >
-          🛒 Agregar al carrito
-        </button>
-
-      </div>
-
-
-      <div
-        class="producto producto-estatico"
-        data-nombre="lissia consulta color"
-        data-precio="10000"
-      >
-
-        <img
-          src="imagenes/lissia.jpg"
-          alt="Lissia"
-        >
-
-        <h3>
-          Lissia
-        </h3>
-
-        <p class="precio">
-          $10.000
-        </p>
-
-        <p>
-          Consulta color.
-        </p>
-
-        <button
-          onclick="agregarAlCarrito('Lissia', 10000)"
-        >
-          🛒 Agregar al carrito
-        </button>
-
-      </div>
-
-
-      <div
-        class="producto producto-estatico"
-        data-nombre="thyms consulta color"
-        data-precio="15000"
-      >
-
-        <img
-          src="imagenes/thyms.jpg"
-          alt="Thyms"
-        >
-
-        <h3>
-          Thyms
-        </h3>
-
-        <p class="precio">
-          $15.000
-        </p>
-
-        <p>
-          Consulta color.
-        </p>
-
-        <button
-          onclick="agregarAlCarrito('Thyms', 15000)"
-        >
-          🛒 Agregar al carrito
-        </button>
-
-      </div>
-
-
-      <div
-        class="producto producto-estatico"
-        data-nombre="posillos posillos"
-        data-precio="5000"
-      >
-
-        <img
-          src="imagenes/posillo.jpg"
-          alt="Posillos"
-        >
-
-        <h3>
-          Posillo
-        </h3>
-
-        <p class="precio">
-          $5.000
-        </p>
-
-        <p>
-          Posillos.
-        </p>
-
-        <button
-          onclick="agregarAlCarrito('Posillos', 5000)"
-        >
-          🛒 Agregar al carrito
-        </button>
-
-      </div>
-
-
-      <div
-        class="producto producto-estatico"
-        data-nombre="globos consulta color precio"
-        data-precio="10000"
-      >
-
-        <img
-          src="imagenes/globos.jpg"
-          alt="Globos"
-        >
-
-        <h3>
-          Globos
-        </h3>
-
-        <p class="precio">
-          $10.000
-        </p>
-
-        <p>
-          Consulta color y precio.
-        </p>
-
-        <button
-          onclick="agregarAlCarrito('Globos', 10000)"
-        >
-          🛒 Agregar al carrito
-        </button>
-
-      </div>
-
-
-      <div
-        class="producto producto-estatico"
-        data-nombre="keraton consulta color"
-        data-precio="10000"
-      >
-
-        <img
-          src="imagenes/keraton.jpg"
-          alt="Keraton"
-        >
-
-        <h3>
-          Keraton
-        </h3>
-
-        <p class="precio">
-          $10.000
-        </p>
-
-        <p>
-          Consulta color.
-        </p>
-
-        <button
-          onclick="agregarAlCarrito('Keraton', 10000)"
-        >
-          🛒 Agregar al carrito
-        </button>
-
-      </div>
-
-
-      <!-- AQUÍ APARECEN LOS PRODUCTOS DE FIREBASE -->
-
-      <div
-        id="productosDinamicos"
-        class="productos-dinamicos"
-      ></div>
-
-
-      <!-- MENSAJE SIN RESULTADOS -->
-
-      <div
-        id="sinResultados"
-        class="sin-resultados"
-        style="display: none;"
-      >
-
-        <div class="sin-resultados-icono">
-          🔍
-        </div>
-
-        <h3>
-          No encontramos productos
-        </h3>
-
-        <p>
-          Intenta cambiar la búsqueda o el rango de precios.
-        </p>
-
-        <button onclick="limpiarFiltros()">
-          🔄 Ver todos
-        </button>
-
-      </div>
-
-    </div>
-
-  </main>
-
-
-  <!-- ==================== LOGIN ==================== -->
-
+  <!-- =====================================================
+       MODAL LOGIN
+       ===================================================== -->
   <div
     id="ventanaLogin"
-    class="ventana-login"
-  >
+    class="modal">
 
-    <div class="login">
+    <div class="modal-contenido">
 
       <button
-        class="cerrar-login"
-        onclick="cerrarLogin()"
-      >
-        ✕
+        class="cerrar-modal"
+        onclick="cerrarLogin()">
+        ×
       </button>
 
-      <div class="login-icono">
-        👑
+      <div class="icono-login">
+        🔐
       </div>
 
       <h2>
-        Acceso del dueño
+        Iniciar sesión
       </h2>
 
       <p>
-        Inicia sesión para administrar la tienda.
+        Acceso exclusivo para el administrador.
       </p>
 
 
-      <label for="correoLogin">
-        Correo
-      </label>
+      <div class="campo-login">
 
-      <input
-        type="email"
-        id="correoLogin"
-        placeholder="Tu correo"
-        autocomplete="email"
-      >
+        <label for="correoLogin">
+          Correo
+        </label>
+
+        <input
+          type="email"
+          id="correoLogin"
+          placeholder="Correo electrónico"
+          autocomplete="email">
+
+      </div>
 
 
-      <label for="contrasenaLogin">
-        Contraseña
-      </label>
+      <div class="campo-login">
 
-      <input
-        type="password"
-        id="contrasenaLogin"
-        placeholder="Tu contraseña"
-        autocomplete="current-password"
-      >
+        <label for="passwordLogin">
+          Contraseña
+        </label>
+
+        <input
+          type="password"
+          id="passwordLogin"
+          placeholder="Contraseña"
+          autocomplete="current-password">
+
+      </div>
 
 
       <button
-        class="boton-entrar"
-        onclick="iniciarSesion()"
-      >
-        🔐 Entrar
+        class="boton-login"
+        onclick="iniciarSesion()">
+        Entrar
       </button>
 
 
-      <p id="mensajeLogin"></p>
+      <p
+        id="mensajeLogin"
+        class="mensaje-login">
+      </p>
 
     </div>
 
   </div>
 
 
-  <!-- ==================== CARRITO ==================== -->
-
+  <!-- =====================================================
+       MODAL CARRITO
+       ===================================================== -->
   <div
     id="ventanaCarrito"
-    class="ventana-carrito"
-  >
+    class="modal">
 
-    <div class="carrito">
+    <div class="modal-contenido modal-carrito">
 
       <button
-        class="cerrar-carrito"
-        onclick="cerrarCarrito()"
-      >
-        ✕
+        class="cerrar-modal"
+        onclick="cerrarCarrito()">
+        ×
       </button>
 
+      <div class="icono-carrito-modal">
+        🛒
+      </div>
+
       <h2>
-        🛒 Mi carrito
+        Mi carrito
       </h2>
 
-      <div id="listaCarrito"></div>
 
       <div
-        id="carritoVacio"
-        class="carrito-vacio"
-      >
-        🛒 Tu carrito está vacío.
+        id="listaCarrito"
+        class="lista-carrito">
       </div>
 
 
       <div
-        id="resumenCarrito"
-        class="resumen-carrito"
-      >
-
-        <div class="total-carrito">
-          <span>
-            Total:
-          </span>
-
-          <strong id="totalCarrito">
-            $0
-          </strong>
-        </div>
-
-
-        <button
-          onclick="vaciarCarrito()"
-          class="boton-vaciar"
-        >
-          🗑️ Vaciar carrito
-        </button>
-
-
-        <button
-          onclick="comprarCarritoWhatsApp()"
-          class="boton-whatsapp"
-        >
-          💬 Comprar por WhatsApp
-        </button>
-
+        id="totalCarrito"
+        class="total-carrito">
+        Total: $0
       </div>
+
+
+      <button
+        class="boton-whatsapp"
+        onclick="comprarPorWhatsApp()">
+        💬 Comprar por WhatsApp
+      </button>
 
     </div>
 
   </div>
 
 
-  <footer>
-    <p>
-      © 2026 Variedades Karleny · Todos los derechos reservados.
-    </p>
-  </footer>
-
-
+  <!-- =====================================================
+       JAVASCRIPT
+       ===================================================== -->
   <script
     type="module"
-    src="script.js"
-  ></script>
+    src="script.js">
+  </script>
 
 </body>
 </html>
