@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#d90070">
+  <meta name="description" content="Variedades Karleny — tienda y personalización de camisas.">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Karleny">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.1/dist/fabric.min.js" defer></script>
+</head>
+<body>
+  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+  <section id="pantallaInicio" class="pantalla pantalla-inicio">
+    <div class="bg-orb orb-a"></div><div class="bg-orb orb-b"></div><div class="bg-orb orb-c"></div>
+    <div class="inicio-card">
+      <span class="eyebrow">✨ BIENVENIDO</span>
+      <div class="brand-mark">🛍️</div>
+      <h1>Variedades <span>Karleny</span></h1>
+      <p>Tu tienda de detalles, productos y camisas personalizadas. Diseña, revisa y envía tu pedido desde el celular.</p>
+      <div class="inicio-actions">
+        <button class="btn btn-primary" onclick="mostrarProductos()">🛍️ Ver productos</button>
+        <button class="btn btn-personalizar" onclick="abrirPersonalizador()">
+          <span class="tag-new">✨ NUEVA FUNCIÓN</span><span class="btn-icon">👕</span>
+          <span class="btn-copy"><b>Personalizar camisa</b><small>Crea tu diseño a tu gusto</small></span><span>→</span>
+        </button>
+        <button class="btn btn-ghost" onclick="abrirLogin()">🔐 Entrar</button>
+        <button id="botonInstalarApp" class="btn btn-install" type="button" onclick="instalarApp()" hidden>📲 Instalar app</button>
+      </div>
+      <div class="trust-row"><span>🔒 Compra segura</span><span>📦 Pedido detallado</span><span>📱 Hecho para celular</span></div>
+    </div>
+  </section>
+
+  <section id="pantallaProductos" class="pantalla pantalla-productos" hidden>
+    <header class="topbar">
+      <button class="icon-btn" onclick="volverInicio()" aria-label="Volver">←</button>
+      <div class="logo">🛍️ Variedades <span>Karleny</span></div>
+      <button class="cart-btn" onclick="abrirCarrito()">🛒 <span id="cantidadCarrito">0</span></button>
+    </header>
+
+    <main class="store-shell">
+      <section id="panelAdmin" class="admin-panel" hidden>
+        <div class="admin-head">
+          <div><span class="eyebrow pink">👑 ADMINISTRADOR</span><h2>Panel del dueño</h2><p id="estadoAdmin">Sesión no activa.</p></div>
+          <div class="admin-actions"><button class="btn btn-small" onclick="mostrarPedidosAdmin()">🔔 Pedidos <span id="contadorPedidosAdmin">0</span></button><button class="btn btn-small btn-outline" onclick="activarNotificacionesAdmin()">🔔 Activar notificaciones</button><button class="btn btn-small btn-danger" onclick="cerrarSesion()">🚪 Salir</button></div>
+        </div>
+        <div id="panelPedidosAdmin" class="orders-panel" hidden>
+          <div class="orders-head"><div><span class="eyebrow pink">📦 BANDEJA</span><h3>Pedidos recibidos</h3><p>Solo visible para la cuenta del dueño.</p></div><button class="icon-btn" onclick="ocultarPedidosAdmin()">✕</button></div>
+          <div id="listaPedidosAdmin" class="orders-list"></div>
+        </div>
+        <div class="admin-form card">
+          <div class="admin-grid">
+            <label>📷 Foto del producto<input id="fotoProducto" type="file" accept="image/*"><span id="previewProductoWrap" class="upload-preview"><img id="vistaPreviaProducto" alt="Vista previa"></span></label>
+            <label>🏷️ Nombre<input id="nombreProducto" maxlength="100" placeholder="Ej: Labial rojo"></label>
+            <label>💰 Precio<input id="precioProducto" type="number" min="0" step="1" inputmode="numeric" placeholder="15000"></label>
+            <label class="full">📝 Descripción<textarea id="descripcionProducto" maxlength="300" placeholder="Describe el producto..."></textarea></label>
+          </div>
+          <button class="btn btn-primary" onclick="agregarProducto()">➕ Publicar producto</button><p id="mensajeProducto" class="status-text"></p>
+        </div>
+      </section>
+
+      <section class="store-hero"><div><span class="eyebrow pink">🛍️ NUESTRA TIENDA</span><h2>Productos</h2><p>Explora, agrega al carrito y compra por WhatsApp.</p></div><button class="btn btn-outline" onclick="alternarFiltros()">🔎 Buscar / Filtrar</button></section>
+
+      <section id="panelFiltros" class="filter-panel" hidden>
+        <div class="filter-head"><div><b>🔎 Buscar productos</b><small>Nombre o descripción</small></div><button class="icon-btn" onclick="cerrarFiltros()">✕</button></div>
+        <div class="search-row"><input id="buscadorProductos" type="search" placeholder="Ej: labial, peluche..." autocomplete="off"><button class="icon-btn" onclick="limpiarBusqueda()">✕</button></div>
+        <div class="price-row"><b>💰 Precio máximo</b><b id="valorPrecioFiltro">$100.000+</b></div>
+        <input id="rangoPrecio" type="range" min="0" max="100000" step="5000" value="100000">
+        <div class="range-labels"><span>$0</span><span>$100.000+</span></div>
+        <button class="btn btn-small btn-outline" onclick="limpiarFiltros()">🔄 Mostrar todos</button>
+      </section>
+
+      <div id="contadorResultados" class="result-count">Mostrando productos</div>
+      <div id="productos" class="product-grid"></div>
+      <div id="sinResultados" class="empty-state" hidden><div>🔍</div><h3>No encontramos productos</h3><p>Prueba otra búsqueda o un rango de precio diferente.</p><button class="btn btn-outline" onclick="limpiarFiltros()">Ver todos</button></div>
+    </main>
+    <footer class="footer">© 2026 Variedades Karleny · Todos los derechos reservados.</footer>
+  </section>
+
+  <section id="pantallaPersonalizador" class="pantalla pantalla-personalizador" hidden>
+    <header class="topbar editor-topbar"><button class="icon-btn" onclick="terminarPersonalizacion()">←</button><div class="logo">👕 Personalizar <span>camisa</span></div><button class="btn btn-small btn-outline" onclick="terminarPersonalizacion()">Terminar</button></header>
+
+    <div id="pasoDatosPersonalizacion" class="editor-step active">
+      <div class="step-hero"><span class="eyebrow pink">✨ NUEVA FUNCIÓN</span><h2>Diseña tu camisa</h2><p>Primero completa tus datos. Luego podrás crear cada diseño.</p></div>
+      <div class="card form-card">
+        <label>👤 Tu nombre<input id="clienteNombre" type="text" maxlength="80" placeholder="Ej: Juan Pérez" autocomplete="name"></label>
+        <label>📱 Número de teléfono<input id="clienteTelefono" type="tel" maxlength="20" inputmode="tel" placeholder="Ej: 320 123 4567" autocomplete="tel"></label>
+        <label class="full">📦 ¿Para cuándo quieres tu pedido?<input id="fechaEntrega" type="date"><small>Elige el día en que deseas recibirlo.</small></label>
+        <div class="full"><label>👕 Talla base</label><div id="tallasBase" class="segmented"><button type="button" data-talla="XS">XS</button><button type="button" data-talla="S" class="selected">S</button><button type="button" data-talla="L">L</button></div><small>Luego puedes cambiar la talla de cada camisa.</small></div>
+        <button id="btnIniciarPersonalizacion" class="btn btn-primary full" disabled onclick="iniciarPersonalizacion()">🚀 Iniciar diseño</button>
+      </div>
+    </div>
+
+    <div id="pasoCantidadPersonalizacion" class="editor-step" hidden>
+      <div class="step-hero"><span class="eyebrow pink">01 · CANTIDAD</span><h2>¿Cuántas camisas deseas comprar?</h2><p>Puedes usar un diseño diferente en cada una.</p></div>
+      <div class="card quantity-card"><div class="shirt-mini">👕</div><div class="quantity-control"><button onclick="cambiarCantidadCamisas(-1)">−</button><output id="cantidadCamisas">1</output><button onclick="cambiarCantidadCamisas(1)">+</button></div><strong id="textoCantidadCamisas">1 camisa</strong><small>Máximo 20 por pedido.</small></div>
+      <button class="btn btn-primary big-btn" onclick="continuarAlEditor()">Continuar al diseño →</button>
+    </div>
+
+    <div id="pasoEditorPersonalizacion" class="editor-step" hidden>
+      <div class="editor-meta"><div><span id="indiceCamisaActual">CAMISA 1 DE 1</span><h2 id="tituloCamisaActual">Diseño de camisa</h2></div><div class="side-switch"><button id="btnLadoFrente" class="selected" onclick="cambiarLadoCamisa('frente')">Frente</button><button id="btnLadoEspalda" onclick="cambiarLadoCamisa('espalda')">Espalda</button></div></div>
+      <div class="editor-layout">
+        <aside class="editor-tools">
+          <div class="tool-card"><div class="tool-title"><b>🎨 Color</b><span id="nombreColorCamisa">Blanco</span></div><div id="paletaColoresCamisa" class="color-palette"></div></div>
+          <div class="tool-card"><div class="tool-title"><b>🖼️ Imágenes</b><small>Varias permitidas</small></div><label for="inputImagenCamisa" class="upload-btn">＋ Agregar imágenes</label><input id="inputImagenCamisa" type="file" accept="image/*" multiple hidden></div>
+          <div class="tool-card"><div class="tool-title"><b>✋ Herramientas</b><span id="estadoSeleccion">Selecciona una imagen</span></div><div class="tool-grid"><button onclick="escalarSeleccion(1.08)">＋ Tamaño</button><button onclick="escalarSeleccion(.92)">− Tamaño</button><button onclick="centrarSeleccion()">◎ Centrar</button><button class="danger" onclick="eliminarSeleccion()">🗑️ Eliminar</button></div></div>
+          <div class="tool-card"><div class="tool-title"><b>📏 Medidas</b><small>Referencia de impresión</small></div><div class="measure-grid"><div><span>Ancho</span><b id="medidaAncho">0,0 cm</b></div><div><span>Alto</span><b id="medidaAlto">0,0 cm</b></div><div><span>Posición X</span><b id="medidaX">0,0 cm</b></div><div><span>Posición Y</span><b id="medidaY">0,0 cm</b></div></div></div>
+          <div class="tool-card history-row"><button onclick="deshacerEditor()">↶ Deshacer</button><button onclick="rehacerEditor()">↷ Rehacer</button></div>
+        </aside>
+        <section class="shirt-stage"><div class="touch-help">👆 Arrastra la imagen • usa las esquinas para cambiar tamaño</div><div class="shirt-wrap" id="vistaCamisaWrap"><svg id="camisaSvg" viewBox="0 0 500 600" class="shirt-svg"><path id="siluetaCamisa" d="M175 50 L112 75 L35 155 L83 225 L128 188 L128 525 Q128 548 151 548 L349 548 Q372 548 372 525 L372 188 L417 225 L465 155 L388 75 L325 50 Q303 102 250 102 Q197 102 175 50 Z" fill="#fff" stroke="#d8d8dc" stroke-width="4" stroke-linejoin="round"/><path d="M175 50 Q197 102 250 102 Q303 102 325 50" fill="none" stroke="#d0d0d6" stroke-width="5"/></svg><div class="print-zone"><span>ÁREA DE DISEÑO</span></div><div id="canvasHost" class="canvas-host"><canvas id="canvasCamisa"></canvas></div></div><div class="stage-note">📏 Área de referencia: <b>30 × 40 cm</b>. Las medidas son de diseño y sirven como guía; el tamaño físico final debe comprobarse al imprimir.</div></section>
+      </div>
+      <div class="editor-footer"><label>Talla de esta camisa<select id="tallaCamisaActual" onchange="cambiarTallaCamisaActual(this.value)"><option>XS</option><option>S</option><option>L</option></select></label><button id="btnCopiarDisenoAnterior" class="btn btn-outline" style="display:none" onclick="copiarDisenoAnterior()">📋 Copiar diseño anterior</button><button id="btnSiguienteCamisa" class="btn btn-primary" onclick="guardarYContinuarCamisa()">Guardar y continuar →</button></div>
+    </div>
+
+    <div id="pasoRevisionPersonalizacion" class="editor-step" hidden>
+      <div class="step-hero"><span class="eyebrow pink">✅ ÚLTIMO PASO</span><h2>Revisa tu pedido</h2><p>El administrador verá estos diseños y todas sus medidas.</p></div>
+      <div id="listaRevisionCamisas" class="review-list"></div>
+      <div class="card client-summary"><div><span>👤 Cliente</span><b id="revisionNombre">—</b></div><div><span>📱 Teléfono</span><b id="revisionTelefono">—</b></div><div><span>📦 Entrega</span><b id="revisionEntrega">—</b></div><div><span>👕 Cantidad</span><b id="revisionCantidad">—</b></div></div>
+      <button id="btnConfirmarPedido" class="btn btn-primary big-btn" onclick="confirmarPedidoPersonalizado()">✅ Confirmar y enviar pedido</button>
+      <button class="btn btn-outline big-btn" onclick="volverAEditarUltimaCamisa()">← Revisar diseños</button>
+    </div>
+    <div id="mensajeFinalPedido" class="final-message" hidden></div>
+  </section>
+
+  <div id="ventanaLogin" class="modal" hidden><div class="modal-card"><button class="modal-close" onclick="cerrarLogin()">✕</button><div class="modal-icon">👑</div><h2>Acceso del dueño</h2><p>Entra para administrar productos y pedidos.</p><label>Correo<input id="correoLogin" type="email" autocomplete="email" placeholder="Tu correo"></label><label>Contraseña<input id="contrasenaLogin" type="password" autocomplete="current-password" placeholder="Tu contraseña"></label><button class="btn btn-primary full" onclick="iniciarSesion()">🔐 Entrar</button><p id="mensajeLogin" class="status-text"></p></div></div>
+
+  <div id="ventanaCarrito" class="modal" hidden><div class="modal-card cart-modal"><button class="modal-close" onclick="cerrarCarrito()">✕</button><div class="modal-icon">🛒</div><h2>Mi carrito</h2><div id="listaCarrito"></div><div id="carritoVacio" class="empty-state compact"><div>🛒</div><h3>Tu carrito está vacío</h3></div><div id="resumenCarrito" class="cart-summary" hidden><div><span>Total</span><b id="totalCarrito">$0</b></div><button class="btn btn-outline full" onclick="vaciarCarrito()">🗑️ Vaciar carrito</button><button class="btn btn-whatsapp full" onclick="comprarCarritoWhatsApp()">💬 Comprar por WhatsApp</button></div></div></div>
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>
