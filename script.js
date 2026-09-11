@@ -1,11 +1,32 @@
 /* =========================================================
-   VARIEDADES KARLENY — VERSION PÓLVORA 💥
-   Tienda + Firebase + Cloudinary + PWA + Personalizador 2D
+   VARIEDADES KARLENY — APP + TIENDA + PERSONALIZADOR 2D
    ========================================================= */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, updateDoc, doc, serverTimestamp, onSnapshot } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+
+import {
+  getAuth,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signOut
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs,
+  deleteDoc,
+  updateDoc,
+  doc,
+  serverTimestamp,
+  onSnapshot
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+
+
+/* =========================================================
+   FIREBASE
+   ========================================================= */
 
 const firebaseConfig = {
   apiKey: "AIzaSyBzTvF-Af08z8jsjpa6L2mGEQQ7IxZZqAI",
@@ -22,575 +43,6146 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 const UID_DUENO = "vKixdwAJz9MfApZV81FPOiPybFr2";
+
 const CLOUDINARY_CLOUD_NAME = "ktxu8h5o";
 const CLOUDINARY_UPLOAD_PRESET = "productos";
+
 const WHATSAPP = "573202104423";
 
-/* El área editable representa una guía de 30 × 40 cm. */
+
+/* =========================================================
+   CONFIGURACIÓN DEL EDITOR
+   ========================================================= */
+
+/*
+  Área física de referencia:
+  30 cm × 40 cm
+
+  El editor interno utiliza:
+  600 × 800 px
+
+  Por lo tanto:
+  20 px = 1 cm horizontal
+  20 px = 1 cm vertical
+*/
+
 const EDITOR_WIDTH = 600;
 const EDITOR_HEIGHT = 800;
-const PRINT_CM_W = 30;
-const PRINT_CM_H = 40;
-const CM_PER_PX_X = PRINT_CM_W / EDITOR_WIDTH;
-const CM_PER_PX_Y = PRINT_CM_H / EDITOR_HEIGHT;
-const PRINT_PREVIEW = { x: 145, y: 150, width: 210, height: 300 };
-const MAX_FILE_MB = 8;
-const MAX_OBJECTS_PER_SIDE = 20;
+
+const CM_PER_EDITOR_PX_X = 30 / EDITOR_WIDTH;
+const CM_PER_EDITOR_PX_Y = 40 / EDITOR_HEIGHT;
+
+
+/* =========================================================
+   COLORES DE CAMISA
+   ========================================================= */
 
 const COLORES_CAMISA = [
-  { nombre: "Blanco", valor: "#ffffff", borde: "#d8d8dc" },
-  { nombre: "Negro", valor: "#181818", borde: "#080808" },
-  { nombre: "Rojo", valor: "#d62839", borde: "#aa1a29" },
-  { nombre: "Azul", valor: "#2463c4", borde: "#174587" },
-  { nombre: "Celeste", valor: "#58b8e8", borde: "#3f91b9" },
-  { nombre: "Verde", valor: "#2da66f", borde: "#20744f" },
-  { nombre: "Amarillo", valor: "#ffd447", borde: "#c4a122" },
-  { nombre: "Naranja", valor: "#f28c28", borde: "#c86e19" },
-  { nombre: "Rosado", valor: "#ef6cae", borde: "#c24c88" },
-  { nombre: "Morado", valor: "#7b4cc6", borde: "#563196" },
-  { nombre: "Café", valor: "#8b5e3c", borde: "#68452d" },
-  { nombre: "Gris", valor: "#9da3aa", borde: "#747a80" }
+  {
+    nombre: "Blanco",
+    valor: "#ffffff",
+    borde: "#d8d8dc"
+  },
+  {
+    nombre: "Negro",
+    valor: "#171717",
+    borde: "#090909"
+  },
+  {
+    nombre: "Rojo",
+    valor: "#d62839",
+    borde: "#a51929"
+  },
+  {
+    nombre: "Azul",
+    valor: "#2463c4",
+    borde: "#174587"
+  },
+  {
+    nombre: "Celeste",
+    valor: "#58b8e8",
+    borde: "#3f91b9"
+  },
+  {
+    nombre: "Verde",
+    valor: "#2da66f",
+    borde: "#20744f"
+  },
+  {
+    nombre: "Amarillo",
+    valor: "#ffd447",
+    borde: "#c4a122"
+  },
+  {
+    nombre: "Naranja",
+    valor: "#f28c28",
+    borde: "#c86e19"
+  },
+  {
+    nombre: "Rosado",
+    valor: "#ef6cae",
+    borde: "#c24c88"
+  },
+  {
+    nombre: "Morado",
+    valor: "#7b4cc6",
+    borde: "#563196"
+  },
+  {
+    nombre: "Café",
+    valor: "#8b5e3c",
+    borde: "#68452d"
+  },
+  {
+    nombre: "Gris",
+    valor: "#9da3aa",
+    borde: "#747a80"
+  }
 ];
 
-const PRODUCTOS_ESTATICOS = [
-  { id: "static-labial", nombre: "Labial", precio: 15000, descripcion: "Labial de excelente calidad.", imagen: "imagenes/labial.jpg" },
-  { id: "static-peluche", nombre: "Peluche", precio: 25000, descripcion: "Bonito peluche para regalar.", imagen: "imagenes/peluche.jpg" },
-  { id: "static-24k", nombre: "Jabón 24k", precio: 7000, descripcion: "Jabón 24k.", imagen: "imagenes/karite.jpg" },
-  { id: "static-lissia", nombre: "Lissia", precio: 10000, descripcion: "Consulta color.", imagen: "imagenes/lissia.jpg" },
-  { id: "static-thyms", nombre: "Thyms", precio: 15000, descripcion: "Consulta color.", imagen: "imagenes/thyms.jpg" },
-  { id: "static-posillos", nombre: "Posillos", precio: 5000, descripcion: "Posillos.", imagen: "imagenes/posillo.jpg" },
-  { id: "static-globos", nombre: "Globos", precio: 10000, descripcion: "Consulta color y precio.", imagen: "imagenes/globos.jpg" },
-  { id: "static-keraton", nombre: "Keraton", precio: 10000, descripcion: "Consulta color.", imagen: "imagenes/keraton.jpg" }
-];
 
-let carrito = cargarLocalStorage("karleny_carrito", []);
+/* =========================================================
+   ESTADO GLOBAL
+   ========================================================= */
+
+let carrito = [];
+
 let productosFirebase = [];
+
 let fabricCanvas = null;
-let deferredInstallPrompt = null;
+let fabricReadyPromise = null;
+
 let editorColor = COLORES_CAMISA[0].valor;
 let editorColorNombre = COLORES_CAMISA[0].nombre;
+
 let cantidadCamisas = 1;
+
 let tallaBase = "S";
+
 let camisaActual = 0;
-let ladoActual = "frente";
+
 let camisas = [];
-let historyPast = [];
-let historyFuture = [];
-let restoring = false;
-let unsubscribePedidos = null;
-let pedidosInicializados = false;
+
+let ladoActual = "frente";
+
+let editorHistoryPast = [];
+let editorHistoryFuture = [];
+
+let restaurandoEditor = false;
+
+let ultimaOperacionHistorial = 0;
+
 let pedidosAdmin = [];
-let adminPedidosAbierto = false;
-let ultimoToastPedido = 0;
+let pedidosInicializados = false;
+
+let unsubscribePedidos = null;
+
+let idsPedidosConocidos = new Set();
+
+let deferredInstallPrompt = null;
+
+
+/* =========================================================
+   UTILIDAD DOM
+   ========================================================= */
 
 const $ = (id) => document.getElementById(id);
-const money = (n) => `$${Number(n || 0).toLocaleString("es-CO")}`;
-const limitar = (n, min, max) => Math.max(min, Math.min(max, n));
-const fechaBonita = (iso) => {
-  if (!iso) return "—";
-  const d = new Date(`${iso}T12:00:00`);
-  return Number.isNaN(d.getTime()) ? iso : d.toLocaleDateString("es-CO", { day: "2-digit", month: "long", year: "numeric" });
+
+
+/* =========================================================
+   UTILIDADES GENERALES
+   ========================================================= */
+
+function formatearPrecio(precio) {
+  return new Intl.NumberFormat("es-CO", {
+    style: "currency",
+    currency: "COP",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(Number(precio) || 0);
+}
+
+
+function escaparHTML(texto) {
+  return String(texto ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+
+function mostrarToast(titulo, mensaje, tipo = "normal") {
+
+  const contenedor = $("toastContainer");
+
+  if (!contenedor) return;
+
+  const toast = document.createElement("div");
+
+  toast.className = `toast toast-${tipo}`;
+
+  toast.innerHTML = `
+    <strong>${escaparHTML(titulo)}</strong>
+    <span>${escaparHTML(mensaje)}</span>
+  `;
+
+  contenedor.appendChild(toast);
+
+  setTimeout(() => {
+    toast.classList.add("mostrar");
+  }, 20);
+
+  setTimeout(() => {
+
+    toast.classList.remove("mostrar");
+
+    setTimeout(() => {
+      toast.remove();
+    }, 250);
+
+  }, 4800);
+}
+
+
+function fechaBonita(valor) {
+
+  if (!valor) return "—";
+
+  const partes = String(valor).split("-");
+
+  if (partes.length === 3) {
+    return `${partes[2]}/${partes[1]}/${partes[0]}`;
+  }
+
+  if (typeof valor?.toDate === "function") {
+    return valor.toDate().toLocaleDateString("es-CO");
+  }
+
+  return String(valor);
+}
+
+
+function limitarNumero(valor, min, max) {
+  return Math.min(max, Math.max(min, valor));
+}
+
+
+/*
+  Clonado seguro.
+
+  No utilizamos structuredClone porque algunos navegadores
+  pueden tener problemas con objetos provenientes de Fabric.
+*/
+
+function clonarObjetos(objetos) {
+
+  try {
+
+    return JSON.parse(
+      JSON.stringify(objetos || [])
+    );
+
+  } catch (error) {
+
+    console.warn(
+      "No se pudieron clonar los objetos:",
+      error
+    );
+
+    return [];
+  }
+}
+
+
+/* =========================================================
+   ESPERAR FABRIC.JS
+   ========================================================= */
+
+function esperarFabric() {
+
+  if (fabricReadyPromise) {
+    return fabricReadyPromise;
+  }
+
+  fabricReadyPromise = new Promise((resolve, reject) => {
+
+    const inicio = Date.now();
+
+    const revisar = () => {
+
+      if (window.fabric?.Canvas) {
+
+        resolve(window.fabric);
+
+        return;
+      }
+
+      if (Date.now() - inicio > 15000) {
+
+        reject(
+          new Error(
+            "No se pudo cargar el editor de camisas."
+          )
+        );
+
+        return;
+      }
+
+      setTimeout(revisar, 100);
+    };
+
+    revisar();
+  });
+
+  return fabricReadyPromise;
+}
+
+
+/* =========================================================
+   NAVEGACIÓN PRINCIPAL
+   ========================================================= */
+
+window.mostrarProductos = function () {
+
+  const inicio = $("pantallaInicio");
+
+  if (inicio) {
+    inicio.style.display = "none";
+  }
+
+  const pantalla = $("pantallaProductos");
+
+  if (pantalla) {
+
+    pantalla.style.display = "block";
+
+    pantalla.classList.add("activa");
+  }
+
+  const personalizador = $("pantallaPersonalizador");
+
+  if (personalizador) {
+    personalizador.style.display = "none";
+  }
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
 };
-const escapar = (s) => String(s ?? "").replace(/[&<>'"]/g, (c) => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", "'":"&#39;", '"':"&quot;" }[c]));
 
-function cargarLocalStorage(key, fallback) {
-  try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; }
-}
-function guardarLocalStorage(key, value) {
-  try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) { console.warn("No se pudo guardar en localStorage", e); }
-}
 
-function mostrarToast(titulo, cuerpo = "", tipo = "info") {
-  const cont = $("toastContainer");
-  if (!cont) return;
-  const el = document.createElement("div");
-  el.className = `toast toast-${tipo}`;
-  el.innerHTML = `<b>${escapar(titulo)}</b><span>${escapar(cuerpo)}</span>`;
-  cont.appendChild(el);
-  requestAnimationFrame(() => el.classList.add("show"));
-  setTimeout(() => { el.classList.remove("show"); setTimeout(() => el.remove(), 220); }, 4200);
-}
+window.volverInicio = function () {
 
-/* =========================
-   PWA
-   ========================= */
-window.addEventListener("beforeinstallprompt", (event) => {
-  event.preventDefault();
-  deferredInstallPrompt = event;
-  const b = $("botonInstalarApp");
-  if (b) b.hidden = false;
-});
-window.addEventListener("appinstalled", () => {
-  deferredInstallPrompt = null;
-  const b = $("botonInstalarApp");
-  if (b) b.hidden = true;
-  mostrarToast("📲 App instalada", "Variedades Karleny ya está en tu dispositivo.", "success");
-});
-window.instalarApp = async function () {
-  if (!deferredInstallPrompt) {
-    mostrarToast("Instalación", "Abre el menú del navegador y elige “Instalar app” o “Añadir a pantalla de inicio”.", "info");
+  const productos = $("pantallaProductos");
+
+  if (productos) {
+
+    productos.classList.remove("activa");
+
+    productos.style.display = "none";
+  }
+
+  const personalizador = $("pantallaPersonalizador");
+
+  if (personalizador) {
+    personalizador.style.display = "none";
+  }
+
+  const inicio = $("pantallaInicio");
+
+  if (inicio) {
+    inicio.style.display = "flex";
+  }
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+};
+
+
+/* =========================================================
+   LOGIN + ADMIN
+   ========================================================= */
+
+onAuthStateChanged(auth, (usuario) => {
+
+  const panel = $("panelAdmin");
+
+  const estado = $("estadoAdmin");
+
+  if (!usuario) {
+
+    if (panel) {
+      panel.style.display = "none";
+    }
+
+    detenerEscuchaPedidos();
+
     return;
   }
-  deferredInstallPrompt.prompt();
-  await deferredInstallPrompt.userChoice;
-  deferredInstallPrompt = null;
-  const b = $("botonInstalarApp");
-  if (b) b.hidden = true;
-};
-if ("serviceWorker" in navigator) window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(console.warn));
 
-/* =========================
-   NAVEGACIÓN
-   ========================= */
-function mostrarSolo(id) {
-  ["pantallaInicio", "pantallaProductos", "pantallaPersonalizador"].forEach((x) => { const el = $(x); if (el) el.hidden = x !== id; });
-  window.scrollTo({ top: 0, behavior: "instant" });
-}
-window.mostrarProductos = async function () { mostrarSolo("pantallaProductos"); await cargarProductos(); };
-window.volverInicio = function () { mostrarSolo("pantallaInicio"); };
+  if (usuario.uid !== UID_DUENO) {
 
-/* =========================
-   LOGIN + ADMIN
-   ========================= */
-window.abrirLogin = function () { $("ventanaLogin").hidden = false; $("mensajeLogin").textContent = ""; setTimeout(() => $("correoLogin")?.focus(), 50); };
-window.cerrarLogin = function () { $("ventanaLogin").hidden = true; };
-window.iniciarSesion = async function () {
-  const correo = $("correoLogin").value.trim();
-  const contrasena = $("contrasenaLogin").value;
-  const msg = $("mensajeLogin");
-  if (!correo || !contrasena) { msg.textContent = "⚠️ Completa correo y contraseña."; return; }
-  msg.textContent = "⏳ Iniciando sesión...";
-  try {
-    const cred = await signInWithEmailAndPassword(auth, correo, contrasena);
-    if (cred.user.uid !== UID_DUENO) {
-      await signOut(auth);
-      throw new Error("Cuenta sin permisos");
+    signOut(auth).catch(console.error);
+
+    if (panel) {
+      panel.style.display = "none";
     }
-    msg.textContent = "✅ Sesión iniciada.";
-    cerrarLogin();
-    mostrarSolo("pantallaProductos");
-    await cargarProductos();
-  } catch (e) {
-    console.error(e);
-    msg.textContent = "❌ Correo, contraseña o permisos incorrectos.";
+
+    mostrarToast(
+      "Acceso denegado",
+      "Esta cuenta no tiene permisos de administrador.",
+      "error"
+    );
+
+    return;
+  }
+
+  if (panel) {
+    panel.style.display = "block";
+  }
+
+  if (estado) {
+    estado.textContent =
+      "🟢 Sesión de dueño activa";
+  }
+
+  iniciarEscuchaPedidos();
+});
+
+
+window.abrirLogin = function () {
+
+  const ventana = $("ventanaLogin");
+
+  const mensaje = $("mensajeLogin");
+
+  if (mensaje) {
+    mensaje.textContent = "";
+  }
+
+  if (ventana) {
+    ventana.style.display = "flex";
+  }
+
+  setTimeout(() => {
+    $("correoLogin")?.focus();
+  }, 80);
+};
+
+
+window.cerrarLogin = function () {
+
+  const ventana = $("ventanaLogin");
+
+  if (ventana) {
+    ventana.style.display = "none";
   }
 };
-window.cerrarSesion = async function () { try { await signOut(auth); mostrarToast("Sesión cerrada", "Hasta luego 👋", "success"); } catch (e) { console.error(e); } };
 
-onAuthStateChanged(auth, async (usuario) => {
-  const panel = $("panelAdmin");
-  const estado = $("estadoAdmin");
-  const esAdmin = !!usuario && usuario.uid === UID_DUENO;
-  if (panel) panel.hidden = !esAdmin;
-  if (estado) estado.textContent = esAdmin ? "🟢 Sesión de dueño activa" : "";
-  if (esAdmin) {
-    iniciarEscuchaPedidos();
-    actualizarContadorPedidos();
-  } else detenerEscuchaPedidos();
-});
 
-/* =========================
-   PRODUCTOS + CARRITO
-   ========================= */
-window.alternarFiltros = function () { $("panelFiltros").hidden = !$("panelFiltros").hidden; };
-window.cerrarFiltros = function () { $("panelFiltros").hidden = true; };
-window.limpiarBusqueda = function () { $("buscadorProductos").value = ""; aplicarFiltros(); };
-window.limpiarFiltros = function () { $("buscadorProductos").value = ""; $("rangoPrecio").value = "100000"; $("valorPrecioFiltro").textContent = "$100.000+"; aplicarFiltros(); };
+window.iniciarSesion = async function () {
 
-function renderProductos() {
-  const cont = $("productos");
-  if (!cont) return;
-  const todos = [...PRODUCTOS_ESTATICOS, ...productosFirebase];
-  cont.innerHTML = todos.map((p) => `
-    <article class="product-card" data-nombre="${escapar(`${p.nombre} ${p.descripcion || ""}`).toLowerCase()}" data-precio="${Number(p.precio || 0)}">
-      <div class="product-image"><img src="${escapar(p.imagen || "")}" alt="${escapar(p.nombre)}" loading="lazy" onerror="this.parentElement.classList.add('image-error');this.style.display='none'"><span class="image-fallback">🛍️</span></div>
-      <div class="product-info"><h3>${escapar(p.nombre)}</h3><strong class="price">${money(p.precio)}</strong><p>${escapar(p.descripcion || "")}</p>
-      <div class="product-actions"><button class="btn btn-primary btn-small" onclick="agregarAlCarrito(${JSON.stringify(p.nombre)},${Number(p.precio)},${JSON.stringify(p.imagen || "")})">🛒 Agregar</button>${p.id?.startsWith("fb-") || p.id?.startsWith("doc-") ? `<button class="btn btn-icon-danger" title="Eliminar producto" onclick="eliminarProducto('${escapar(p.id.replace('doc-',''))}')">🗑️</button>` : ""}</div></div>
-    </article>`).join("");
-  aplicarFiltros();
-}
+  const correo =
+    $("correoLogin")?.value.trim() || "";
 
-async function cargarProductos() {
+  const contrasena =
+    $("contrasenaLogin")?.value || "";
+
+  const mensaje = $("mensajeLogin");
+
+  if (!correo || !contrasena) {
+
+    if (mensaje) {
+      mensaje.textContent =
+        "⚠️ Escribe tu correo y contraseña.";
+    }
+
+    return;
+  }
+
+  if (mensaje) {
+    mensaje.textContent =
+      "⏳ Iniciando sesión...";
+  }
+
   try {
-    const snap = await getDocs(collection(db, "productos"));
-    productosFirebase = snap.docs.map((d) => ({ id: `doc-${d.id}`, ...d.data(), firestoreId: d.id }));
-  } catch (e) { console.warn("No se pudieron cargar productos de Firestore:", e); productosFirebase = []; }
-  renderProductos();
-}
 
-function aplicarFiltros() {
-  const q = ($( "buscadorProductos")?.value || "").trim().toLowerCase();
-  const max = Number($("rangoPrecio")?.value || 100000);
-  if ($("valorPrecioFiltro")) $("valorPrecioFiltro").textContent = max >= 100000 ? "$100.000+" : money(max);
-  const cards = [...document.querySelectorAll(".product-card")];
-  let visibles = 0;
-  cards.forEach((card) => {
-    const okQ = !q || card.dataset.nombre.includes(q);
-    const okP = Number(card.dataset.precio || 0) <= max || max >= 100000;
-    const visible = okQ && okP;
-    card.hidden = !visible;
-    if (visible) visibles++;
-  });
-  $("sinResultados").hidden = visibles !== 0;
-  $("contadorResultados").textContent = `${visibles} ${visibles === 1 ? "producto encontrado" : "productos encontrados"}`;
-}
+    const resultado =
+      await signInWithEmailAndPassword(
+        auth,
+        correo,
+        contrasena
+      );
 
-$("buscadorProductos")?.addEventListener("input", aplicarFiltros);
-$("rangoPrecio")?.addEventListener("input", aplicarFiltros);
-$("fotoProducto")?.addEventListener("change", () => {
-  const f = $("fotoProducto").files?.[0]; const img = $("vistaPreviaProducto");
-  if (!f || !img) { if (img) img.removeAttribute("src"); return; }
-  if (f.size > MAX_FILE_MB * 1024 * 1024) { mostrarToast("Imagen pesada", `Máximo ${MAX_FILE_MB} MB.`, "error"); $("fotoProducto").value = ""; return; }
-  const reader = new FileReader(); reader.onload = () => { img.src = String(reader.result); }; reader.readAsDataURL(f);
-});
+    if (resultado.user.uid !== UID_DUENO) {
 
-async function subirCloudinary(fileOrBlob, publicPrefix = "karleny") {
-  const form = new FormData();
-  form.append("file", fileOrBlob);
-  form.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
-  form.append("folder", publicPrefix);
-  const r = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, { method: "POST", body: form });
-  const data = await r.json();
-  if (!r.ok || !data.secure_url) throw new Error(data?.error?.message || "Falló la subida a Cloudinary");
-  return data.secure_url;
-}
+      await signOut(auth);
 
-window.agregarProducto = async function () {
-  const usuario = auth.currentUser;
-  if (!usuario || usuario.uid !== UID_DUENO) return mostrarToast("Sin permiso", "Solo el dueño puede publicar productos.", "error");
-  const foto = $("fotoProducto").files?.[0];
-  const nombre = $("nombreProducto").value.trim();
-  const precio = Number($("precioProducto").value);
-  const descripcion = $("descripcionProducto").value.trim();
-  const msg = $("mensajeProducto");
-  if (!foto || !nombre || !Number.isFinite(precio) || precio <= 0) { msg.textContent = "⚠️ Completa foto, nombre y precio."; return; }
-  if (foto.size > MAX_FILE_MB * 1024 * 1024) { msg.textContent = `⚠️ La imagen supera ${MAX_FILE_MB} MB.`; return; }
+      if (mensaje) {
+        mensaje.textContent =
+          "❌ Esta cuenta no tiene permiso de administrador.";
+      }
+
+      return;
+    }
+
+    if (mensaje) {
+      mensaje.textContent =
+        "✅ ¡Bienvenido!";
+    }
+
+    mostrarToast(
+      "Administrador conectado",
+      "Ahora puedes revisar tus pedidos.",
+      "success"
+    );
+
+    setTimeout(() => {
+      window.cerrarLogin();
+    }, 500);
+
+    window.mostrarProductos();
+
+  } catch (error) {
+
+    console.error(error);
+
+    if (mensaje) {
+      mensaje.textContent =
+        "❌ Correo o contraseña incorrectos.";
+    }
+  }
+};
+
+
+window.cerrarSesion = async function () {
+
   try {
-    msg.textContent = "📸 Subiendo imagen...";
-    const url = await subirCloudinary(foto, "karleny/productos");
-    msg.textContent = "🗄️ Guardando producto...";
-    await addDoc(collection(db, "productos"), { nombre, precio, descripcion, imagen: url, creado: serverTimestamp() });
-    msg.textContent = "✅ Producto publicado.";
-    ["fotoProducto","nombreProducto","precioProducto","descripcionProducto"].forEach((id) => { const el = $(id); if (el) el.value = ""; });
-    $("vistaPreviaProducto")?.removeAttribute("src");
-    await cargarProductos();
-  } catch (e) { console.error(e); msg.textContent = "❌ No se pudo publicar. Revisa Cloudinary y Firestore."; }
+
+    await signOut(auth);
+
+    window.ocultarPedidosAdmin();
+
+    mostrarToast(
+      "Sesión cerrada",
+      "Hasta pronto.",
+      "normal"
+    );
+
+  } catch (error) {
+
+    console.error(error);
+  }
 };
 
-window.eliminarProducto = async function (firestoreId) {
-  if (!auth.currentUser || auth.currentUser.uid !== UID_DUENO) return;
-  if (!firestoreId || !confirm("¿Eliminar este producto de la tienda?")) return;
-  try { await deleteDoc(doc(db, "productos", firestoreId)); await cargarProductos(); mostrarToast("Producto eliminado", "Ya no aparecerá en la tienda.", "success"); }
-  catch (e) { console.error(e); mostrarToast("No se pudo eliminar", "Revisa las reglas de Firestore.", "error"); }
+
+/* =========================================================
+   CLOUDINARY
+   ========================================================= */
+
+async function subirImagenCloudinary(archivo) {
+
+  const datos = new FormData();
+
+  datos.append("file", archivo);
+
+  datos.append(
+    "upload_preset",
+    CLOUDINARY_UPLOAD_PRESET
+  );
+
+  const respuesta = await fetch(
+    `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+    {
+      method: "POST",
+      body: datos
+    }
+  );
+
+  if (!respuesta.ok) {
+
+    throw new Error(
+      "No se pudo subir la imagen."
+    );
+  }
+
+  return respuesta.json();
+}
+
+
+/* =========================================================
+   PRODUCTOS
+   ========================================================= */
+
+async function cargarProductosFirebase() {
+
+  try {
+
+    const snapshot =
+      await getDocs(
+        collection(db, "productos")
+      );
+
+    productosFirebase =
+      snapshot.docs.map((item) => ({
+        id: item.id,
+        ...item.data()
+      }));
+
+    renderizarProductos();
+
+  } catch (error) {
+
+    console.error(
+      "Error cargando productos:",
+      error
+    );
+
+    mostrarToast(
+      "Error",
+      "No se pudieron cargar los productos.",
+      "error"
+    );
+  }
+}
+
+
+function renderizarProductos() {
+
+  const contenedor =
+    $("contenedorProductos");
+
+  if (!contenedor) return;
+
+  if (!productosFirebase.length) {
+
+    contenedor.innerHTML = `
+      <div class="sin-productos">
+        <strong>No hay productos todavía.</strong>
+      </div>
+    `;
+
+    return;
+  }
+
+  contenedor.innerHTML =
+    productosFirebase.map((producto) => {
+
+      const nombre =
+        escaparHTML(
+          producto.nombre || "Producto"
+        );
+
+      const descripcion =
+        escaparHTML(
+          producto.descripcion || ""
+        );
+
+      const precio =
+        formatearPrecio(
+          producto.precio
+        );
+
+      const imagen =
+        escaparHTML(
+          producto.imagen || ""
+        );
+
+      return `
+        <article class="producto-card">
+
+          <div class="imagen-producto">
+
+            ${
+              imagen
+                ? `<img src="${imagen}" alt="${nombre}" loading="lazy">`
+                : `<div class="sin-imagen-producto">📦</div>`
+            }
+
+          </div>
+
+          <div class="producto-info">
+
+            <h3>${nombre}</h3>
+
+            ${
+              descripcion
+                ? `<p>${descripcion}</p>`
+                : ""
+            }
+
+            <strong class="precio-producto">
+              ${precio}
+            </strong>
+
+            <button
+              class="btn btn-primary"
+              onclick="agregarAlCarrito('${producto.id}')"
+            >
+              🛒 Agregar
+            </button>
+
+          </div>
+
+        </article>
+      `;
+
+    }).join("");
+}
+
+
+window.agregarProductoAdmin = async function () {
+
+  const nombre =
+    $("nombreProductoAdmin")?.value.trim() || "";
+
+  const descripcion =
+    $("descripcionProductoAdmin")?.value.trim() || "";
+
+  const precio =
+    Number(
+      $("precioProductoAdmin")?.value || 0
+    );
+
+  const archivo =
+    $("imagenProductoAdmin")?.files?.[0];
+
+  if (!nombre || !precio) {
+
+    mostrarToast(
+      "Faltan datos",
+      "Escribe el nombre y precio del producto.",
+      "error"
+    );
+
+    return;
+  }
+
+  try {
+
+    let imagen = "";
+
+    if (archivo) {
+
+      mostrarToast(
+        "Subiendo imagen",
+        "Espera un momento...",
+        "normal"
+      );
+
+      const resultado =
+        await subirImagenCloudinary(
+          archivo
+        );
+
+      imagen =
+        resultado.secure_url || "";
+    }
+
+    await addDoc(
+      collection(db, "productos"),
+      {
+        nombre,
+        descripcion,
+        precio,
+        imagen,
+        creado: serverTimestamp()
+      }
+    );
+
+    mostrarToast(
+      "Producto agregado",
+      "El producto ya está disponible.",
+      "success"
+    );
+
+    $("nombreProductoAdmin").value = "";
+    $("descripcionProductoAdmin").value = "";
+    $("precioProductoAdmin").value = "";
+
+    if ($("imagenProductoAdmin")) {
+      $("imagenProductoAdmin").value = "";
+    }
+
+    await cargarProductosFirebase();
+
+  } catch (error) {
+
+    console.error(error);
+
+    mostrarToast(
+      "Error",
+      "No se pudo guardar el producto.",
+      "error"
+    );
+  }
 };
 
-window.agregarAlCarrito = function (nombre, precio, imagen = "") {
-  const existente = carrito.find((p) => p.nombre === nombre);
-  if (existente) existente.cantidad += 1; else carrito.push({ nombre, precio: Number(precio), imagen, cantidad: 1 });
-  guardarLocalStorage("karleny_carrito", carrito); actualizarCarrito(); mostrarToast("🛒 Añadido", `${nombre} está en tu carrito.`, "success");
+
+window.eliminarProductoAdmin = async function (id) {
+
+  if (!id) return;
+
+  const confirmar =
+    confirm(
+      "¿Seguro que quieres eliminar este producto?"
+    );
+
+  if (!confirmar) return;
+
+  try {
+
+    await deleteDoc(
+      doc(db, "productos", id)
+    );
+
+    mostrarToast(
+      "Producto eliminado",
+      "Se eliminó correctamente.",
+      "success"
+    );
+
+    await cargarProductosFirebase();
+
+  } catch (error) {
+
+    console.error(error);
+
+    mostrarToast(
+      "Error",
+      "No se pudo eliminar el producto.",
+      "error"
+    );
+  }
 };
-window.abrirCarrito = function () { $("ventanaCarrito").hidden = false; actualizarCarrito(); };
-window.cerrarCarrito = function () { $("ventanaCarrito").hidden = true; };
-window.vaciarCarrito = function () { if (!carrito.length || !confirm("¿Vaciar el carrito?")) return; carrito = []; guardarLocalStorage("karleny_carrito", carrito); actualizarCarrito(); };
-window.cambiarCantidadCarrito = function (indice, delta) { if (!carrito[indice]) return; carrito[indice].cantidad = limitar(carrito[indice].cantidad + delta, 1, 99); guardarLocalStorage("karleny_carrito", carrito); actualizarCarrito(); };
-window.eliminarDelCarrito = function (indice) { carrito.splice(indice, 1); guardarLocalStorage("karleny_carrito", carrito); actualizarCarrito(); };
-function actualizarCarrito() {
-  const totalItems = carrito.reduce((s, p) => s + p.cantidad, 0); const total = carrito.reduce((s, p) => s + p.precio * p.cantidad, 0);
-  if ($("cantidadCarrito")) $("cantidadCarrito").textContent = String(totalItems);
-  const lista = $("listaCarrito"); const vacio = $("carritoVacio"); const resumen = $("resumenCarrito");
+
+
+/* =========================================================
+   CARRITO
+   ========================================================= */
+
+function guardarCarrito() {
+
+  try {
+
+    localStorage.setItem(
+      "variedadesKarlenyCarrito",
+      JSON.stringify(carrito)
+    );
+
+  } catch (error) {
+
+    console.warn(
+      "No se pudo guardar el carrito.",
+      error
+    );
+  }
+}
+
+
+function cargarCarrito() {
+
+  try {
+
+    const guardado =
+      localStorage.getItem(
+        "variedadesKarlenyCarrito"
+      );
+
+    carrito =
+      guardado
+        ? JSON.parse(guardado)
+        : [];
+
+  } catch (error) {
+
+    carrito = [];
+  }
+
+  renderizarCarrito();
+}
+
+
+window.agregarAlCarrito = function (id) {
+
+  const producto =
+    productosFirebase.find(
+      (item) => item.id === id
+    );
+
+  if (!producto) {
+
+    mostrarToast(
+      "Producto no encontrado",
+      "Actualiza la página e inténtalo otra vez.",
+      "error"
+    );
+
+    return;
+  }
+
+  const existente =
+    carrito.find(
+      (item) => item.id === id
+    );
+
+  if (existente) {
+
+    existente.cantidad =
+      Number(existente.cantidad || 0) + 1;
+
+  } else {
+
+    carrito.push({
+      id: producto.id,
+      nombre: producto.nombre,
+      precio: Number(producto.precio) || 0,
+      imagen: producto.imagen || "",
+      cantidad: 1
+    });
+  }
+
+  guardarCarrito();
+
+  renderizarCarrito();
+
+  mostrarToast(
+    "Agregado al carrito",
+    producto.nombre,
+    "success"
+  );
+};
+
+
+function renderizarCarrito() {
+
+  const lista =
+    $("listaCarrito");
+
+  const vacio =
+    $("carritoVacio");
+
+  const resumen =
+    $("resumenCarrito");
+
+  const total =
+    $("totalCarrito");
+
+  const contador =
+    $("contadorCarrito");
+
   if (!lista) return;
-  lista.innerHTML = carrito.map((p, i) => `<div class="cart-item"><div><b>${escapar(p.nombre)}</b><span>${money(p.precio)} c/u</span></div><div class="cart-controls"><button onclick="cambiarCantidadCarrito(${i},-1)">−</button><b>${p.cantidad}</b><button onclick="cambiarCantidadCarrito(${i},1)">+</button><button class="remove" onclick="eliminarDelCarrito(${i})">🗑️</button></div></div>`).join("");
-  if (vacio) vacio.hidden = carrito.length > 0; if (resumen) resumen.hidden = carrito.length === 0; if ($("totalCarrito")) $("totalCarrito").textContent = money(total);
+
+  if (!carrito.length) {
+
+    lista.innerHTML = "";
+
+    if (vacio) {
+      vacio.style.display = "block";
+    }
+
+    if (resumen) {
+      resumen.style.display = "none";
+    }
+
+    if (contador) {
+      contador.textContent = "0";
+    }
+
+    return;
+  }
+
+  if (vacio) {
+    vacio.style.display = "none";
+  }
+
+  lista.innerHTML =
+    carrito.map((item, indice) => {
+
+      const subtotal =
+        Number(item.precio || 0) *
+        Number(item.cantidad || 0);
+
+      return `
+        <div class="item-carrito">
+
+          <div class="info-item-carrito">
+
+            <strong>
+              ${escaparHTML(item.nombre)}
+            </strong>
+
+            <span>
+              ${formatearPrecio(item.precio)}
+            </span>
+
+            <small>
+              Subtotal:
+              ${formatearPrecio(subtotal)}
+            </small>
+
+          </div>
+
+          <div class="controles-carrito">
+
+            <button
+              onclick="cambiarCantidadCarrito(${indice},-1)"
+            >
+              −
+            </button>
+
+            <strong>
+              ${item.cantidad}
+            </strong>
+
+            <button
+              onclick="cambiarCantidadCarrito(${indice},1)"
+            >
+              +
+            </button>
+
+            <button
+              class="eliminar-item"
+              onclick="eliminarDelCarrito(${indice})"
+            >
+              🗑️
+            </button>
+
+          </div>
+
+        </div>
+      `;
+
+    }).join("");
+
+  const totalCalculado =
+    carrito.reduce(
+      (suma, item) =>
+        suma +
+        Number(item.precio || 0) *
+        Number(item.cantidad || 0),
+      0
+    );
+
+  if (total) {
+    total.textContent =
+      formatearPrecio(totalCalculado);
+  }
+
+  if (resumen) {
+    resumen.style.display = "block";
+  }
+
+  if (contador) {
+
+    contador.textContent =
+      String(
+        carrito.reduce(
+          (suma, item) =>
+            suma +
+            Number(item.cantidad || 0),
+          0
+        )
+      );
+  }
 }
-window.comprarCarritoWhatsApp = function () {
-  if (!carrito.length) return;
-  let text = "Hola 👋, quiero hacer este pedido en Variedades Karleny:\n\n";
-  carrito.forEach((p) => { text += `🛍️ ${p.nombre} x${p.cantidad} — ${money(p.precio * p.cantidad)}\n`; });
-  text += `\n💰 TOTAL: ${money(carrito.reduce((s,p)=>s+p.precio*p.cantidad,0))}`;
-  window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(text)}`, "_blank");
+
+
+window.cambiarCantidadCarrito = function (
+  indice,
+  delta
+) {
+
+  if (!carrito[indice]) return;
+
+  carrito[indice].cantidad =
+    Number(carrito[indice].cantidad || 0) +
+    delta;
+
+  if (carrito[indice].cantidad <= 0) {
+    carrito.splice(indice, 1);
+  }
+
+  guardarCarrito();
+
+  renderizarCarrito();
 };
 
-/* =========================
-   PERSONALIZADOR
-   ========================= */
-window.abrirPersonalizador = function () {
-  mostrarSolo("pantallaPersonalizador");
-  resetPersonalizador();
-  const min = new Date(); min.setDate(min.getDate() + 1);
-  $("fechaEntrega").min = min.toISOString().slice(0,10);
-  validarDatosPersonalizacion();
-};
-window.terminarPersonalizacion = function () {
-  const activo = ["pasoCantidadPersonalizacion","pasoEditorPersonalizacion","pasoRevisionPersonalizacion"].some((id)=>!$(id).hidden);
-  if (activo && !confirm("¿Salir? Los cambios de este pedido se perderán.")) return;
-  mostrarSolo("pantallaInicio"); resetPersonalizador();
-};
-function resetPersonalizador() {
-  camisas = []; cantidadCamisas = 1; camisaActual = 0; ladoActual = "frente"; historyPast = []; historyFuture = []; editorColor = "#fff"; editorColorNombre = "Blanco";
-  ["pasoDatosPersonalizacion","pasoCantidadPersonalizacion","pasoEditorPersonalizacion","pasoRevisionPersonalizacion"].forEach((id,i)=>{ const el=$(id); if(el) el.hidden=i!==0; el?.classList.toggle("active",i===0); });
-  const final=$("mensajeFinalPedido"); if(final){ final.hidden=true; final.innerHTML=""; }
-  $("clienteNombre").value=""; $("clienteTelefono").value=""; $("fechaEntrega").value=""; $("cantidadCamisas").textContent="1"; $("textoCantidadCamisas").textContent="1 camisa";
-  document.querySelectorAll("#tallasBase button").forEach((b)=>b.classList.toggle("selected",b.dataset.talla==="S")); tallaBase="S";
-}
-function mostrarPasoPersonalizador(nombre) {
-  const map = { datos:"pasoDatosPersonalizacion", cantidad:"pasoCantidadPersonalizacion", editor:"pasoEditorPersonalizacion", revision:"pasoRevisionPersonalizacion" };
-  const target = map[nombre]; if (!target) return;
-  Object.values(map).forEach((id)=>{const el=$(id); if(el){el.hidden=id!==target; el.classList.toggle("active",id===target);}});
-  const final=$("mensajeFinalPedido"); if(final && nombre!=="revision") final.hidden=true;
-  window.scrollTo({top:0,behavior:"smooth"});
-}
-function validarDatosPersonalizacion() {
-  const ok = $("clienteNombre").value.trim().length >= 2 && $("clienteTelefono").value.replace(/\D/g,"").length >= 7 && !!$("fechaEntrega").value && !!tallaBase;
-  $("btnIniciarPersonalizacion").disabled = !ok;
-}
-["clienteNombre","clienteTelefono","fechaEntrega"].forEach((id)=>$(id)?.addEventListener("input",validarDatosPersonalizacion));
-$("tallasBase")?.addEventListener("click",(e)=>{const b=e.target.closest("button[data-talla]"); if(!b)return; tallaBase=b.dataset.talla; document.querySelectorAll("#tallasBase button").forEach(x=>x.classList.toggle("selected",x===b)); validarDatosPersonalizacion();});
 
-window.iniciarPersonalizacion = function () { validarDatosPersonalizacion(); if($("btnIniciarPersonalizacion").disabled)return; cantidadCamisas=1; inicializarCamisas(); actualizarCantidadUI(); mostrarPasoPersonalizador("cantidad"); };
-function crearCamisa(talla = tallaBase, copia = null) {
+window.eliminarDelCarrito = function (indice) {
+
+  if (!carrito[indice]) return;
+
+  carrito.splice(indice, 1);
+
+  guardarCarrito();
+
+  renderizarCarrito();
+};
+
+
+window.vaciarCarrito = function () {
+
+  carrito = [];
+
+  guardarCarrito();
+
+  renderizarCarrito();
+};
+
+
+window.abrirCarrito = function () {
+
+  const ventana =
+    $("ventanaCarrito");
+
+  if (ventana) {
+    ventana.style.display = "flex";
+  }
+
+  renderizarCarrito();
+};
+
+
+window.cerrarCarrito = function () {
+
+  const ventana =
+    $("ventanaCarrito");
+
+  if (ventana) {
+    ventana.style.display = "none";
+  }
+};
+
+
+/* =========================================================
+   PERSONALIZADOR — DATOS
+   ========================================================= */
+
+function mostrarSolo(id) {
+
+  const pantallas = [
+    "pantallaInicio",
+    "pantallaProductos",
+    "pantallaPersonalizador"
+  ];
+
+  pantallas.forEach((pantallaId) => {
+
+    const elemento =
+      $(pantallaId);
+
+    if (!elemento) return;
+
+    elemento.style.display =
+      pantallaId === id
+        ? (pantallaId === "pantallaInicio"
+            ? "flex"
+            : "block")
+        : "none";
+  });
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+}
+
+
+function mostrarPasoPersonalizador(paso) {
+
+  const pasos = {
+    datos:
+      "pasoDatosPersonalizacion",
+
+    cantidad:
+      "pasoCantidadPersonalizacion",
+
+    editor:
+      "pasoEditorPersonalizacion",
+
+    revision:
+      "pasoRevisionPersonalizacion",
+
+    final:
+      "pasoFinalPersonalizacion"
+  };
+
+  Object.entries(pasos).forEach(
+    ([nombre, id]) => {
+
+      const elemento = $(id);
+
+      if (!elemento) return;
+
+      const activo =
+        nombre === paso;
+
+      elemento.hidden = !activo;
+
+      elemento.classList.toggle(
+        "paso-activo",
+        activo
+      );
+    }
+  );
+}
+
+
+function crearCamisa(
+  talla = tallaBase,
+  copia = null
+) {
+
   return {
+
     talla,
-    color: copia?.color || "#ffffff",
-    colorNombre: copia?.colorNombre || "Blanco",
-    frenteObjects: copia ? clonarObjetos(copia.frenteObjects || []) : [],
-    espaldaObjects: copia ? clonarObjetos(copia.espaldaObjects || []) : [],
-    previewFrente: "", previewEspalda: ""
+
+    color:
+      copia?.color ||
+      COLORES_CAMISA[0].valor,
+
+    colorNombre:
+      copia?.colorNombre ||
+      COLORES_CAMISA[0].nombre,
+
+    frenteObjects:
+      copia
+        ? clonarObjetos(
+            copia.frenteObjects || []
+          )
+        : [],
+
+    espaldaObjects:
+      copia
+        ? clonarObjetos(
+            copia.espaldaObjects || []
+          )
+        : [],
+
+    previewFrente:
+      copia?.previewFrente || "",
+
+    previewEspalda:
+      copia?.previewEspalda || ""
   };
 }
-function inicializarCamisas() { camisas = Array.from({length:cantidadCamisas},()=>crearCamisa()); }
-window.cambiarCantidadCamisas = function (delta) {
-  cantidadCamisas=limitar(cantidadCamisas+delta,1,20);
-  while(camisas.length<cantidadCamisas) camisas.push(crearCamisa());
-  if(camisas.length>cantidadCamisas) camisas.length=cantidadCamisas;
+
+
+function inicializarCamisas() {
+
+  camisas =
+    Array.from(
+      {
+        length: cantidadCamisas
+      },
+      () => crearCamisa()
+    );
+}
+
+
+function resetPersonalizador() {
+
+  cantidadCamisas = 1;
+
+  tallaBase = "S";
+
+  camisaActual = 0;
+
+  ladoActual = "frente";
+
+  editorColor =
+    COLORES_CAMISA[0].valor;
+
+  editorColorNombre =
+    COLORES_CAMISA[0].nombre;
+
+  camisas = [];
+
+  editorHistoryPast = [];
+
+  editorHistoryFuture = [];
+
+  restaurandoEditor = false;
+
+  ultimaOperacionHistorial = 0;
+
+  const nombre =
+    $("clienteNombre");
+
+  const telefono =
+    $("clienteTelefono");
+
+  const fecha =
+    $("fechaEntrega");
+
+  if (nombre) {
+    nombre.value = "";
+  }
+
+  if (telefono) {
+    telefono.value = "";
+  }
+
+  if (fecha) {
+    fecha.value = "";
+  }
+
+  const tallaButtons =
+    document.querySelectorAll(
+      "#tallasBase button"
+    );
+
+  tallaButtons.forEach((boton) => {
+
+    boton.classList.toggle(
+      "selected",
+      boton.dataset.talla === "S"
+    );
+  });
+
   actualizarCantidadUI();
-};
-function actualizarCantidadUI(){ $("cantidadCamisas").textContent=String(cantidadCamisas); $("textoCantidadCamisas").textContent=cantidadCamisas===1?"1 camisa":`${cantidadCamisas} camisas`; }
-window.continuarAlEditor = async function () { if(!camisas.length) inicializarCamisas(); camisaActual=0; ladoActual="frente"; await prepararEditor(); mostrarPasoPersonalizador("editor"); await cargarCamisaEnEditor(0); };
 
-function construirPaleta(){
-  const p=$("paletaColoresCamisa"); if(!p)return; p.innerHTML="";
-  COLORES_CAMISA.forEach((c)=>{ const b=document.createElement("button"); b.type="button"; b.className="color-chip"; b.dataset.color=c.valor; b.title=c.nombre; b.setAttribute("aria-label",`Camisa ${c.nombre}`); b.style.background=c.valor; if(c.valor==="#fff"||c.valor==="#ffffff") b.style.borderColor=c.borde; b.onclick=()=>seleccionarColor(c); p.appendChild(b); });
-}
-function seleccionarColor(c){ editorColor=c.valor; editorColorNombre=c.nombre; if(camisas[camisaActual]){camisas[camisaActual].color=c.valor;camisas[camisaActual].colorNombre=c.nombre;} actualizarCamisaSVG(); seleccionarChip(c.valor); }
-function seleccionarChip(color){ document.querySelectorAll(".color-chip").forEach((b)=>b.classList.toggle("selected",b.dataset.color===color)); if($("nombreColorCamisa")) $("nombreColorCamisa").textContent=COLORES_CAMISA.find(c=>c.valor===color)?.nombre||"Blanco"; }
-function actualizarCamisaSVG(){ const s=$("siluetaCamisa"); if(!s)return; s.setAttribute("fill",editorColor); s.setAttribute("stroke",COLORES_CAMISA.find(c=>c.valor===editorColor)?.borde||"#d8d8dc"); }
+  mostrarPasoPersonalizador(
+    "datos"
+  );
 
-async function esperarFabric(){
-  if(window.fabric) return window.fabric;
-  await new Promise((resolve,reject)=>{const start=Date.now(); const timer=setInterval(()=>{if(window.fabric){clearInterval(timer);resolve();} else if(Date.now()-start>10000){clearInterval(timer);reject(new Error("Fabric no cargó"));}},50);});
-  return window.fabric;
-}
-async function prepararEditor(){
-  if(fabricCanvas)return;
-  const fabric=await esperarFabric(); const canvasEl=$("canvasCamisa");
-  fabricCanvas=new fabric.Canvas(canvasEl,{width:EDITOR_WIDTH,height:EDITOR_HEIGHT,preserveObjectStacking:true,selection:true,uniformScaling:true,backgroundColor:"transparent"});
-  fabricCanvas.setDimensions({width:210,height:300},{cssOnly:true});
-  fabricCanvas.on("selection:created",actualizarMedidasSeleccion); fabricCanvas.on("selection:updated",actualizarMedidasSeleccion); fabricCanvas.on("selection:cleared",actualizarMedidasSeleccion);
-  fabricCanvas.on("object:moving",(e)=>{mantenerDentroDelArea(e.target);actualizarMedidasSeleccion();});
-  fabricCanvas.on("object:scaling",(e)=>{mantenerDentroDelArea(e.target);actualizarMedidasSeleccion();});
-  fabricCanvas.on("object:modified",()=>{actualizarMedidasSeleccion();registrarHistoria();});
-  fabricCanvas.on("object:added",()=>{if(!restoring)registrarHistoria();}); fabricCanvas.on("object:removed",()=>{if(!restoring)registrarHistoria();});
-  construirPaleta();
-}
-function prepararObjeto(obj,nombre="Imagen"){
-  obj.set({nombreArchivo:nombre,tipo:"imagenDiseño",lockRotation:true,hasRotatingPoint:false,cornerColor:"#d90070",cornerStrokeColor:"#fff",transparentCorners:false,padding:5,borderColor:"#d90070",cornerSize:13,originX:obj.originX||"left",originY:obj.originY||"top"});
-  obj.setControlsVisibility({mtr:false}); obj.setCoords();
-}
-function limpiarCanvas(){if(!fabricCanvas)return;restoring=true;fabricCanvas.clear();fabricCanvas.backgroundColor="transparent";restoring=false;}
-async function cargarCamisaEnEditor(indice){
-  await prepararEditor(); camisaActual=indice; const c=camisas[indice]||crearCamisa();
-  editorColor=c.color||"#ffffff"; editorColorNombre=c.colorNombre||"Blanco"; actualizarCamisaSVG(); seleccionarChip(editorColor); limpiarCanvas(); historyPast=[]; historyFuture=[];
-  const objs= c[ladoActual === "frente" ? "frenteObjects":"espaldaObjects"] || [];
-  if(objs.length){ restoring=true; try{await fabricCanvas.loadFromJSON({version:window.fabric.version,objects:objs}); fabricCanvas.getObjects().forEach((o)=>prepararObjeto(o,o.nombreArchivo||"Imagen"));} finally{restoring=false;} }
-  actualizarEditorMeta(); actualizarTallaUI(); registrarHistoriaInicial(); fabricCanvas.renderAll(); actualizarMedidasSeleccion();
-}
-function serializarActual(){ return fabricCanvas ? fabricCanvas.toJSON(["nombreArchivo","tipo"]).objects||[]:[]; }
-function clonarObjetos(objs){ return JSON.parse(JSON.stringify(objs||[])); }
-async function guardarCamisaActual(){
-  if(!fabricCanvas||!camisas[camisaActual])return;
-  const key=ladoActual === "frente" ? "frenteObjects":"espaldaObjects";
-  const previewKey=ladoActual === "frente" ? "previewFrente":"previewEspalda";
-  camisas[camisaActual][key]=serializarActual();
-  camisas[camisaActual].color=editorColor; camisas[camisaActual].colorNombre=editorColorNombre; camisas[camisaActual].talla=$("tallaCamisaActual").value||tallaBase;
-  camisas[camisaActual][previewKey]=await generarPreviewCamisa(camisas[camisaActual],ladoActual,camisaActual+1);
-}
-function actualizarEditorMeta(){
-  const objs=camisas[camisaActual]?.[ladoActual==="frente"?"frenteObjects":"espaldaObjects"]||[];
-  $("indiceCamisaActual").textContent=`CAMISA ${camisaActual+1} DE ${cantidadCamisas}`; $("tituloCamisaActual").textContent=objs.length?"Diseño en progreso":"Diseño de camisa";
-  $("btnLadoFrente")?.classList.toggle("selected",ladoActual==="frente"); $("btnLadoEspalda")?.classList.toggle("selected",ladoActual==="espalda");
-  const copy=$("btnCopiarDisenoAnterior"); if(copy) copy.style.display=camisaActual>0&&!objs.length?"inline-flex":"none";
-}
-function actualizarTallaUI(){ $("tallaCamisaActual").value=camisas[camisaActual]?.talla||tallaBase; }
-window.cambiarTallaCamisaActual=function(v){if(camisas[camisaActual])camisas[camisaActual].talla=v;};
+  actualizarPaletaColores();
 
-window.cambiarLadoCamisa=async function(lado){ const nuevo=lado==="espalda"?"espalda":"frente"; if(nuevo===ladoActual)return; await guardarCamisaActual(); ladoActual=nuevo; await cargarCamisaEnEditor(camisaActual); };
+  if (fabricCanvas) {
 
-function actualizarMedidasSeleccion(){
-  const o=fabricCanvas?.getActiveObject(); const ids=["medidaAncho","medidaAlto","medidaX","medidaY"];
-  if(!o){$("estadoSeleccion").textContent="Selecciona una imagen";ids.forEach(id=>$(id).textContent="0,0 cm");return;}
-  const w=o.getScaledWidth()*CM_PER_PX_X; const h=o.getScaledHeight()*CM_PER_PX_Y; const x=(o.left||0)*CM_PER_PX_X; const y=(o.top||0)*CM_PER_PX_Y;
-  $("estadoSeleccion").textContent=o.nombreArchivo||"Imagen seleccionada"; $("medidaAncho").textContent=`${w.toFixed(1).replace(".",",")} cm`; $("medidaAlto").textContent=`${h.toFixed(1).replace(".",",")} cm`; $("medidaX").textContent=`${x.toFixed(1).replace(".",",")} cm`; $("medidaY").textContent=`${y.toFixed(1).replace(".",",")} cm`;
-}
-function mantenerDentroDelArea(o){ if(!o)return; const w=o.getScaledWidth(),h=o.getScaledHeight(); o.left=limitar(o.left||0,0,Math.max(0,EDITOR_WIDTH-w)); o.top=limitar(o.top||0,0,Math.max(0,EDITOR_HEIGHT-h)); o.setCoords(); }
+    fabricCanvas.clear();
 
-$("inputImagenCamisa")?.addEventListener("change",async(e)=>{
-  const files=Array.from(e.target.files||[]); if(!files.length)return; if(!fabricCanvas){e.target.value="";return;}
-  const actuales=fabricCanvas.getObjects().length; if(actuales+files.length>MAX_OBJECTS_PER_SIDE){mostrarToast("Demasiadas imágenes",`Máximo ${MAX_OBJECTS_PER_SIDE} por lado.`,"error");e.target.value="";return;}
-  for(const f of files){
-    if(!f.type.startsWith("image/"))continue; if(f.size>MAX_FILE_MB*1024*1024){mostrarToast("Imagen omitida",`${f.name}: máximo ${MAX_FILE_MB} MB.`,"error");continue;}
-    try{const data=await leerDataURL(f);await agregarImagenCanvas(data,f.name);}catch(err){console.error(err);mostrarToast("No se pudo agregar",f.name,"error");}
+    fabricCanvas.backgroundColor =
+      "transparent";
+
+    fabricCanvas.renderAll();
   }
-  e.target.value="";
-});
-function leerDataURL(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result));r.onerror=rej;r.readAsDataURL(file);});}
-function agregarImagenCanvas(dataUrl,nombre){return new Promise((resolve,reject)=>{
-  window.fabric.Image.fromURL(dataUrl,(o)=>{if(!o)return reject(new Error("Imagen inválida")); prepararObjeto(o,nombre); const w=o.width||1,h=o.height||1; const scale=Math.min(240/w,240/h,1); o.scale(scale); o.set({left:(EDITOR_WIDTH-o.getScaledWidth())/2,top:(EDITOR_HEIGHT-o.getScaledHeight())/2,originX:"left",originY:"top"}); fabricCanvas.add(o);fabricCanvas.setActiveObject(o);fabricCanvas.renderAll();actualizarMedidasSeleccion();resolve();},{crossOrigin:"anonymous"});
-});}
-window.escalarSeleccion=function(factor){const o=fabricCanvas?.getActiveObject();if(!o||o.type==="activeSelection")return mostrarToast("Selecciona una imagen","Toca una imagen primero.","error");o.set({scaleX:limitar((o.scaleX||1)*factor,.03,8),scaleY:limitar((o.scaleY||1)*factor,.03,8)});mantenerDentroDelArea(o);fabricCanvas.renderAll();actualizarMedidasSeleccion();registrarHistoria();};
-window.centrarSeleccion=function(){const o=fabricCanvas?.getActiveObject();if(!o)return mostrarToast("Selecciona una imagen","Toca una imagen primero.","error");o.set({left:(EDITOR_WIDTH-o.getScaledWidth())/2,top:(EDITOR_HEIGHT-o.getScaledHeight())/2});mantenerDentroDelArea(o);fabricCanvas.renderAll();actualizarMedidasSeleccion();registrarHistoria();};
-window.eliminarSeleccion=function(){const o=fabricCanvas?.getActiveObject();if(!o)return mostrarToast("Nada seleccionado","Selecciona una imagen para eliminarla.","error");fabricCanvas.remove(o);fabricCanvas.discardActiveObject();fabricCanvas.renderAll();actualizarMedidasSeleccion();registrarHistoria();};
+}
 
-/* Deshacer / rehacer sin rotación. */
-function snapshot(){return JSON.stringify(serializarActual());}
-function registrarHistoriaInicial(){historyPast=[snapshot()];historyFuture=[];}
-function registrarHistoria(){if(!fabricCanvas||restoring)return;const s=snapshot();if(historyPast.at(-1)!==s){historyPast.push(s);if(historyPast.length>40)historyPast.shift();historyFuture=[];}}
-async function restaurarSnapshot(s){restoring=true;try{await fabricCanvas.loadFromJSON({version:window.fabric.version,objects:JSON.parse(s)});fabricCanvas.getObjects().forEach(o=>prepararObjeto(o,o.nombreArchivo||"Imagen"));fabricCanvas.renderAll();}finally{restoring=false;}actualizarMedidasSeleccion();}
-window.deshacerEditor=async function(){if(historyPast.length<=1)return;historyFuture.push(historyPast.pop());await restaurarSnapshot(historyPast.at(-1));};
-window.rehacerEditor=async function(){if(!historyFuture.length)return;const s=historyFuture.pop();historyPast.push(s);await restaurarSnapshot(s);};
 
-window.copiarDisenoAnterior=function(){
-  if(camisaActual<=0||!camisas[camisaActual-1])return;
-  const prev=camisas[camisaActual-1]; const current=camisas[camisaActual]; current.color=prev.color;current.colorNombre=prev.colorNombre; current.frenteObjects=clonarObjetos(prev.frenteObjects);current.espaldaObjects=clonarObjetos(prev.espaldaObjects); current.previewFrente=prev.previewFrente;current.previewEspalda=prev.previewEspalda; cargarCamisaEnEditor(camisaActual);
-  mostrarToast("Diseño copiado", "Ahora puedes cambiar tamaño, posición o imágenes.", "success");
-};
+window.abrirPersonalizador =
+  function () {
 
-window.guardarYContinuarCamisa=async function(){
-  try{
-    await guardarCamisaActual();
-    if(camisaActual< cantidadCamisas-1){camisaActual++;ladoActual="frente";await cargarCamisaEnEditor(camisaActual);}
-    else await prepararRevision();
-  }catch(e){console.error(e);mostrarToast("No se pudo guardar",e.message||"Inténtalo otra vez.","error");}
-};
-async function prepararRevision(){
-  for(let i=0;i<camisas.length;i++){
-    if(!camisas[i].previewFrente)camisas[i].previewFrente=await generarPreviewCamisa(camisas[i],"frente",i+1);
-    if(!camisas[i].previewEspalda)camisas[i].previewEspalda=await generarPreviewCamisa(camisas[i],"espalda",i+1);
+    mostrarSolo(
+      "pantallaPersonalizador"
+    );
+
+    resetPersonalizador();
+
+    const min =
+      new Date();
+
+    min.setDate(
+      min.getDate() + 1
+    );
+
+    const fecha =
+      $("fechaEntrega");
+
+    if (fecha) {
+
+      fecha.min =
+        min.toISOString()
+          .slice(0, 10);
+    }
+
+    validarDatosPersonalizacion();
+  };
+
+
+function validarDatosPersonalizacion() {
+
+  const nombre =
+    $("clienteNombre")?.value.trim() || "";
+
+  const telefono =
+    $("clienteTelefono")?.value.trim() || "";
+
+  const fecha =
+    $("fechaEntrega")?.value || "";
+
+  const boton =
+    $("btnIniciarPersonalizacion");
+
+  const valido =
+    Boolean(
+      nombre &&
+      telefono &&
+      fecha &&
+      tallaBase
+    );
+
+  if (boton) {
+    boton.disabled = !valido;
   }
-  $("revisionNombre").textContent=$("clienteNombre").value.trim(); $("revisionTelefono").textContent=$("clienteTelefono").value.trim(); $("revisionEntrega").textContent=fechaBonita($("fechaEntrega").value); $("revisionCantidad").textContent=`${cantidadCamisas} camisa${cantidadCamisas===1?"":"s"}`;
-  renderRevision(); mostrarPasoPersonalizador("revision");
+
+  return valido;
 }
 
-function construirSVGCamisa(color,lado="frente"){
-  const c=COLORES_CAMISA.find(x=>x.valor===color)||COLORES_CAMISA[0];
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="500" height="600" viewBox="0 0 500 600"><defs><filter id="shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="3" stdDeviation="4" flood-opacity=".15"/></filter></defs><path filter="url(#shadow)" d="M175 50 L112 75 L35 155 L83 225 L128 188 L128 525 Q128 548 151 548 L349 548 Q372 548 372 525 L372 188 L417 225 L465 155 L388 75 L325 50 Q303 102 250 102 Q197 102 175 50 Z" fill="${color}" stroke="${c.borde}" stroke-width="4" stroke-linejoin="round"/><path d="M175 50 Q197 102 250 102 Q303 102 325 50" fill="none" stroke="${c.borde}" stroke-width="5"/></svg>`;
-}
 
-async function generarPreviewCamisa(camisa,lado="frente",numero=1){
-  const salida=document.createElement("canvas"); salida.width=600;salida.height=700; const ctx=salida.getContext("2d"); ctx.clearRect(0,0,600,700); ctx.fillStyle="#f4f2f5";ctx.fillRect(0,0,600,700);
-  const shirt=new Image();shirt.src=`data:image/svg+xml;charset=utf-8,${encodeURIComponent(construirSVGCamisa(camisa.color||"#fff",lado))}`;await esperarImagen(shirt);ctx.drawImage(shirt,50,20,500,600);
-  const objs=camisa[lado==="frente"?"frenteObjects":"espaldaObjects"]||[];
-  for(const o of objs){
-    if(!o.src)continue; try{
-      const img=new Image();img.src=o.src;await esperarImagen(img);
-      const sx=Number(o.left||0)/EDITOR_WIDTH*PRINT_PREVIEW.width+PRINT_PREVIEW.x;
-      const sy=Number(o.top||0)/EDITOR_HEIGHT*PRINT_PREVIEW.height+PRINT_PREVIEW.y;
-      const sw=Number(o.width||img.naturalWidth||1)*Number(o.scaleX||1)/EDITOR_WIDTH*PRINT_PREVIEW.width;
-      const sh=Number(o.height||img.naturalHeight||1)*Number(o.scaleY||1)/EDITOR_HEIGHT*PRINT_PREVIEW.height;
-      ctx.drawImage(img,sx,sy,sw,sh);
-    }catch(e){console.warn("Preview image",e);}
+window.iniciarPersonalizacion =
+  function () {
+
+    if (!validarDatosPersonalizacion()) {
+
+      mostrarToast(
+        "Faltan datos",
+        "Completa tu nombre, teléfono, fecha y talla.",
+        "error"
+      );
+
+      return;
+    }
+
+    cantidadCamisas = 1;
+
+    inicializarCamisas();
+
+    actualizarCantidadUI();
+
+    mostrarPasoPersonalizador(
+      "cantidad"
+    );
+  };
+
+
+/* =========================================================
+   TALLAS
+   ========================================================= */
+
+document.addEventListener(
+  "click",
+  (evento) => {
+
+    const boton =
+      evento.target.closest(
+        "#tallasBase button"
+      );
+
+    if (!boton) return;
+
+    tallaBase =
+      boton.dataset.talla || "S";
+
+    document
+      .querySelectorAll(
+        "#tallasBase button"
+      )
+      .forEach((item) => {
+
+        item.classList.toggle(
+          "selected",
+          item === boton
+        );
+      });
+
+    validarDatosPersonalizacion();
   }
-  ctx.fillStyle="#3c3740";ctx.font="800 17px Arial";ctx.textAlign="center";ctx.fillText(`Camisa ${numero} · ${lado==="frente"?"Frente":"Espalda"}`,300,665);
-  return salida.toDataURL("image/jpeg",0.84);
-}
-function esperarImagen(img){return new Promise((res,rej)=>{if(img.complete&&img.naturalWidth){res();return;}img.onload=()=>res();img.onerror=()=>rej(new Error("No cargó imagen"));});}
+);
 
-function objetoDetalle(obj,idx){
-  const w=(Number(obj.width||0)*Number(obj.scaleX||1))*CM_PER_PX_X;const h=(Number(obj.height||0)*Number(obj.scaleY||1))*CM_PER_PX_Y;const x=Number(obj.left||0)*CM_PER_PX_X;const y=Number(obj.top||0)*CM_PER_PX_Y;
-  return {imagen:idx+1,nombreArchivo:obj.nombreArchivo||`Imagen ${idx+1}`,anchoCm:Number(w.toFixed(1)),altoCm:Number(h.toFixed(1)),posXcm:Number(x.toFixed(1)),posYcm:Number(y.toFixed(1))};
-}
-function renderResumenObjetos(objs,lado){
-  if(!objs.length)return `<div class="no-images">○ Sin imágenes en ${lado.toLowerCase()}.</div>`;
-  return `<div class="detail-block"><b>📐 ${lado} · ${objs.length} imagen${objs.length===1?"":"es"}</b>${objs.map((o,i)=>{const d=objetoDetalle(o,i);return `<div class="detail-row"><span>Imagen ${d.imagen}</span><strong>${d.altoCm} cm alto × ${d.anchoCm} cm ancho</strong><small>${escapar(d.nombreArchivo)} · X ${d.posXcm} cm · Y ${d.posYcm} cm</small></div>`;}).join("")}</div>`;
-}
-function renderRevision(){
-  const lista=$("listaRevisionCamisas"); if(!lista)return; lista.innerHTML=camisas.map((c,i)=>`<article class="review-card"><div class="review-visuals"><div><span>FRENTE</span><img src="${c.previewFrente}" alt="Frente camisa ${i+1}"></div><div><span>ESPALDA</span><img src="${c.previewEspalda}" alt="Espalda camisa ${i+1}"></div></div><div class="review-data"><div class="review-title"><b>CAMISA ${i+1}</b><strong>${escapar(c.talla)}</strong></div><p><i style="background:${escapar(c.color)}"></i> Color: <b>${escapar(c.colorNombre)}</b></p><div class="review-count">🖼️ ${(c.frenteObjects||[]).length+(c.espaldaObjects||[]).length} imágenes en total</div>${renderResumenObjetos(c.frenteObjects||[],"Frente")}${renderResumenObjetos(c.espaldaObjects||[],"Espalda")}</div></article>`).join("");
-}
-window.volverAEditarUltimaCamisa=async function(){mostrarPasoPersonalizador("editor");await cargarCamisaEnEditor(Math.min(camisaActual,cantidadCamisas-1));};
 
-/* =========================
-   PEDIDO — SE SUBEN PREVIEWS E IMÁGENES, NO DATA URLs A FIRESTORE
-   ========================= */
-async function dataUrlABlob(dataUrl){const r=await fetch(dataUrl);return r.blob();}
-async function prepararCamisaParaPedido(camisa,index){
-  const previewFrenteUrl=await subirCloudinary(await dataUrlABlob(camisa.previewFrente),`karleny/pedidos/${index+1}`);
-  const previewEspaldaUrl=await subirCloudinary(await dataUrlABlob(camisa.previewEspalda),`karleny/pedidos/${index+1}`);
-  const lados=["frenteObjects","espaldaObjects"]; const salida={numero:index+1,talla:camisa.talla,color:camisa.color,colorNombre:camisa.colorNombre,previewFrenteUrl,previewEspaldaUrl,imagenesFrente:[],imagenesEspalda:[]};
-  for(const lado of lados){
-    const destino=lado==="frenteObjects"?salida.imagenesFrente:salida.imagenesEspalda;
-    for(let i=0;i<(camisa[lado]||[]).length;i++){
-      const o=camisa[lado][i]; const detalle=objetoDetalle(o,i); let url="";
-      if(o.src?.startsWith("data:")){ try{url=await subirCloudinary(await dataUrlABlob(o.src),`karleny/pedidos/${index+1}/imagenes`);}catch(e){console.warn("Imagen individual no subida",e); } }
-      destino.push({...detalle,imagenUrl:url});
+/* =========================================================
+   CANTIDAD DE CAMISAS
+   ========================================================= */
+
+window.cambiarCantidadCamisas =
+  function (delta) {
+
+    cantidadCamisas =
+      limitarNumero(
+        cantidadCamisas + delta,
+        1,
+        20
+      );
+
+    while (
+      camisas.length <
+      cantidadCamisas
+    ) {
+
+      camisas.push(
+        crearCamisa()
+      );
+    }
+
+    if (
+      camisas.length >
+      cantidadCamisas
+    ) {
+
+      camisas.length =
+        cantidadCamisas;
+    }
+
+    actualizarCantidadUI();
+  };
+
+
+function actualizarCantidadUI() {
+
+  const cantidad =
+    $("cantidadCamisas");
+
+  const texto =
+    $("textoCantidadCamisas");
+
+  if (cantidad) {
+    cantidad.textContent =
+      String(cantidadCamisas);
+  }
+
+  if (texto) {
+
+    texto.textContent =
+      cantidadCamisas === 1
+        ? "1 camisa"
+        : `${cantidadCamisas} camisas`;
+  }
+}
+
+
+/* =========================================================
+   PREPARAR EDITOR — CORREGIDO
+   ========================================================= */
+
+/*
+  IMPORTANTE:
+
+  Antes el editor intentaba crear Fabric mientras el paso
+  estaba oculto con hidden.
+
+  Ahora:
+  1. Se muestra el editor.
+  2. El navegador calcula sus dimensiones.
+  3. Se crea Fabric.
+  4. Se recalcula el offset.
+
+  Esto evita que el canvas aparezca vacío o no responda.
+*/
+
+async function prepararEditor() {
+
+  if (fabricCanvas) {
+
+    fabricCanvas.calcOffset();
+
+    fabricCanvas.renderAll();
+
+    return fabricCanvas;
+  }
+
+  const fabric =
+    await esperarFabric();
+
+  const canvasElement =
+    $("canvasCamisa");
+
+  if (!canvasElement) {
+
+    throw new Error(
+      "No existe #canvasCamisa en la página."
+    );
+  }
+
+  try {
+
+    canvasElement.width =
+      EDITOR_WIDTH;
+
+    canvasElement.height =
+      EDITOR_HEIGHT;
+
+    const nuevoCanvas =
+      new fabric.Canvas(
+        canvasElement,
+        {
+          width: EDITOR_WIDTH,
+          height: EDITOR_HEIGHT,
+
+          preserveObjectStacking: true,
+
+          selection: true,
+
+          uniformScaling: true,
+
+          allowTouchScrolling: false,
+
+          stopContextMenu: true,
+
+          fireRightClick: false,
+
+          backgroundColor:
+            "transparent"
+        }
+      );
+
+    fabricCanvas =
+      nuevoCanvas;
+
+
+    /* -------------------------
+       SELECCIÓN
+       ------------------------- */
+
+    fabricCanvas.on(
+      "selection:created",
+      actualizarMedidasSeleccion
+    );
+
+    fabricCanvas.on(
+      "selection:updated",
+      actualizarMedidasSeleccion
+    );
+
+    fabricCanvas.on(
+      "selection:cleared",
+      actualizarMedidasSeleccion
+    );
+
+
+    /* -------------------------
+       MOVIMIENTO
+       ------------------------- */
+
+    fabricCanvas.on(
+      "object:moving",
+      (evento) => {
+
+        mantenerDentroDelArea(
+          evento.target
+        );
+
+        evento.target.setCoords();
+
+        actualizarMedidasSeleccion();
+      }
+    );
+
+
+    /* -------------------------
+       ESCALADO
+       ------------------------- */
+
+    fabricCanvas.on(
+      "object:scaling",
+      (evento) => {
+
+        mantenerDentroDelArea(
+          evento.target
+        );
+
+        evento.target.setCoords();
+
+        actualizarMedidasSeleccion();
+      }
+    );
+
+
+    /* -------------------------
+       MODIFICADO
+       ------------------------- */
+
+    fabricCanvas.on(
+      "object:modified",
+      () => {
+
+        actualizarMedidasSeleccion();
+
+        registrarHistoria();
+      }
+    );
+
+
+    /* -------------------------
+       AGREGADO
+       ------------------------- */
+
+    fabricCanvas.on(
+      "object:added",
+      () => {
+
+        if (!restaurandoEditor) {
+
+          registrarHistoria();
+        }
+      }
+    );
+
+
+    /* -------------------------
+       ELIMINADO
+       ------------------------- */
+
+    fabricCanvas.on(
+      "object:removed",
+      () => {
+
+        if (!restaurandoEditor) {
+
+          registrarHistoria();
+        }
+      }
+    );
+
+
+    canvasElement.setAttribute(
+      "aria-label",
+      "Área de diseño de la camisa"
+    );
+
+
+    /*
+      Como el elemento ya está visible,
+      calculamos correctamente el offset.
+    */
+
+    fabricCanvas.calcOffset();
+
+    fabricCanvas.renderAll();
+
+    return fabricCanvas;
+
+  } catch (error) {
+
+    /*
+      Si Fabric falla, dejamos fabricCanvas
+      en null para poder intentar nuevamente.
+    */
+
+    fabricCanvas = null;
+
+    console.error(
+      "Error creando Fabric:",
+      error
+    );
+
+    throw error;
+  }
+}
+
+
+/* =========================================================
+   CONTINUAR AL EDITOR — CORREGIDO
+   ========================================================= */
+
+window.continuarAlEditor =
+  async function () {
+
+    /*
+      Garantizamos que exista una estructura
+      para todas las camisas.
+    */
+
+    if (!camisas.length) {
+
+      camisas = [
+        crearCamisa()
+      ];
+    }
+
+    while (
+      camisas.length <
+      cantidadCamisas
+    ) {
+
+      camisas.push(
+        crearCamisa()
+      );
+    }
+
+    camisaActual = 0;
+
+    ladoActual = "frente";
+
+
+    /*
+      🔥 SOLUCIÓN PRINCIPAL
+
+      PRIMERO mostramos el editor.
+      DESPUÉS inicializamos Fabric.
+    */
+
+    mostrarPasoPersonalizador(
+      "editor"
+    );
+
+
+    try {
+
+      /*
+        Esperamos dos frames para que el navegador
+        tenga tiempo de calcular correctamente
+        el tamaño del contenedor visible.
+      */
+
+      await new Promise(
+        (resolve) => {
+
+          requestAnimationFrame(
+            () => {
+
+              requestAnimationFrame(
+                resolve
+              );
+
+            }
+          );
+
+        }
+      );
+
+
+      await prepararEditor();
+
+
+      if (!fabricCanvas) {
+
+        throw new Error(
+          "El lienzo de diseño no pudo inicializarse."
+        );
+      }
+
+
+      await cargarCamisaEnEditor(
+        0
+      );
+
+
+      fabricCanvas.calcOffset();
+
+      fabricCanvas.renderAll();
+
+
+    } catch (error) {
+
+      console.error(
+        "Error al abrir el editor:",
+        error
+      );
+
+
+      /*
+        En vez de dejar la pantalla en blanco,
+        regresamos al selector de cantidad.
+      */
+
+      mostrarPasoPersonalizador(
+        "cantidad"
+      );
+
+
+      mostrarToast(
+        "No se pudo abrir el diseñador",
+        "Recarga la página e inténtalo otra vez.",
+        "error"
+      );
+    }
+  };
+
+
+/* =========================================================
+   PALETA DE COLORES
+   ========================================================= */
+
+function actualizarPaletaColores() {
+
+  const paleta =
+    $("paletaColoresCamisa");
+
+  if (!paleta) return;
+
+  paleta.innerHTML =
+    COLORES_CAMISA.map(
+      (color, indice) => {
+
+        const seleccionado =
+          color.valor.toLowerCase() ===
+          String(editorColor).toLowerCase();
+
+        return `
+          <button
+            type="button"
+            class="color-camisa ${seleccionado ? "seleccionada" : ""}"
+            data-color-indice="${indice}"
+            title="${escaparHTML(color.nombre)}"
+            aria-label="Color ${escaparHTML(color.nombre)}"
+            style="
+              background:${color.valor};
+              border-color:${seleccionado ? color.borde : "transparent"};
+            "
+          ></button>
+        `;
+
+      }
+    ).join("");
+}
+
+
+document.addEventListener(
+  "click",
+  (evento) => {
+
+    const boton =
+      evento.target.closest(
+        "#paletaColoresCamisa .color-camisa"
+      );
+
+    if (!boton) return;
+
+    const indice =
+      Number(
+        boton.dataset.colorIndice
+      );
+
+    const color =
+      COLORES_CAMISA[indice];
+
+    if (!color) return;
+
+    editorColor =
+      color.valor;
+
+    editorColorNombre =
+      color.nombre;
+
+    const camisa =
+      camisas[camisaActual];
+
+    if (camisa) {
+
+      camisa.color =
+        color.valor;
+
+      camisa.colorNombre =
+        color.nombre;
+    }
+
+    actualizarPaletaColores();
+
+    actualizarColorVisualCamisa();
+  }
+);
+
+
+/* =========================================================
+   COLOR VISUAL DE LA CAMISA
+   ========================================================= */
+
+function actualizarColorVisualCamisa() {
+
+  const silueta =
+    $("siluetaCamisa");
+
+  if (!silueta) return;
+
+  silueta.setAttribute(
+    "fill",
+    editorColor
+  );
+
+
+  const nombre =
+    $("nombreColorCamisa");
+
+  if (nombre) {
+
+    nombre.textContent =
+      editorColorNombre;
+  }
+}
+
+
+/* =========================================================
+   CARGAR CAMISA EN EDITOR
+   ========================================================= */
+
+async function cargarCamisaEnEditor(
+  indice
+) {
+
+  if (!fabricCanvas) {
+    return;
+  }
+
+  if (!camisas[indice]) {
+    return;
+  }
+
+  camisaActual =
+    indice;
+
+  const camisa =
+    camisas[indice];
+
+
+  editorColor =
+    camisa.color ||
+    COLORES_CAMISA[0].valor;
+
+  editorColorNombre =
+    camisa.colorNombre ||
+    "Blanco";
+
+
+  actualizarPaletaColores();
+
+  actualizarColorVisualCamisa();
+
+
+  restaurandoEditor = true;
+
+  fabricCanvas.clear();
+
+  fabricCanvas.backgroundColor =
+    "transparent";
+
+
+  const objetos =
+    ladoActual === "frente"
+      ? camisa.frenteObjects
+      : camisa.espaldaObjects;
+
+
+  try {
+
+    if (
+      objetos &&
+      objetos.length
+    ) {
+
+      await fabricCanvas.loadFromJSON(
+        {
+          version:
+            fabricCanvas.version,
+          objects:
+            clonarObjetos(objetos)
+        }
+      );
+
+      fabricCanvas.getObjects()
+        .forEach((objeto) => {
+
+          objeto.set({
+            selectable: true,
+            evented: true
+          });
+
+          objeto.setCoords();
+        });
+    }
+
+  } catch (error) {
+
+    console.error(
+      "Error cargando diseño:",
+      error
+    );
+
+  } finally {
+
+    restaurandoEditor = false;
+  }
+
+
+  fabricCanvas.discardActiveObject();
+
+  fabricCanvas.calcOffset();
+
+  fabricCanvas.renderAll();
+
+
+  actualizarMedidasSeleccion();
+
+  actualizarEstadoLadoUI();
+}
+
+
+/* =========================================================
+   GUARDAR DISEÑO ACTUAL
+   ========================================================= */
+
+function guardarCamisaActual() {
+
+  if (!fabricCanvas) {
+    return;
+  }
+
+  const camisa =
+    camisas[camisaActual];
+
+  if (!camisa) {
+    return;
+  }
+
+
+  const objetos =
+    fabricCanvas.getObjects();
+
+
+  const datos =
+    objetos.map((objeto) => {
+
+      const salida =
+        objeto.toObject([
+          "id",
+          "left",
+          "top",
+          "scaleX",
+          "scaleY",
+          "width",
+          "height",
+          "angle",
+          "originX",
+          "originY",
+          "flipX",
+          "flipY",
+          "type",
+          "src"
+        ]);
+
+      return salida;
+    });
+
+
+  if (ladoActual === "frente") {
+
+    camisa.frenteObjects =
+      clonarObjetos(datos);
+
+  } else {
+
+    camisa.espaldaObjects =
+      clonarObjetos(datos);
+  }
+
+
+  actualizarPreviewCamisaActual();
+}
+
+
+/* =========================================================
+   CAMBIAR FRENTE / ESPALDA
+   ========================================================= */
+
+window.cambiarLadoCamisa =
+  async function (lado) {
+
+    if (
+      lado !== "frente" &&
+      lado !== "espalda"
+    ) {
+
+      return;
+    }
+
+    if (
+      lado === ladoActual
+    ) {
+
+      actualizarEstadoLadoUI();
+
+      return;
+    }
+
+
+    /*
+      Antes de cambiar de lado,
+      guardamos exactamente lo que hay.
+    */
+
+    guardarCamisaActual();
+
+
+    ladoActual =
+      lado;
+
+
+    await cargarCamisaEnEditor(
+      camisaActual
+    );
+  };
+
+
+function actualizarEstadoLadoUI() {
+
+  const frente =
+    $("btnLadoFrente");
+
+  const espalda =
+    $("btnLadoEspalda");
+
+
+  if (frente) {
+
+    frente.classList.toggle(
+      "selected",
+      ladoActual === "frente"
+    );
+
+    frente.classList.toggle(
+      "activo",
+      ladoActual === "frente"
+    );
+  }
+
+
+  if (espalda) {
+
+    espalda.classList.toggle(
+      "selected",
+      ladoActual === "espalda"
+    );
+
+    espalda.classList.toggle(
+      "activo",
+      ladoActual === "espalda"
+    );
+  }
+
+
+  const indicador =
+    $("estadoLadoCamisa");
+
+  if (indicador) {
+
+    indicador.textContent =
+      ladoActual === "frente"
+        ? "Frente"
+        : "Espalda";
+  }
+}
+
+
+/* =========================================================
+   MANTENER OBJETOS DENTRO DEL ÁREA
+   ========================================================= */
+
+function mantenerDentroDelArea(
+  objeto
+) {
+
+  if (!objeto) return;
+
+
+  objeto.setCoords();
+
+
+  const mitadAncho =
+    objeto.getScaledWidth() / 2;
+
+  const mitadAlto =
+    objeto.getScaledHeight() / 2;
+
+
+  const minX =
+    mitadAncho;
+
+  const maxX =
+    EDITOR_WIDTH -
+    mitadAncho;
+
+
+  const minY =
+    mitadAlto;
+
+  const maxY =
+    EDITOR_HEIGHT -
+    mitadAlto;
+
+
+  objeto.left =
+    limitarNumero(
+      Number(objeto.left) || 0,
+      minX,
+      maxX
+    );
+
+
+  objeto.top =
+    limitarNumero(
+      Number(objeto.top) || 0,
+      minY,
+      maxY
+    );
+
+
+  objeto.setCoords();
+}
+
+
+/* =========================================================
+   MEDIDAS EN CM
+   ========================================================= */
+
+function obtenerMedidasObjeto(
+  objeto
+) {
+
+  if (!objeto) {
+
+    return {
+      ancho: 0,
+      alto: 0,
+      x: 0,
+      y: 0
+    };
+  }
+
+
+  const anchoPx =
+    objeto.getScaledWidth();
+
+  const altoPx =
+    objeto.getScaledHeight();
+
+
+  const xPx =
+    Number(objeto.left) || 0;
+
+  const yPx =
+    Number(objeto.top) || 0;
+
+
+  return {
+
+    ancho:
+      anchoPx *
+      CM_PER_EDITOR_PX_X,
+
+    alto:
+      altoPx *
+      CM_PER_EDITOR_PX_Y,
+
+    x:
+      xPx *
+      CM_PER_EDITOR_PX_X,
+
+    y:
+      yPx *
+      CM_PER_EDITOR_PX_Y
+  };
+}
+
+
+function formatoCM(valor) {
+
+  return `${Number(valor || 0)
+    .toFixed(1)
+    .replace(".", ",")} cm`;
+}
+
+
+function actualizarMedidasSeleccion() {
+
+  const activo =
+    fabricCanvas?.getActiveObject();
+
+
+  const ancho =
+    $("medidaAncho");
+
+  const alto =
+    $("medidaAlto");
+
+  const x =
+    $("medidaX");
+
+  const y =
+    $("medidaY");
+
+  const estado =
+    $("estadoSeleccion");
+
+
+  if (!activo) {
+
+    if (ancho) {
+      ancho.textContent = "0,0 cm";
+    }
+
+    if (alto) {
+      alto.textContent = "0,0 cm";
+    }
+
+    if (x) {
+      x.textContent = "0,0 cm";
+    }
+
+    if (y) {
+      y.textContent = "0,0 cm";
+    }
+
+    if (estado) {
+      estado.textContent =
+        "Selecciona una imagen";
+    }
+
+    return;
+  }
+
+
+  const medidas =
+    obtenerMedidasObjeto(
+      activo
+    );
+
+
+  if (ancho) {
+    ancho.textContent =
+      formatoCM(medidas.ancho);
+  }
+
+  if (alto) {
+    alto.textContent =
+      formatoCM(medidas.alto);
+  }
+
+  if (x) {
+    x.textContent =
+      formatoCM(medidas.x);
+  }
+
+  if (y) {
+    y.textContent =
+      formatoCM(medidas.y);
+  }
+
+
+  if (estado) {
+
+    estado.textContent =
+      "Imagen seleccionada";
+  }
+}
+
+
+/* =========================================================
+   ESCALAR SELECCIÓN
+   ========================================================= */
+
+window.escalarSeleccion =
+  function (factor) {
+
+    if (!fabricCanvas) return;
+
+    const objeto =
+      fabricCanvas.getActiveObject();
+
+    if (!objeto) {
+
+      mostrarToast(
+        "Selecciona una imagen",
+        "Primero toca una imagen del diseño.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    const escalaX =
+      Number(objeto.scaleX) ||
+      1;
+
+    const escalaY =
+      Number(objeto.scaleY) ||
+      1;
+
+
+    objeto.set({
+      scaleX:
+        escalaX * factor,
+
+      scaleY:
+        escalaY * factor
+    });
+
+
+    mantenerDentroDelArea(
+      objeto
+    );
+
+
+    fabricCanvas.renderAll();
+
+    actualizarMedidasSeleccion();
+
+    registrarHistoria();
+  };
+
+
+/* =========================================================
+   CENTRAR SELECCIÓN
+   ========================================================= */
+
+window.centrarSeleccion =
+  function () {
+
+    if (!fabricCanvas) return;
+
+    const objeto =
+      fabricCanvas.getActiveObject();
+
+    if (!objeto) {
+
+      mostrarToast(
+        "Selecciona una imagen",
+        "Primero toca una imagen del diseño.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    objeto.set({
+      left:
+        EDITOR_WIDTH / 2,
+
+      top:
+        EDITOR_HEIGHT / 2,
+
+      originX: "center",
+
+      originY: "center"
+    });
+
+
+    mantenerDentroDelArea(
+      objeto
+    );
+
+
+    fabricCanvas.renderAll();
+
+    actualizarMedidasSeleccion();
+
+    registrarHistoria();
+  };
+
+
+/* =========================================================
+   ELIMINAR SELECCIÓN
+   ========================================================= */
+
+window.eliminarSeleccion =
+  function () {
+
+    if (!fabricCanvas) return;
+
+    const objeto =
+      fabricCanvas.getActiveObject();
+
+    if (!objeto) {
+
+      mostrarToast(
+        "Nada seleccionado",
+        "Selecciona una imagen para eliminarla.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    fabricCanvas.remove(
+      objeto
+    );
+
+    fabricCanvas.discardActiveObject();
+
+    fabricCanvas.renderAll();
+
+    actualizarMedidasSeleccion();
+
+    registrarHistoria();
+  };
+
+
+/* =========================================================
+   IMÁGENES
+   ========================================================= */
+
+$("inputImagenCamisa")
+  ?.addEventListener(
+    "change",
+    async (evento) => {
+
+      const archivos =
+        Array.from(
+          evento.target.files || []
+        );
+
+
+      if (!archivos.length) {
+        return;
+      }
+
+
+      if (!fabricCanvas) {
+
+        mostrarToast(
+          "Editor no listo",
+          "Espera un momento y vuelve a intentarlo.",
+          "error"
+        );
+
+        evento.target.value = "";
+
+        return;
+      }
+
+
+      const cantidadActual =
+        fabricCanvas.getObjects().length;
+
+
+      const disponibles =
+        Math.max(
+          0,
+          12 - cantidadActual
+        );
+
+
+      if (disponibles <= 0) {
+
+        mostrarToast(
+          "Límite alcanzado",
+          "Puedes colocar hasta 12 imágenes por lado.",
+          "error"
+        );
+
+        evento.target.value = "";
+
+        return;
+      }
+
+
+      const archivosAProcesar =
+        archivos.slice(
+          0,
+          disponibles
+        );
+
+
+      if (
+        archivos.length >
+        disponibles
+      ) {
+
+        mostrarToast(
+          "Algunas imágenes no se agregaron",
+          "Hay un máximo de 12 imágenes por lado.",
+          "error"
+        );
+      }
+
+
+      for (
+        const archivo
+        of archivosAProcesar
+      ) {
+
+        try {
+
+          await agregarImagenAlCanvas(
+            archivo
+          );
+
+        } catch (error) {
+
+          console.error(
+            "Error agregando imagen:",
+            error
+          );
+
+          mostrarToast(
+            "Error con una imagen",
+            "No se pudo agregar esa imagen.",
+            "error"
+          );
+        }
+      }
+
+
+      evento.target.value = "";
+    }
+  );
+
+
+async function agregarImagenAlCanvas(
+  archivo
+) {
+
+  const fabric =
+    await esperarFabric();
+
+
+  if (!fabricCanvas) {
+    throw new Error(
+      "Canvas no disponible."
+    );
+  }
+
+
+  if (
+    !archivo.type.startsWith(
+      "image/"
+    )
+  ) {
+
+    throw new Error(
+      "El archivo no es una imagen."
+    );
+  }
+
+
+  const url =
+    await leerArchivoComoDataURL(
+      archivo
+    );
+
+
+  return new Promise(
+    (resolve, reject) => {
+
+      fabric.Image.fromURL(
+        url,
+        (imagen) => {
+
+          if (!imagen) {
+
+            reject(
+              new Error(
+                "No se pudo crear la imagen."
+              )
+            );
+
+            return;
+          }
+
+
+          /*
+            Tamaño inicial razonable.
+
+            La imagen se adapta para entrar
+            dentro del área de impresión.
+          */
+
+          const maxWidth = 300;
+
+          const maxHeight = 300;
+
+
+          const escalaX =
+            maxWidth /
+            (imagen.width || maxWidth);
+
+          const escalaY =
+            maxHeight /
+            (imagen.height || maxHeight);
+
+
+          const escala =
+            Math.min(
+              escalaX,
+              escalaY,
+              1
+            );
+
+
+          imagen.set({
+
+            left:
+              EDITOR_WIDTH / 2,
+
+            top:
+              EDITOR_HEIGHT / 2,
+
+            originX:
+              "center",
+
+            originY:
+              "center",
+
+            scaleX:
+              escala,
+
+            scaleY:
+              escala,
+
+            selectable:
+              true,
+
+            evented:
+              true
+          });
+
+
+          mantenerDentroDelArea(
+            imagen
+          );
+
+
+          fabricCanvas.add(
+            imagen
+          );
+
+
+          fabricCanvas.setActiveObject(
+            imagen
+          );
+
+
+          fabricCanvas.renderAll();
+
+
+          actualizarMedidasSeleccion();
+
+          registrarHistoria();
+
+
+          resolve(imagen);
+
+        },
+        {
+          crossOrigin: "anonymous"
+        }
+      );
+
+    }
+  );
+}
+
+
+function leerArchivoComoDataURL(
+  archivo
+) {
+
+  return new Promise(
+    (resolve, reject) => {
+
+      const lector =
+        new FileReader();
+
+
+      lector.onload =
+        () => resolve(
+          lector.result
+        );
+
+
+      lector.onerror =
+        () => reject(
+          lector.error
+        );
+
+
+      lector.readAsDataURL(
+        archivo
+      );
+    }
+  );
+}
+
+
+/* =========================================================
+   HISTORIAL — DESHACER / REHACER
+   ========================================================= */
+
+function obtenerEstadoCanvas() {
+
+  if (!fabricCanvas) {
+    return null;
+  }
+
+  return JSON.stringify(
+    fabricCanvas.toJSON([
+      "id",
+      "src"
+    ])
+  );
+}
+
+
+function registrarHistoria() {
+
+  if (
+    restaurandoEditor ||
+    !fabricCanvas
+  ) {
+    return;
+  }
+
+
+  const ahora =
+    Date.now();
+
+
+  /*
+    Evita llenar el historial con demasiadas
+    operaciones consecutivas.
+  */
+
+  if (
+    ahora -
+    ultimaOperacionHistorial <
+    80
+  ) {
+
+    return;
+  }
+
+
+  ultimaOperacionHistorial =
+    ahora;
+
+
+  const estado =
+    obtenerEstadoCanvas();
+
+
+  if (!estado) return;
+
+
+  const ultimo =
+    editorHistoryPast[
+      editorHistoryPast.length - 1
+    ];
+
+
+  if (ultimo === estado) {
+    return;
+  }
+
+
+  editorHistoryPast.push(
+    estado
+  );
+
+
+  /*
+    Conservamos un historial razonable.
+  */
+
+  if (
+    editorHistoryPast.length >
+    50
+  ) {
+
+    editorHistoryPast.shift();
+  }
+
+
+  editorHistoryFuture = [];
+}
+
+
+async function restaurarEstado(
+  estado
+) {
+
+  if (!fabricCanvas) {
+    return;
+  }
+
+
+  restaurandoEditor = true;
+
+
+  try {
+
+    fabricCanvas.clear();
+
+    fabricCanvas.backgroundColor =
+      "transparent";
+
+
+    if (estado) {
+
+      await fabricCanvas.loadFromJSON(
+        JSON.parse(estado)
+      );
+    }
+
+
+    fabricCanvas.renderAll();
+
+    actualizarMedidasSeleccion();
+
+  } catch (error) {
+
+    console.error(
+      "Error restaurando historial:",
+      error
+    );
+
+  } finally {
+
+    restaurandoEditor = false;
+  }
+}
+
+
+window.deshacerEditor =
+  async function () {
+
+    if (
+      editorHistoryPast.length <
+      2
+    ) {
+      return;
+    }
+
+
+    const actual =
+      editorHistoryPast.pop();
+
+
+    editorHistoryFuture.push(
+      actual
+    );
+
+
+    const anterior =
+      editorHistoryPast[
+        editorHistoryPast.length - 1
+      ];
+
+
+    await restaurarEstado(
+      anterior
+    );
+
+
+    guardarCamisaActual();
+  };
+
+
+window.rehacerEditor =
+  async function () {
+
+    if (
+      !editorHistoryFuture.length
+    ) {
+      return;
+    }
+
+
+    const siguiente =
+      editorHistoryFuture.pop();
+
+
+    editorHistoryPast.push(
+      siguiente
+    );
+
+
+    await restaurarEstado(
+      siguiente
+    );
+
+
+    guardarCamisaActual();
+  };
+
+
+/* =========================================================
+   PREVIEW
+   ========================================================= */
+
+async function crearPreviewCanvas(
+  objetos,
+  color
+) {
+
+  /*
+    Esta función crea una miniatura independiente
+    para que el administrador pueda ver exactamente
+    el diseño del cliente.
+  */
+
+  const fabric =
+    await esperarFabric();
+
+
+  const elemento =
+    document.createElement(
+      "canvas"
+    );
+
+
+  elemento.width =
+    EDITOR_WIDTH;
+
+  elemento.height =
+    EDITOR_HEIGHT;
+
+
+  const canvas =
+    new fabric.StaticCanvas(
+      elemento,
+      {
+        width:
+          EDITOR_WIDTH,
+
+        height:
+          EDITOR_HEIGHT,
+
+        backgroundColor:
+          "transparent"
+      }
+    );
+
+
+  try {
+
+    if (
+      objetos &&
+      objetos.length
+    ) {
+
+      await canvas.loadFromJSON({
+        version:
+          canvas.version,
+
+        objects:
+          clonarObjetos(objetos)
+      });
+    }
+
+
+    canvas.renderAll();
+
+
+    /*
+      Exportamos únicamente el área de diseño.
+    */
+
+    return canvas.toDataURL({
+      format: "png",
+      multiplier: 1
+    });
+
+  } finally {
+
+    canvas.dispose();
+  }
+}
+
+
+async function actualizarPreviewCamisaActual() {
+
+  const camisa =
+    camisas[camisaActual];
+
+  if (!camisa) return;
+
+
+  try {
+
+    camisa.previewFrente =
+      await crearPreviewCanvas(
+        camisa.frenteObjects,
+        camisa.color
+      );
+
+
+    camisa.previewEspalda =
+      await crearPreviewCanvas(
+        camisa.espaldaObjects,
+        camisa.color
+      );
+
+  } catch (error) {
+
+    console.error(
+      "Error creando preview:",
+      error
+    );
+  }
+}
+
+
+/* =========================================================
+   CAMBIAR CAMISA
+   ========================================================= */
+
+window.siguienteCamisa =
+  async function () {
+
+    guardarCamisaActual();
+
+    await actualizarPreviewCamisaActual();
+
+
+    if (
+      camisaActual <
+      camisas.length - 1
+    ) {
+
+      camisaActual++;
+
+      ladoActual =
+        "frente";
+
+      await cargarCamisaEnEditor(
+        camisaActual
+      );
+
+      actualizarNumeroCamisaUI();
+
+      return;
+    }
+
+
+    /*
+      Última camisa:
+      vamos a revisión.
+    */
+
+    await prepararRevision();
+
+    mostrarPasoPersonalizador(
+      "revision"
+    );
+  };
+
+
+function actualizarNumeroCamisaUI() {
+
+  const numero =
+    $("numeroCamisaActual");
+
+  if (numero) {
+
+    numero.textContent =
+      `Camisa ${camisaActual + 1} de ${camisas.length}`;
+  }
+}
+
+
+/* =========================================================
+   COPIAR DISEÑO
+   ========================================================= */
+
+window.copiarDisenoCamisa =
+  function () {
+
+    if (
+      !camisas[camisaActual]
+    ) {
+      return;
+    }
+
+
+    guardarCamisaActual();
+
+
+    const origen =
+      camisas[camisaActual];
+
+
+    const destino =
+      camisas[
+        camisaActual + 1
+      ];
+
+
+    if (!destino) {
+
+      mostrarToast(
+        "Última camisa",
+        "No hay otra camisa para copiar.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    destino.color =
+      origen.color;
+
+    destino.colorNombre =
+      origen.colorNombre;
+
+    destino.frenteObjects =
+      clonarObjetos(
+        origen.frenteObjects
+      );
+
+    destino.espaldaObjects =
+      clonarObjetos(
+        origen.espaldaObjects
+      );
+
+
+    mostrarToast(
+      "Diseño copiado",
+      "La siguiente camisa recibió el mismo diseño.",
+      "success"
+    );
+  };
+
+
+/* =========================================================
+   TALLA INDIVIDUAL
+   ========================================================= */
+
+function actualizarTallaCamisaActual(
+  valor
+) {
+
+  const camisa =
+    camisas[camisaActual];
+
+  if (!camisa) return;
+
+  if (
+    !["XS", "S", "L"]
+      .includes(valor)
+  ) {
+    return;
+  }
+
+  camisa.talla =
+    valor;
+}
+
+
+document.addEventListener(
+  "change",
+  (evento) => {
+
+    const select =
+      evento.target.closest(
+        "#tallaCamisaActual"
+      );
+
+    if (!select) return;
+
+    actualizarTallaCamisaActual(
+      select.value
+    );
+  }
+);
+
+
+/* =========================================================
+   TERMINAR / SALIR
+   ========================================================= */
+
+window.terminarPersonalizacion =
+  function () {
+
+    const confirmar =
+      confirm(
+        "¿Quieres salir del personalizador? Se perderá el diseño que no hayas enviado."
+      );
+
+    if (!confirmar) {
+      return;
+    }
+
+    mostrarSolo(
+      "pantallaInicio"
+    );
+  };
+
+
+/* =========================================================
+   INICIALIZACIÓN
+   ========================================================= */
+
+document.addEventListener(
+  "DOMContentLoaded",
+  () => {
+
+    cargarCarrito();
+
+    cargarProductosFirebase();
+
+    validarDatosPersonalizacion();
+
+    actualizarPaletaColores();
+
+    actualizarColorVisualCamisa();
+
+    actualizarCantidadUI();
+
+  }
+);
+/* =========================================================
+   VISTA PREVIA FINAL — CAMISA + DISEÑO
+   ========================================================= */
+
+function construirSVGCamisa(color, lado = "frente") {
+
+  const borde =
+    COLORES_CAMISA.find(
+      (c) => c.valor === color
+    )?.borde || "#d0d0d6";
+
+  return `
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="500"
+      height="600"
+      viewBox="0 0 500 600"
+    >
+
+      <path
+        d="
+          M175 50
+          L112 75
+          L35 155
+          L83 225
+          L128 188
+          L128 525
+          Q128 548 151 548
+          L349 548
+          Q372 548 372 525
+          L372 188
+          L417 225
+          L465 155
+          L388 75
+          L325 50
+          Q303 102 250 102
+          Q197 102 175 50
+          Z
+        "
+        fill="${color}"
+        stroke="${borde}"
+        stroke-width="4"
+        stroke-linejoin="round"
+      />
+
+      ${
+        lado === "frente"
+          ? `
+            <path
+              d="
+                M175 50
+                Q197 102 250 102
+                Q303 102 325 50
+              "
+              fill="none"
+              stroke="${borde}"
+              stroke-width="5"
+            />
+          `
+          : `
+            <path
+              d="
+                M184 58
+                Q210 80 250 80
+                Q290 80 316 58
+              "
+              fill="none"
+              stroke="${borde}"
+              stroke-width="4"
+            />
+          `
+      }
+
+    </svg>
+  `;
+}
+
+
+async function generarVistaPreviaDesdeDatos(
+  datosCamisa,
+  lado = "frente",
+  indice = 0
+) {
+
+  const fabric =
+    await esperarFabric();
+
+  const salida =
+    document.createElement("canvas");
+
+  salida.width = 600;
+  salida.height = 700;
+
+  const ctx =
+    salida.getContext("2d");
+
+  ctx.clearRect(
+    0,
+    0,
+    salida.width,
+    salida.height
+  );
+
+
+  const fondo =
+    new Image();
+
+  fondo.src =
+    `data:image/svg+xml;charset=utf-8,${encodeURIComponent(
+      construirSVGCamisa(
+        datosCamisa.color || "#ffffff",
+        lado
+      )
+    )}`;
+
+  await esperarImagen(fondo);
+
+  ctx.drawImage(
+    fondo,
+    50,
+    20,
+    500,
+    600
+  );
+
+
+  const objetos =
+    datosCamisa[
+      lado === "frente"
+        ? "frenteObjects"
+        : "espaldaObjects"
+    ] || [];
+
+
+  if (objetos.length) {
+
+    const canvasTemporal =
+      document.createElement(
+        "canvas"
+      );
+
+    canvasTemporal.width =
+      EDITOR_WIDTH;
+
+    canvasTemporal.height =
+      EDITOR_HEIGHT;
+
+
+    const staticCanvas =
+      new fabric.StaticCanvas(
+        canvasTemporal,
+        {
+          width:
+            EDITOR_WIDTH,
+
+          height:
+            EDITOR_HEIGHT,
+
+          backgroundColor:
+            "transparent"
+        }
+      );
+
+
+    restaurandoEditor = true;
+
+    try {
+
+      await staticCanvas.loadFromJSON({
+        version:
+          fabric.version,
+
+        objects:
+          clonarObjetos(objetos)
+      });
+
+
+      staticCanvas.renderAll();
+
+
+      const diseño =
+        staticCanvas.toDataURL({
+          format: "png",
+          multiplier: 1
+        });
+
+
+      const imagenDiseno =
+        new Image();
+
+      imagenDiseno.src =
+        diseño;
+
+      await esperarImagen(
+        imagenDiseno
+      );
+
+
+      ctx.drawImage(
+        imagenDiseno,
+        145,
+        120,
+        210,
+        330
+      );
+
+    } finally {
+
+      restaurandoEditor = false;
+
+      staticCanvas.dispose();
     }
   }
-  return salida;
-}
-function numeroPedido(){return `VK-${new Date().getFullYear()}-${String(Date.now()).slice(-7)}`;}
-window.confirmarPedidoPersonalizado=async function(){
-  const btn=$("btnConfirmarPedido"); btn.disabled=true; btn.textContent="⏳ Enviando pedido...";
-  try{
-    const nombre=$("clienteNombre").value.trim(),telefono=$("clienteTelefono").value.trim(),fecha=$("fechaEntrega").value;
-    if(!nombre||!telefono||!fecha||!camisas.length)throw new Error("Faltan datos del pedido");
-    const num=numeroPedido(); const camisasPedido=[];
-    for(let i=0;i<camisas.length;i++)camisasPedido.push(await prepararCamisaParaPedido(camisas[i],i));
-    const pedido={numeroPedido:num,tipo:"personalizado",estado:"nuevo",cliente:{nombre,telefono},fechaEntrega:fecha,cantidad:camisas.length,camisas:camisasPedido,creado:serverTimestamp()};
-    await addDoc(collection(db,"pedidos"),pedido);
-    const mensaje=construirMensajeWhatsAppPedido(pedido); const final=$("mensajeFinalPedido");
-    final.hidden=false; final.innerHTML=`<div class="final-ok">✓</div><h2>¡Pedido recibido!</h2><p>Tu número de pedido es <b>${escapar(num)}</b>.</p><small>El administrador ya puede ver el diseño y las medidas.</small><div class="final-actions"><button class="btn btn-whatsapp" onclick="abrirWhatsAppPedido(${JSON.stringify(mensaje)})">💬 Confirmar por WhatsApp</button><button class="btn btn-outline" onclick="salirPersonalizadorDespuesPedido()">Volver al inicio</button></div>`;
-    $("btnConfirmarPedido").hidden=true; mostrarToast("✅ Pedido enviado",num,"success");
-  }catch(e){console.error(e);mostrarToast("No se pudo enviar",e.message||"Revisa la conexión y prueba otra vez.","error");btn.disabled=false;btn.textContent="✅ Confirmar y enviar pedido";}
-};
-function construirMensajeWhatsAppPedido(pedido){let t=`Hola 👋, acabo de realizar el pedido ${pedido.numeroPedido}.\n\nCliente: ${pedido.cliente.nombre}\nTeléfono: ${pedido.cliente.telefono}\nEntrega: ${fechaBonita(pedido.fechaEntrega)}\nCantidad: ${pedido.cantidad} camisa(s).\n\n`;pedido.camisas.forEach(c=>{t+=`👕 Camisa ${c.numero}: talla ${c.talla}, color ${c.colorNombre}.\n`;(c.imagenesFrente||[]).forEach(o=>t+=`Frente · imagen ${o.imagen}: ${o.altoCm} cm alto × ${o.anchoCm} cm ancho.\n`);(c.imagenesEspalda||[]).forEach(o=>t+=`Espalda · imagen ${o.imagen}: ${o.altoCm} cm alto × ${o.anchoCm} cm ancho.\n`);t+="\n";});return t;}
-window.abrirWhatsAppPedido=function(texto){window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(texto||"")}`,"_blank");};
-window.salirPersonalizadorDespuesPedido=function(){resetPersonalizador();mostrarSolo("pantallaInicio");};
 
-/* =========================
-   ADMIN — PEDIDOS + NOTIFICACIÓN EN PRIMER PLANO
-   ========================= */
-function iniciarEscuchaPedidos(){
-  if(unsubscribePedidos||!auth.currentUser||auth.currentUser.uid!==UID_DUENO)return;
-  unsubscribePedidos=onSnapshot(collection(db,"pedidos"),(snap)=>{
-    const nuevos=[]; snap.docChanges().forEach((c)=>{if(c.type==="added"&&pedidosInicializados)nuevos.push({id:c.doc.id,...c.doc.data()});}); pedidosInicializados=true;
-    if(nuevos.length){const ahora=Date.now(); if(ahora-ultimoToastPedido>1000){nuevos.forEach((p)=>{mostrarToast("🔔 Nuevo pedido",`${p.numeroPedido||p.id} · ${p.cliente?.nombre||"Cliente"}`,"pedido");enviarNotificacionNavegador("Nuevo pedido en Variedades Karleny",`${p.numeroPedido||"Pedido"} · ${p.cliente?.nombre||"Cliente"}`);});ultimoToastPedido=ahora;}}
-    pedidosAdmin=snap.docs.map((d)=>({id:d.id,...d.data()})).sort((a,b)=>(b.creado?.seconds||0)-(a.creado?.seconds||0)); actualizarContadorPedidos(); if(adminPedidosAbierto)renderPedidosAdmin();
-  },(e)=>{console.error(e);mostrarToast("Pedidos","No se pudo actualizar la bandeja.","error");});
-}
-function detenerEscuchaPedidos(){if(unsubscribePedidos)unsubscribePedidos();unsubscribePedidos=null;pedidosInicializados=false;pedidosAdmin=[];actualizarContadorPedidos();}
-async function enviarNotificacionNavegador(titulo,cuerpo){if(!(window.Notification))return;try{let p=Notification.permission;if(p==="default")p=await Notification.requestPermission();if(p==="granted")new Notification(titulo,{body:cuerpo,icon:"icons/icon-192.png",tag:"karleny-pedido"});}catch(e){console.warn(e);}}
-window.activarNotificacionesAdmin=async function(){if(!auth.currentUser||auth.currentUser.uid!==UID_DUENO)return mostrarToast("Sin permiso","Inicia sesión como dueño.","error");if(!(window.Notification))return mostrarToast("No disponible","Este navegador no soporta notificaciones.","error");const p=await Notification.requestPermission();mostrarToast(p==="granted"?"🔔 Notificaciones activadas":"Notificaciones no activadas",p==="granted"?"Te avisaremos mientras el panel esté abierto.":"El navegador no dio permiso.",p==="granted"?"success":"error");};
-window.mostrarPedidosAdmin=function(){if(!auth.currentUser||auth.currentUser.uid!==UID_DUENO)return;adminPedidosAbierto=true;$("panelPedidosAdmin").hidden=false;renderPedidosAdmin();};
-window.ocultarPedidosAdmin=function(){adminPedidosAbierto=false;$("panelPedidosAdmin").hidden=true;};
-function actualizarContadorPedidos(){const n=pedidosAdmin.filter(p=>(p.estado||"nuevo")==="nuevo").length;if($("contadorPedidosAdmin"))$("contadorPedidosAdmin").textContent=String(n);}
-function renderPedidosAdmin(){
-  const lista=$("listaPedidosAdmin");if(!lista)return;
-  if(!pedidosAdmin.length){lista.innerHTML=`<div class="empty-state compact"><div>📦</div><h3>Aún no hay pedidos</h3><p>Cuando alguien confirme una camisa aparecerá aquí.</p></div>`;return;}
-  lista.innerHTML=pedidosAdmin.map((p)=>{
-    const estado=p.estado||"nuevo";
-    return `<article class="order-card"><div class="order-head"><div><span class="order-number">${escapar(p.numeroPedido||p.id)}</span><small>📦 ${escapar(fechaBonita(p.fechaEntrega))}</small></div><select onchange="actualizarEstadoPedido('${escapar(p.id)}',this.value)"><option value="nuevo" ${estado==="nuevo"?"selected":""}>Nuevo</option><option value="en_proceso" ${estado==="en_proceso"?"selected":""}>En proceso</option><option value="listo" ${estado==="listo"?"selected":""}>Listo</option><option value="entregado" ${estado==="entregado"?"selected":""}>Entregado</option></select></div><div class="order-client"><div><span>👤 Cliente</span><b>${escapar(p.cliente?.nombre||"—")}</b></div><div><span>📱 Teléfono</span><b>${escapar(p.cliente?.telefono||"—")}</b></div><div><span>👕 Cantidad</span><b>${Number(p.cantidad||0)} camisa(s)</b></div></div><div class="order-shirts">${(p.camisas||[]).map(renderAdminCamisa).join("")}</div><button class="btn btn-danger btn-small order-delete" onclick="eliminarPedidoAdmin('${escapar(p.id)}')">🗑️ Eliminar pedido</button></article>`;
-  }).join("");
-}
-function renderAdminCamisa(c){
-  const total=(c.imagenesFrente||[]).length+(c.imagenesEspalda||[]).length;
-  return `<section class="admin-shirt"><div class="admin-shirt-head"><div><span>CAMISA ${Number(c.numero||1)}</span><h4>${escapar(c.colorNombre||"Color")} · Talla ${escapar(c.talla||"—")}</h4></div><strong>🖼️ ${total} imagen${total===1?"":"es"}</strong></div><div class="admin-previews"><figure><img src="${escapar(c.previewFrenteUrl||"")}" alt="Vista exacta frente"><figcaption>Frente</figcaption></figure><figure><img src="${escapar(c.previewEspaldaUrl||"")}" alt="Vista exacta espalda"><figcaption>Espalda</figcaption></figure></div><div class="admin-color-line"><i style="background:${escapar(c.color||"#fff")}"></i> Color: <b>${escapar(c.colorNombre||"—")}</b></div>${renderAdminDetails(c.imagenesFrente||[],"Frente")}${renderAdminDetails(c.imagenesEspalda||[],"Espalda")}</section>`;
-}
-function renderAdminDetails(arr,lado){if(!arr.length)return `<div class="admin-detail muted">○ Sin imágenes en ${lado.toLowerCase()}.</div>`;return `<div class="admin-detail"><b>📐 ${lado}</b>${arr.map((o)=>`<div><span>Imagen ${Number(o.imagen)} · ${escapar(o.nombreArchivo||"")}</span><strong>${Number(o.altoCm).toFixed(1)} cm alto × ${Number(o.anchoCm).toFixed(1)} cm ancho</strong><small>Posición X ${Number(o.posXcm).toFixed(1)} cm · Y ${Number(o.posYcm).toFixed(1)} cm${o.imagenUrl?` · <a href="${escapar(o.imagenUrl)}" target="_blank" rel="noopener">ver original</a>`:""}</small></div>`).join("")}</div>`;}
-window.actualizarEstadoPedido=async function(id,estado){if(!auth.currentUser||auth.currentUser.uid!==UID_DUENO)return;try{await updateDoc(doc(db,"pedidos",id),{estado,actualizado:serverTimestamp()});mostrarToast("Estado actualizado",estado,"success");}catch(e){console.error(e);mostrarToast("No se pudo actualizar","Revisa Firestore.","error");}};
-window.eliminarPedidoAdmin=async function(id){if(!auth.currentUser||auth.currentUser.uid!==UID_DUENO)return;if(!confirm("¿Eliminar este pedido del panel?"))return;try{await deleteDoc(doc(db,"pedidos",id));mostrarToast("Pedido eliminado","Se quitó de la bandeja.","success");}catch(e){console.error(e);mostrarToast("No se pudo eliminar","Revisa las reglas de Firestore.","error");}};
 
-/* Cerrar modales tocando fuera */
-["ventanaLogin","ventanaCarrito"].forEach((id)=>$(id)?.addEventListener("click",(e)=>{if(e.target.id===id)$(id).hidden=true;}));
+  ctx.font =
+    "800 17px Arial";
 
-document.addEventListener("keydown",(e)=>{if(e.key==="Escape"){if(!$("ventanaLogin").hidden)cerrarLogin();if(!$("ventanaCarrito").hidden)cerrarCarrito();}});
+  ctx.fillStyle =
+    "#333333";
 
-/* Inicio */
-actualizarCarrito(); cargarProductos();
+  ctx.textAlign =
+    "center";
+
+  ctx.fillText(
+    `Camisa ${indice + 1} · ${
+      lado === "frente"
+        ? "Frente"
+        : "Espalda"
+    }`,
+    300,
+    665
+  );
+
+
+  return salida.toDataURL(
+    "image/jpeg",
+    0.78
+  );
+}
+
+
+function esperarImagen(imagen) {
+
+  return new Promise(
+    (resolve, reject) => {
+
+      if (
+        imagen.complete &&
+        imagen.naturalWidth
+      ) {
+
+        resolve();
+
+        return;
+      }
+
+
+      imagen.onload =
+        () => resolve();
+
+      imagen.onerror =
+        reject;
+    }
+  );
+}
+
+
+/* =========================================================
+   CAMBIAR FRENTE / ESPALDA
+   ========================================================= */
+
+async function cambiarLadoCamisaInterno(
+  nuevoLado
+) {
+
+  if (
+    !fabricCanvas ||
+    nuevoLado === ladoActual
+  ) {
+    return;
+  }
+
+
+  await guardarCamisaActualEnMemoria();
+
+
+  ladoActual =
+    nuevoLado;
+
+
+  await cargarCamisaEnEditor(
+    camisaActual
+  );
+}
+
+
+window.cambiarLadoCamisa =
+  async function (lado) {
+
+    if (!camisas.length) {
+      return;
+    }
+
+    try {
+
+      await cambiarLadoCamisaInterno(
+        lado === "espalda"
+          ? "espalda"
+          : "frente"
+      );
+
+    } catch (error) {
+
+      console.error(error);
+
+      mostrarToast(
+        "No se pudo cambiar de lado",
+        "Inténtalo otra vez.",
+        "error"
+      );
+    }
+  };
+
+
+/* =========================================================
+   COPIAR DISEÑO ANTERIOR
+   ========================================================= */
+
+window.copiarDisenoAnterior =
+  async function () {
+
+    if (
+      camisaActual <= 0 ||
+      !camisas[camisaActual - 1]
+    ) {
+      return;
+    }
+
+
+    const anterior =
+      camisas[
+        camisaActual - 1
+      ];
+
+
+    camisas[camisaActual].color =
+      anterior.color ||
+      "#ffffff";
+
+    camisas[camisaActual].colorNombre =
+      anterior.colorNombre ||
+      "Blanco";
+
+
+    camisas[camisaActual].frenteObjects =
+      clonarObjetos(
+        anterior.frenteObjects || []
+      );
+
+
+    camisas[camisaActual].espaldaObjects =
+      clonarObjetos(
+        anterior.espaldaObjects || []
+      );
+
+
+    camisas[camisaActual].previewFrente =
+      "";
+
+    camisas[camisaActual].previewEspalda =
+      "";
+
+
+    ladoActual =
+      "frente";
+
+
+    await cargarCamisaEnEditor(
+      camisaActual
+    );
+
+
+    mostrarToast(
+      "Diseño copiado",
+      "Ahora puedes cambiar talla, color o imágenes.",
+      "success"
+    );
+  };
+
+
+/* =========================================================
+   GUARDAR Y CONTINUAR CAMISA
+   ========================================================= */
+
+window.guardarYContinuarCamisa =
+  async function () {
+
+    const boton =
+      $("btnSiguienteCamisa");
+
+
+    if (boton) {
+
+      boton.disabled = true;
+
+      boton.textContent =
+        "⏳ Guardando...";
+    }
+
+
+    try {
+
+      await guardarCamisaActualEnMemoria();
+
+
+      if (
+        camisaActual <
+        cantidadCamisas - 1
+      ) {
+
+        camisaActual++;
+
+
+        const anterior =
+          camisas[
+            camisaActual - 1
+          ];
+
+
+        /*
+          Si la siguiente camisa está vacía
+          y la anterior tiene diseño,
+          copiamos automáticamente el diseño.
+        */
+
+        if (
+          !camisas[camisaActual]
+            .frenteObjects.length &&
+          !camisas[camisaActual]
+            .espaldaObjects.length &&
+          (
+            anterior?.frenteObjects?.length ||
+            anterior?.espaldaObjects?.length
+          )
+        ) {
+
+          camisas[
+            camisaActual
+          ].frenteObjects =
+            clonarObjetos(
+              anterior.frenteObjects || []
+            );
+
+
+          camisas[
+            camisaActual
+          ].espaldaObjects =
+            clonarObjetos(
+              anterior.espaldaObjects || []
+            );
+
+
+          camisas[
+            camisaActual
+          ].color =
+            anterior.color;
+
+
+          camisas[
+            camisaActual
+          ].colorNombre =
+            anterior.colorNombre;
+
+
+          camisas[
+            camisaActual
+          ].talla =
+            anterior.talla;
+
+
+          camisas[
+            camisaActual
+          ].previewFrente = "";
+
+
+          camisas[
+            camisaActual
+          ].previewEspalda = "";
+        }
+
+
+        ladoActual =
+          "frente";
+
+
+        await cargarCamisaEnEditor(
+          camisaActual
+        );
+
+
+      } else {
+
+        await prepararRevisionPedido();
+
+        mostrarPasoPersonalizador(
+          "revision"
+        );
+      }
+
+
+    } catch (error) {
+
+      console.error(error);
+
+      mostrarToast(
+        "No se pudo guardar",
+        "Inténtalo nuevamente.",
+        "error"
+      );
+
+    } finally {
+
+      if (boton) {
+
+        boton.disabled = false;
+
+        boton.textContent =
+          camisaActual <
+          cantidadCamisas - 1
+
+            ? "Guardar y continuar →"
+
+            : "✅ Revisar pedido";
+      }
+    }
+  };
+
+
+/* =========================================================
+   PREPARAR REVISIÓN DEL PEDIDO
+   ========================================================= */
+
+async function prepararRevisionPedido() {
+
+  await guardarCamisaActualEnMemoria();
+
+
+  if ($("revisionNombre")) {
+
+    $("revisionNombre").textContent =
+      $("clienteNombre")
+        ?.value
+        .trim() || "—";
+  }
+
+
+  if ($("revisionTelefono")) {
+
+    $("revisionTelefono").textContent =
+      $("clienteTelefono")
+        ?.value
+        .trim() || "—";
+  }
+
+
+  if ($("revisionEntrega")) {
+
+    $("revisionEntrega").textContent =
+      fechaBonita(
+        $("fechaEntrega")
+          ?.value || ""
+      );
+  }
+
+
+  if ($("revisionCantidad")) {
+
+    $("revisionCantidad").textContent =
+      cantidadCamisas === 1
+        ? "1 camisa"
+        : `${cantidadCamisas} camisas`;
+  }
+
+
+  const lista =
+    $("listaRevisionCamisas");
+
+
+  if (!lista) {
+    return;
+  }
+
+
+  /*
+    Generamos las dos vistas de cada camisa.
+  */
+
+  for (
+    let i = 0;
+    i < camisas.length;
+    i++
+  ) {
+
+    if (
+      !camisas[i].previewFrente
+    ) {
+
+      camisas[i].previewFrente =
+        await generarVistaPreviaDesdeDatos(
+          camisas[i],
+          "frente",
+          i
+        );
+    }
+
+
+    if (
+      !camisas[i].previewEspalda
+    ) {
+
+      camisas[i].previewEspalda =
+        await generarVistaPreviaDesdeDatos(
+          camisas[i],
+          "espalda",
+          i
+        );
+    }
+  }
+
+
+  lista.innerHTML = "";
+
+
+  camisas.forEach(
+    (camisa, indice) => {
+
+      const tarjeta =
+        document.createElement(
+          "article"
+        );
+
+
+      tarjeta.className =
+        "revision-camisa-card";
+
+
+      tarjeta.innerHTML = `
+
+        <div class="revision-preview-grid">
+
+          <div class="revision-preview">
+
+            <span class="revision-side-label">
+              FRENTE
+            </span>
+
+            ${
+              camisa.previewFrente
+
+                ? `
+                  <img
+                    src="${camisa.previewFrente}"
+                    alt="Frente camisa ${
+                      indice + 1
+                    }"
+                  >
+                `
+
+                : `
+                  <div class="sin-preview">
+                    Sin diseño
+                  </div>
+                `
+            }
+
+          </div>
+
+
+          <div class="revision-preview">
+
+            <span class="revision-side-label">
+              ESPALDA
+            </span>
+
+            ${
+              camisa.previewEspalda
+
+                ? `
+                  <img
+                    src="${camisa.previewEspalda}"
+                    alt="Espalda camisa ${
+                      indice + 1
+                    }"
+                  >
+                `
+
+                : `
+                  <div class="sin-preview">
+                    Sin diseño
+                  </div>
+                `
+            }
+
+          </div>
+
+        </div>
+
+
+        <div class="revision-info">
+
+          <div class="revision-cabecera">
+
+            <span>
+              CAMISA ${indice + 1}
+            </span>
+
+            <strong>
+              ${escaparHTML(
+                camisa.talla || "—"
+              )}
+            </strong>
+
+          </div>
+
+
+          <p>
+
+            <span
+              class="punto-color"
+              style="
+                background:${escaparHTML(
+                  camisa.color ||
+                  "#fff"
+                )}
+              "
+            ></span>
+
+            Color:
+
+            <strong>
+              ${escaparHTML(
+                camisa.colorNombre ||
+                "—"
+              )}
+            </strong>
+
+          </p>
+
+
+          ${renderResumenObjetos(
+            camisa.frenteObjects || [],
+            "Frente"
+          )}
+
+
+          ${renderResumenObjetos(
+            camisa.espaldaObjects || [],
+            "Espalda"
+          )}
+
+        </div>
+      `;
+
+
+      lista.appendChild(
+        tarjeta
+      );
+    }
+  );
+}
+
+
+/* =========================================================
+   RESUMEN DE IMÁGENES
+   ========================================================= */
+
+function renderResumenObjetos(
+  objects,
+  lado = ""
+) {
+
+  if (!objects.length) {
+
+    return `
+      <div class="sin-imagenes">
+        ${escaparHTML(lado)}:
+        ⚪ Sin imágenes agregadas.
+      </div>
+    `;
+  }
+
+
+  const filas =
+    objects.map(
+      (obj, i) => {
+
+        const ancho =
+          (
+            Number(
+              obj.width || 0
+            ) *
+            Number(
+              obj.scaleX || 1
+            ) *
+            CM_PER_EDITOR_PX_X
+          )
+            .toFixed(1)
+            .replace(
+              ".",
+              ","
+            );
+
+
+        const alto =
+          (
+            Number(
+              obj.height || 0
+            ) *
+            Number(
+              obj.scaleY || 1
+            ) *
+            CM_PER_EDITOR_PX_Y
+          )
+            .toFixed(1)
+            .replace(
+              ".",
+              ","
+            );
+
+
+        const x =
+          (
+            (
+              Number(
+                obj.left || 0
+              ) +
+              (
+                Number(
+                  obj.width || 0
+                ) *
+                Number(
+                  obj.scaleX || 1
+                ) /
+                2
+              )
+            ) *
+            CM_PER_EDITOR_PX_X
+          )
+            .toFixed(1)
+            .replace(
+              ".",
+              ","
+            );
+
+
+        const y =
+          (
+            (
+              Number(
+                obj.top || 0
+              ) +
+              (
+                Number(
+                  obj.height || 0
+                ) *
+                Number(
+                  obj.scaleY || 1
+                ) /
+                2
+              )
+            ) *
+            CM_PER_EDITOR_PX_Y
+          )
+            .toFixed(1)
+            .replace(
+              ".",
+              ","
+            );
+
+
+        return `
+          <div class="fila-medida-admin">
+
+            <span>
+              Imagen ${i + 1}
+            </span>
+
+            <strong>
+              ${alto} cm alto ×
+              ${ancho} cm ancho
+            </strong>
+
+            <small>
+              Centro X:
+              ${x} cm ·
+              Y:
+              ${y} cm
+            </small>
+
+          </div>
+        `;
+      }
+    )
+    .join("");
+
+
+  return `
+
+    <div class="resumen-objetos">
+
+      <strong>
+        📐 ${escaparHTML(lado)}
+      </strong>
+
+      ${filas}
+
+    </div>
+
+  `;
+}
+
+
+/* =========================================================
+   PREVIEW COMPLETO DE CAMISA
+   ========================================================= */
+
+async function crearPreviewPedidoCamisa(
+  camisa,
+  indice
+) {
+
+  const ancho = 760;
+  const alto = 450;
+
+
+  const salida =
+    document.createElement(
+      "canvas"
+    );
+
+
+  salida.width =
+    ancho;
+
+  salida.height =
+    alto;
+
+
+  const ctx =
+    salida.getContext("2d");
+
+
+  ctx.fillStyle =
+    "#f5f3f6";
+
+
+  ctx.fillRect(
+    0,
+    0,
+    ancho,
+    alto
+  );
+
+
+  const lados = [
+
+    {
+      nombre: "FRENTE",
+      src:
+        camisa.previewFrente || ""
+    },
+
+    {
+      nombre: "ESPALDA",
+      src:
+        camisa.previewEspalda || ""
+    }
+
+  ];
+
+
+  for (
+    let i = 0;
+    i < lados.length;
+    i++
+  ) {
+
+    const x =
+      i === 0
+        ? 18
+        : 392;
+
+
+    ctx.fillStyle =
+      "#ffffff";
+
+
+    ctx.beginPath();
+
+    ctx.roundRect(
+      x,
+      38,
+      350,
+      374,
+      18
+    );
+
+    ctx.fill();
+
+
+    ctx.strokeStyle =
+      "#e4dfe6";
+
+    ctx.stroke();
+
+
+    ctx.fillStyle =
+      "#6f6a73";
+
+
+    ctx.font =
+      "800 12px Arial";
+
+
+    ctx.textAlign =
+      "center";
+
+
+    ctx.fillText(
+      lados[i].nombre,
+      x + 175,
+      24
+    );
+
+
+    if (
+      lados[i].src
+    ) {
+
+      const img =
+        new Image();
+
+      img.src =
+        lados[i].src;
+
+
+      await esperarImagen(
+        img
+      );
+
+
+      const scale =
+        Math.min(
+          320 /
+            img.naturalWidth,
+
+          340 /
+            img.naturalHeight
+        );
+
+
+      const w =
+        img.naturalWidth *
+        scale;
+
+
+      const h =
+        img.naturalHeight *
+        scale;
+
+
+      ctx.drawImage(
+        img,
+        x +
+          (350 - w) / 2,
+        55 +
+          (340 - h) / 2,
+        w,
+        h
+      );
+
+
+    } else {
+
+      ctx.fillStyle =
+        "#9a959e";
+
+
+      ctx.font =
+        "600 13px Arial";
+
+
+      ctx.fillText(
+        "Sin diseño",
+        x + 175,
+        225
+      );
+    }
+  }
+
+
+  return salida.toDataURL(
+    "image/jpeg",
+    0.54
+  );
+}
+
+
+/* =========================================================
+   CONFIRMAR PEDIDO
+   ========================================================= */
+
+window.confirmarPedidoPersonalizado =
+  async function () {
+
+    const boton =
+      $("btnConfirmarPedido");
+
+
+    if (
+      !camisas.length ||
+      camisas.some(
+        (c) => !c?.talla
+      )
+    ) {
+
+      mostrarToast(
+        "Falta información",
+        "Revisa las tallas antes de continuar.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    if (boton) {
+
+      boton.disabled = true;
+
+      boton.textContent =
+        "⏳ Enviando pedido...";
+    }
+
+
+    try {
+
+      const nombre =
+        $("clienteNombre")
+          ?.value
+          .trim() || "";
+
+
+      const telefono =
+        $("clienteTelefono")
+          ?.value
+          .trim() || "";
+
+
+      const fechaEntrega =
+        $("fechaEntrega")
+          ?.value || "";
+
+
+      const numeroPedido =
+        `VK-${Date.now()
+          .toString()
+          .slice(-7)}`;
+
+
+      const camisasPedido = [];
+
+
+      for (
+        let indice = 0;
+        indice < camisas.length;
+        indice++
+      ) {
+
+        const camisa =
+          camisas[indice];
+
+
+        if (
+          !camisa.previewFrente
+        ) {
+
+          camisa.previewFrente =
+            await generarVistaPreviaDesdeDatos(
+              camisa,
+              "frente",
+              indice
+            );
+        }
+
+
+        if (
+          !camisa.previewEspalda
+        ) {
+
+          camisa.previewEspalda =
+            await generarVistaPreviaDesdeDatos(
+              camisa,
+              "espalda",
+              indice
+            );
+        }
+
+
+        camisasPedido.push({
+
+          numero:
+            indice + 1,
+
+          talla:
+            camisa.talla,
+
+          color:
+            camisa.color,
+
+          colorNombre:
+            camisa.colorNombre,
+
+          previewPedido:
+            await crearPreviewPedidoCamisa(
+              camisa,
+              indice
+            ),
+
+
+          objetosFrente:
+            (camisa.frenteObjects || [])
+              .map(
+                (obj, i) => ({
+
+                  imagen:
+                    i + 1,
+
+                  nombreArchivo:
+                    obj.nombreArchivo ||
+                    `Imagen ${i + 1}`,
+
+                  anchoCm:
+                    Number(
+                      (
+                        (
+                          obj.width || 0
+                        ) *
+                        (
+                          obj.scaleX || 1
+                        ) *
+                        CM_PER_EDITOR_PX_X
+                      ).toFixed(1)
+                    ),
+
+                  altoCm:
+                    Number(
+                      (
+                        (
+                          obj.height || 0
+                        ) *
+                        (
+                          obj.scaleY || 1
+                        ) *
+                        CM_PER_EDITOR_PX_Y
+                      ).toFixed(1)
+                    ),
+
+                  centroXcm:
+                    Number(
+                      (
+                        (
+                          (obj.left || 0) +
+                          (
+                            (obj.width || 0) *
+                            (obj.scaleX || 1) /
+                            2
+                          )
+                        ) *
+                        CM_PER_EDITOR_PX_X
+                      ).toFixed(1)
+                    ),
+
+                  centroYcm:
+                    Number(
+                      (
+                        (
+                          (obj.top || 0) +
+                          (
+                            (obj.height || 0) *
+                            (obj.scaleY || 1) /
+                            2
+                          )
+                        ) *
+                        CM_PER_EDITOR_PX_Y
+                      ).toFixed(1)
+                    )
+                })
+              ),
+
+
+          objetosEspalda:
+            (camisa.espaldaObjects || [])
+              .map(
+                (obj, i) => ({
+
+                  imagen:
+                    i + 1,
+
+                  nombreArchivo:
+                    obj.nombreArchivo ||
+                    `Imagen ${i + 1}`,
+
+                  anchoCm:
+                    Number(
+                      (
+                        (
+                          obj.width || 0
+                        ) *
+                        (
+                          obj.scaleX || 1
+                        ) *
+                        CM_PER_EDITOR_PX_X
+                      ).toFixed(1)
+                    ),
+
+                  altoCm:
+                    Number(
+                      (
+                        (
+                          obj.height || 0
+                        ) *
+                        (
+                          obj.scaleY || 1
+                        ) *
+                        CM_PER_EDITOR_PX_Y
+                      ).toFixed(1)
+                    ),
+
+                  centroXcm:
+                    Number(
+                      (
+                        (
+                          (obj.left || 0) +
+                          (
+                            (obj.width || 0) *
+                            (obj.scaleX || 1) /
+                            2
+                          )
+                        ) *
+                        CM_PER_EDITOR_PX_X
+                      ).toFixed(1)
+                    ),
+
+                  centroYcm:
+                    Number(
+                      (
+                        (
+                          (obj.top || 0) +
+                          (
+                            (obj.height || 0) *
+                            (obj.scaleY || 1) /
+                            2
+                          )
+                        ) *
+                        CM_PER_EDITOR_PX_Y
+                      ).toFixed(1)
+                    )
+                })
+              )
+
+        });
+      }
+
+
+      const pedido = {
+
+        numeroPedido,
+
+        tipo:
+          "personalizado",
+
+        estado:
+          "nuevo",
+
+        cliente: {
+          nombre,
+          telefono
+        },
+
+        fechaEntrega,
+
+        cantidad:
+          cantidadCamisas,
+
+        camisas:
+          camisasPedido,
+
+        creado:
+          serverTimestamp()
+      };
+
+
+      await addDoc(
+        collection(
+          db,
+          "pedidos"
+        ),
+        pedido
+      );
+
+
+      const mensajeWhatsApp =
+        construirMensajeWhatsAppPedido(
+          pedido
+        );
+
+
+      const salida =
+        $("mensajeFinalPedido");
+
+
+      if (salida) {
+
+        salida.style.display =
+          "block";
+
+
+        salida.innerHTML = `
+
+          <div class="check-final">
+            ✓
+          </div>
+
+          <h2>
+            ¡Pedido recibido!
+          </h2>
+
+          <p>
+            Tu número de pedido es
+            <strong>
+              ${escaparHTML(
+                numeroPedido
+              )}
+            </strong>.
+          </p>
+
+          <small>
+            También puedes enviarlo por WhatsApp
+            para confirmar los detalles.
+          </small>
+
+          <button
+            onclick="abrirWhatsAppPedido('${encodeURIComponent(
+              mensajeWhatsApp
+            )}')"
+          >
+            💬 Enviar a WhatsApp
+          </button>
+
+          <button
+            class="secundario"
+            onclick="salirPersonalizadorDespuesPedido()"
+          >
+            Volver al inicio
+          </button>
+
+        `;
+      }
+
+
+      mostrarPasoPersonalizador(
+        "revision"
+      );
+
+
+      $("pasoRevisionPersonalizacion")
+        ?.classList
+        .add(
+          "oculto-tras-envio"
+        );
+
+
+      mostrarToast(
+        "Pedido enviado",
+        "El administrador podrá verlo en su panel.",
+        "success"
+      );
+
+
+    } catch (error) {
+
+      console.error(
+        "Error guardando pedido:",
+        error
+      );
+
+
+      mostrarToast(
+        "No se pudo enviar",
+        "Revisa tu conexión e inténtalo otra vez.",
+        "error"
+      );
+
+
+      if (boton) {
+
+        boton.disabled =
+          false;
+
+        boton.textContent =
+          "✅ Confirmar y enviar pedido";
+      }
+    }
+  };
+
+
+/* =========================================================
+   WHATSAPP
+   ========================================================= */
+
+function construirMensajeWhatsAppPedido(
+  pedido
+) {
+
+  let mensaje =
+    `Hola 👋, acabo de realizar el pedido ${
+      pedido.numeroPedido
+    }.\n\n`;
+
+
+  mensaje +=
+    `Cliente: ${
+      pedido.cliente.nombre
+    }\n`;
+
+
+  mensaje +=
+    `Teléfono: ${
+      pedido.cliente.telefono
+    }\n`;
+
+
+  mensaje +=
+    `Entrega: ${
+      fechaBonita(
+        pedido.fechaEntrega
+      )
+    }\n`;
+
+
+  mensaje +=
+    `Cantidad: ${
+      pedido.cantidad
+    } camisa(s)\n\n`;
+
+
+  pedido.camisas.forEach(
+    (camisa) => {
+
+      mensaje +=
+        `Camisa ${camisa.numero}: talla ${
+          camisa.talla
+        }, color ${
+          camisa.colorNombre
+        }.\n`;
+
+
+      (
+        camisa.objetosFrente ||
+        []
+      ).forEach(
+        (obj) => {
+
+          mensaje +=
+            `Frente · imagen ${
+              obj.imagen
+            }: ${
+              obj.altoCm
+            } cm alto × ${
+              obj.anchoCm
+            } cm ancho.\n`;
+        }
+      );
+
+
+      (
+        camisa.objetosEspalda ||
+        []
+      ).forEach(
+        (obj) => {
+
+          mensaje +=
+            `Espalda · imagen ${
+              obj.imagen
+            }: ${
+              obj.altoCm
+            } cm alto × ${
+              obj.anchoCm
+            } cm ancho.\n`;
+        }
+      );
+
+
+      mensaje +=
+        "\n";
+    }
+  );
+
+
+  return mensaje;
+}
+
+
+window.abrirWhatsAppPedido =
+  function (
+    textoCodificado
+  ) {
+
+    const texto =
+      decodeURIComponent(
+        textoCodificado || ""
+      );
+
+
+    window.open(
+      `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(
+        texto
+      )}`,
+      "_blank"
+    );
+  };
+
+
+window.salirPersonalizadorDespuesPedido =
+  function () {
+
+    reiniciarPersonalizador();
+
+
+    if (
+      $("pantallaPersonalizador")
+    ) {
+
+      $("pantallaPersonalizador")
+        .style
+        .display = "none";
+    }
+
+
+    if (
+      $("pantallaInicio")
+    ) {
+
+      $("pantallaInicio")
+        .style
+        .display = "flex";
+    }
+
+
+    const mensaje =
+      $("mensajeFinalPedido");
+
+
+    if (mensaje) {
+
+      mensaje.style.display =
+        "none";
+    }
+  };
+
+
+/* =========================================================
+   NOTIFICACIONES ADMIN
+   ========================================================= */
+
+window.activarNotificacionesAdmin =
+  async function () {
+
+    if (
+      auth.currentUser?.uid !==
+      UID_DUENO
+    ) {
+
+      mostrarToast(
+        "Acceso restringido",
+        "Solo el administrador puede activar notificaciones.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    if (
+      !("Notification" in window)
+    ) {
+
+      mostrarToast(
+        "No compatible",
+        "Este navegador no admite notificaciones.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    try {
+
+      const permiso =
+        await Notification.requestPermission();
+
+
+      if (
+        permiso === "granted"
+      ) {
+
+        mostrarToast(
+          "🔔 Notificaciones activadas",
+          "Te avisaremos cuando llegue un pedido nuevo.",
+          "success"
+        );
+
+      } else {
+
+        mostrarToast(
+          "Notificaciones desactivadas",
+          "Puedes permitirlas desde los ajustes del navegador.",
+          "error"
+        );
+      }
+
+    } catch (error) {
+
+      console.warn(error);
+    }
+  };
+
+
+/* =========================================================
+   INSTALACIÓN PWA
+   ========================================================= */
+
+window.addEventListener(
+  "beforeinstallprompt",
+  (evento) => {
+
+    evento.preventDefault();
+
+    deferredInstallPrompt =
+      evento;
+
+
+    const boton =
+      $("botonInstalarApp");
+
+
+    if (boton) {
+      boton.hidden = false;
+    }
+  }
+);
+
+
+window.addEventListener(
+  "appinstalled",
+  () => {
+
+    deferredInstallPrompt =
+      null;
+
+
+    const boton =
+      $("botonInstalarApp");
+
+
+    if (boton) {
+      boton.hidden = true;
+    }
+
+
+    mostrarToast(
+      "📲 App instalada",
+      "Variedades Karleny ya está en tu dispositivo.",
+      "success"
+    );
+  }
+);
+
+
+window.instalarApp =
+  async function () {
+
+    if (
+      !deferredInstallPrompt
+    ) {
+
+      mostrarToast(
+        "Instalación",
+        "Usa el menú del navegador y elige “Instalar app” o “Añadir a pantalla de inicio”.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    deferredInstallPrompt.prompt();
+
+
+    await deferredInstallPrompt
+      .userChoice;
+
+
+    deferredInstallPrompt =
+      null;
+
+
+    const boton =
+      $("botonInstalarApp");
+
+
+    if (boton) {
+      boton.hidden = true;
+    }
+  };
+
+
+/* =========================================================
+   ADMIN — PEDIDOS EN TIEMPO REAL
+   ========================================================= */
+
+function iniciarEscuchaPedidos() {
+
+  if (
+    unsubscribePedidos ||
+    !auth.currentUser ||
+    auth.currentUser.uid !==
+      UID_DUENO
+  ) {
+    return;
+  }
+
+
+  unsubscribePedidos =
+    onSnapshot(
+      collection(
+        db,
+        "pedidos"
+      ),
+
+      (snap) => {
+
+        const nuevos = [];
+
+
+        snap.docChanges()
+          .forEach(
+            (cambio) => {
+
+              if (
+                cambio.type ===
+                "added"
+              ) {
+
+                if (
+                  pedidosInicializados
+                ) {
+
+                  nuevos.push({
+                    id:
+                      cambio.doc.id,
+
+                    ...cambio.doc.data()
+                  });
+                }
+
+
+                idsPedidosConocidos.add(
+                  cambio.doc.id
+                );
+              }
+            }
+          );
+
+
+        pedidosInicializados =
+          true;
+
+
+        if (nuevos.length) {
+
+          nuevos.forEach(
+            (pedido) => {
+
+              const numero =
+                pedido.numeroPedido ||
+                "nuevo";
+
+
+              mostrarToast(
+                "🔔 Nuevo pedido",
+                `${numero} de ${
+                  pedido.cliente
+                    ?.nombre ||
+                  "cliente"
+                }`,
+                "pedido"
+              );
+
+
+              enviarNotificacionNavegador(
+                "Nuevo pedido en Variedades Karleny",
+
+                `${numero} · ${
+                  pedido.cliente
+                    ?.nombre ||
+                  "Cliente"
+                } · ${
+                  pedido.cantidad ||
+                  1
+                } camisa(s)`
+              );
+            }
+          );
+        }
+
+
+        pedidosAdmin =
+          snap.docs.map(
+            (d) => ({
+              id: d.id,
+              ...d.data()
+            })
+          );
+
+
+        pedidosAdmin.sort(
+          (a, b) => {
+
+            const ta =
+              a.creado
+                ?.seconds || 0;
+
+            const tb =
+              b.creado
+                ?.seconds || 0;
+
+            return tb - ta;
+          }
+        );
+
+
+        renderPedidosAdmin();
+      },
+
+      (error) => {
+
+        console.error(
+          "Escucha de pedidos:",
+          error
+        );
+
+
+        mostrarToast(
+          "Pedidos",
+          "No se pudo actualizar la bandeja.",
+          "error"
+        );
+      }
+    );
+}
+
+
+function detenerEscuchaPedidos() {
+
+  if (
+    unsubscribePedidos
+  ) {
+
+    unsubscribePedidos();
+  }
+
+
+  unsubscribePedidos =
+    null;
+
+
+  pedidosInicializados =
+    false;
+
+
+  idsPedidosConocidos.clear();
+
+
+  pedidosAdmin = [];
+
+
+  actualizarContadorPedidos();
+}
+
+
+/* =========================================================
+   NOTIFICACIÓN DEL NAVEGADOR
+   ========================================================= */
+
+async function enviarNotificacionNavegador(
+  titulo,
+  cuerpo
+) {
+
+  if (
+    !("Notification" in window)
+  ) {
+    return;
+  }
+
+
+  try {
+
+    let permiso =
+      Notification.permission;
+
+
+    if (
+      permiso === "default"
+    ) {
+
+      permiso =
+        await Notification.requestPermission();
+    }
+
+
+    if (
+      permiso === "granted"
+    ) {
+
+      new Notification(
+        titulo,
+        {
+          body: cuerpo,
+
+          icon:
+            "icons/icon-192.png",
+
+          badge:
+            "icons/icon-192.png",
+
+          tag:
+            "karleny-pedido"
+        }
+      );
+    }
+
+  } catch (error) {
+
+    console.warn(
+      "Notificación de navegador no disponible:",
+      error
+    );
+  }
+}
+
+
+/* =========================================================
+   PANEL DE PEDIDOS ADMIN
+   ========================================================= */
+
+window.mostrarPedidosAdmin =
+  function () {
+
+    if (
+      auth.currentUser?.uid !==
+      UID_DUENO
+    ) {
+
+      mostrarToast(
+        "Acceso restringido",
+        "Solo el administrador puede ver los pedidos.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    if (
+      $("panelPedidosAdmin")
+    ) {
+
+      $("panelPedidosAdmin")
+        .style
+        .display = "block";
+    }
+
+
+    renderPedidosAdmin();
+  };
+
+
+window.ocultarPedidosAdmin =
+  function () {
+
+    if (
+      $("panelPedidosAdmin")
+    ) {
+
+      $("panelPedidosAdmin")
+        .style
+        .display = "none";
+    }
+  };
+
+
+function actualizarContadorPedidos() {
+
+  const nuevos =
+    pedidosAdmin.filter(
+      (p) =>
+        (p.estado || "nuevo") ===
+        "nuevo"
+    ).length;
+
+
+  if (
+    $("contadorPedidosAdmin")
+  ) {
+
+    $("contadorPedidosAdmin")
+      .textContent =
+      nuevos;
+  }
+}
+
+
+/* =========================================================
+   RENDERIZAR PEDIDOS
+   ========================================================= */
+
+function renderPedidosAdmin() {
+
+  const lista =
+    $("listaPedidosAdmin");
+
+
+  if (!lista) {
+    return;
+  }
+
+
+  actualizarContadorPedidos();
+
+
+  if (!pedidosAdmin.length) {
+
+    lista.innerHTML = `
+
+      <div class="sin-pedidos-admin">
+
+        <div>
+          📦
+        </div>
+
+        <strong>
+          Aún no hay pedidos.
+        </strong>
+
+        <span>
+          Cuando alguien confirme
+          una camisa, aparecerá aquí.
+        </span>
+
+      </div>
+
+    `;
+
+    return;
+  }
+
+
+  lista.innerHTML = "";
+
+
+  pedidosAdmin.forEach(
+    (pedido) => {
+
+      const estado =
+        pedido.estado ||
+        "nuevo";
+
+
+      const tarjeta =
+        document.createElement(
+          "article"
+        );
+
+
+      tarjeta.className =
+        `pedido-admin-card estado-${estado}`;
+
+
+      tarjeta.innerHTML = `
+
+        <div class="pedido-admin-top">
+
+          <div>
+
+            <span class="numero-pedido">
+              ${escaparHTML(
+                pedido.numeroPedido ||
+                pedido.id
+              )}
+            </span>
+
+            <small>
+              📦 ${
+                fechaBonita(
+                  pedido.fechaEntrega
+                )
+              }
+            </small>
+
+          </div>
+
+
+          <select
+            class="estado-pedido"
+            data-id="${escaparHTML(
+              pedido.id
+            )}"
+          >
+
+            <option
+              value="nuevo"
+              ${
+                estado === "nuevo"
+                  ? "selected"
+                  : ""
+              }
+            >
+              🆕 Nuevo
+            </option>
+
+            <option
+              value="visto"
+              ${
+                estado === "visto"
+                  ? "selected"
+                  : ""
+              }
+            >
+              👀 Visto
+            </option>
+
+            <option
+              value="preparando"
+              ${
+                estado === "preparando"
+                  ? "selected"
+                  : ""
+              }
+            >
+              🧵 Preparando
+            </option>
+
+            <option
+              value="entregado"
+              ${
+                estado === "entregado"
+                  ? "selected"
+                  : ""
+              }
+            >
+              ✅ Entregado
+            </option>
+
+            <option
+              value="cancelado"
+              ${
+                estado === "cancelado"
+                  ? "selected"
+                  : ""
+              }
+            >
+              ❌ Cancelado
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div class="pedido-cliente-admin">
+
+          <div>
+
+            <span>
+              👤 Cliente
+            </span>
+
+            <strong>
+              ${escaparHTML(
+                pedido.cliente
+                  ?.nombre ||
+                "—"
+              )}
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              📱 Teléfono
+            </span>
+
+            <strong>
+              ${escaparHTML(
+                pedido.cliente
+                  ?.telefono ||
+                "—"
+              )}
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              👕 Cantidad
+            </span>
+
+            <strong>
+              ${escaparHTML(
+                String(
+                  pedido.cantidad ||
+                  0
+                )
+              )}
+              camisa(s)
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <div
+          class="camisas-admin-list"
+        ></div>
+
+      `;
+
+
+      const contenedorCamisas =
+        tarjeta.querySelector(
+          ".camisas-admin-list"
+        );
+
+
+      (
+        pedido.camisas ||
+        []
+      ).forEach(
+        (camisa) => {
+
+          const bloque =
+            document.createElement(
+              "div"
+            );
+
+
+          bloque.className =
+            "camisa-admin-bloque";
+
+
+          bloque.innerHTML = `
+
+            <div
+              class="camisa-admin-cabecera"
+            >
+
+              <strong>
+                👕 Camisa ${
+                  camisa.numero
+                }
+              </strong>
+
+              <span>
+                ${
+                  escaparHTML(
+                    camisa.colorNombre ||
+                    "—"
+                  )
+                }
+                · Talla
+                ${
+                  escaparHTML(
+                    camisa.talla ||
+                    "—"
+                  )
+                }
+              </span>
+
+            </div>
+
+
+            <div
+              class="camisa-admin-contenido"
+            >
+
+              <div
+                class="camisa-admin-previews"
+              >
+
+                <div
+                  class="
+                    camisa-admin-preview
+                    camisa-admin-preview-combinada
+                  "
+                >
+
+                  ${
+                    camisa.previewPedido
+
+                      ? `
+                        <img
+                          src="${
+                            camisa.previewPedido
+                          }"
+                          alt="
+                            Frente y espalda
+                            de camisa ${
+                              camisa.numero
+                            }
+                          "
+                        >
+                      `
+
+                      : `
+                        <span>
+                          Sin vista previa
+                        </span>
+                      `
+                  }
+
+                </div>
+
+              </div>
+
+
+              <div
+                class="camisa-admin-datos"
+              >
+
+                ${
+                  camisa.objetosFrente
+                    ?.length
+
+                    ? renderObjetosPedidoAdmin(
+                        camisa.objetosFrente,
+                        "Frente"
+                      )
+
+                    : `
+                      <div class="sin-imagenes">
+                        Frente:
+                        no se agregaron imágenes.
+                      </div>
+                    `
+                }
+
+
+                ${
+                  camisa.objetosEspalda
+                    ?.length
+
+                    ? renderObjetosPedidoAdmin(
+                        camisa.objetosEspalda,
+                        "Espalda"
+                      )
+
+                    : `
+                      <div
+                        class="sin-imagenes"
+                        style="margin-top:8px"
+                      >
+                        Espalda:
+                        no se agregaron imágenes.
+                      </div>
+                    `
+                }
+
+              </div>
+
+            </div>
+
+          `;
+
+
+          contenedorCamisas.appendChild(
+            bloque
+          );
+        }
+      );
+
+
+      const select =
+        tarjeta.querySelector(
+          ".estado-pedido"
+        );
+
+
+      select.addEventListener(
+        "change",
+        () => {
+
+          actualizarEstadoPedido(
+            pedido.id,
+            select.value
+          );
+        }
+      );
+
+
+      lista.appendChild(
+        tarjeta
+      );
+    }
+  );
+}
+
+
+/* =========================================================
+   DATOS DE IMÁGENES EN ADMIN
+   ========================================================= */
+
+function renderObjetosPedidoAdmin(
+  objetos,
+  lado = "Frente"
+) {
+
+  return `
+
+    <div
+      class="objeto-admin-list"
+    >
+
+      <strong>
+        📐 ${escaparHTML(lado)}
+        · Medidas exactas registradas
+      </strong>
+
+
+      ${
+        objetos
+          .map(
+            (obj) => `
+
+              <div>
+
+                <span>
+                  Imagen ${
+                    obj.imagen
+                  }
+                </span>
+
+                <strong>
+                  ${
+                    obj.altoCm
+                  } cm alto ×
+                  ${
+                    obj.anchoCm
+                  } cm ancho
+                </strong>
+
+                <small>
+                  Centro X
+                  ${
+                    obj.centroXcm
+                  } cm · Y
+                  ${
+                    obj.centroYcm
+                  } cm
+                </small>
+
+              </div>
+
+            `
+          )
+          .join("")
+      }
+
+    </div>
+
+  `;
+}
+
+
+/* =========================================================
+   ACTUALIZAR ESTADO DEL PEDIDO
+   ========================================================= */
+
+async function actualizarEstadoPedido(
+  id,
+  estado
+) {
+
+  if (
+    auth.currentUser?.uid !==
+    UID_DUENO
+  ) {
+    return;
+  }
+
+
+  try {
+
+    await updateDoc(
+      doc(
+        db,
+        "pedidos",
+        id
+      ),
+      {
+        estado,
+        actualizado:
+          serverTimestamp()
+      }
+    );
+
+
+    mostrarToast(
+      "Pedido actualizado",
+      `Estado: ${estado}`,
+      "success"
+    );
+
+  } catch (error) {
+
+    console.error(error);
+
+    mostrarToast(
+      "No se pudo actualizar",
+      "Revisa las reglas de Firebase.",
+      "error"
+    );
+  }
+}
+
+
+/* =========================================================
+   TECLADO / MODALES / INICIO
+   ========================================================= */
+
+window.addEventListener(
+  "click",
+  (evento) => {
+
+    if (
+      evento.target ===
+      $("ventanaLogin")
+    ) {
+
+      window.cerrarLogin();
+    }
+
+
+    if (
+      evento.target ===
+      $("ventanaCarrito")
+    ) {
+
+      cerrarCarrito();
+    }
+  }
+);
+
+
+window.addEventListener(
+  "keydown",
+  (evento) => {
+
+    if (
+      evento.key ===
+      "Escape"
+    ) {
+
+      window.cerrarLogin();
+
+      cerrarCarrito();
+    }
+
+
+    if (
+      evento.key === "Delete" &&
+      fabricCanvas &&
+      document.activeElement
+        ?.tagName !== "INPUT" &&
+      document.activeElement
+        ?.tagName !== "TEXTAREA"
+    ) {
+
+      window.eliminarSeleccion();
+    }
+  }
+);
+
+
+$("contrasenaLogin")
+  ?.addEventListener(
+    "keydown",
+    (evento) => {
+
+      if (
+        evento.key === "Enter"
+      ) {
+
+        window.iniciarSesion();
+      }
+    }
+  );
+
+
+/* =========================================================
+   INICIAR INTERFAZ
+   ========================================================= */
+
+construirPaletaColores();
+
+actualizarCarrito();
+
+cargarProductos();
+
+aplicarFiltros();
+
+
+/* =========================================================
+   PWA — SERVICE WORKER
+   ========================================================= */
+
+if (
+  "serviceWorker" in navigator
+) {
+
+  window.addEventListener(
+    "load",
+    () => {
+
+      navigator.serviceWorker
+        .register("sw.js")
+        .catch(
+          (error) => {
+
+            console.warn(
+              "Service Worker no disponible:",
+              error
+            );
+          }
+        );
+    }
+  );
+}
