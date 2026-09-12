@@ -1,6 +1,29 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, updateDoc, doc, serverTimestamp, onSnapshot } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+import {
+  initializeApp
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs,
+  deleteDoc,
+  doc,
+  setDoc,
+  getDoc
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+
+
+/* =========================================================
+   FIREBASE
+========================================================= */
 
 const firebaseConfig = {
   apiKey: "AIzaSyBzTvF-Af08z8jsjpa6L2mGEQQ7IxZZqAI",
@@ -8,192 +31,2656 @@ const firebaseConfig = {
   projectId: "variedades-karleny",
   storageBucket: "variedades-karleny.firebasestorage.app",
   messagingSenderId: "117661003844",
-  appId: "1:117661003844:web:2ba3db02e3fdf6e6278c11",
+  appId: "1:117661003844:web:2ba3db02e3df6e6278c11",
   measurementId: "G-80VJK2V1FB"
 };
+
+
+/* =========================================================
+   INICIALIZACIÓN
+========================================================= */
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-const UID_DUENO = "vKixdwAJz9MfApZV81FPOiPybFr2";
-const CLOUDINARY_CLOUD_NAME = "ktxu8h5o";
-const CLOUDINARY_UPLOAD_PRESET = "productos";
-const WHATSAPP = "573202104423";
-const MAX_FILE_MB = 8;
 
-const PRODUCTOS_ESTATICOS = [
-  { id:"static-labial", nombre:"Labial", precio:15000, descripcion:"Labial de excelente calidad.", imagen:"imagenes/labial.jpg" },
-  { id:"static-peluche", nombre:"Peluche", precio:25000, descripcion:"Bonito peluche para regalar.", imagen:"imagenes/peluche.jpg" },
-  { id:"static-24k", nombre:"Jabón 24k", precio:7000, descripcion:"Jabón 24k.", imagen:"imagenes/karite.jpg" },
-  { id:"static-lissia", nombre:"Lissia", precio:10000, descripcion:"Consulta color.", imagen:"imagenes/lissia.jpg" },
-  { id:"static-thyms", nombre:"Thyms", precio:15000, descripcion:"Consulta color.", imagen:"imagenes/thyms.jpg" },
-  { id:"static-posillos", nombre:"Posillos", precio:5000, descripcion:"Posillos.", imagen:"imagenes/posillo.jpg" },
-  { id:"static-globos", nombre:"Globos", precio:10000, descripcion:"Consulta color y precio.", imagen:"imagenes/globos.jpg" },
-  { id:"static-keraton", nombre:"Keraton", precio:10000, descripcion:"Consulta color.", imagen:"imagenes/keraton.jpg" }
+/* =========================================================
+   CONFIGURACIÓN
+========================================================= */
+
+const UID_DUENO =
+  "vKixdwAJz9MfApZV81FPOiPybFr2";
+
+const CLOUDINARY_CLOUD_NAME =
+  "ktxu8h5o";
+
+const CLOUDINARY_UPLOAD_PRESET =
+  "productos";
+
+const NUMERO_WHATSAPP =
+  "573202104423";
+
+
+let carrito = [];
+
+
+
+/* =========================================================
+   PRODUCTOS BASE
+   Estos son los productos que antes estaban escritos
+   directamente en index.html.
+
+   Ahora se guardan automáticamente en Firestore.
+   De esta forma el ADMIN TAMBIÉN LOS PUEDE BORRAR.
+========================================================= */
+
+const PRODUCTOS_BASE = [
+
+  {
+    id: "base-labial",
+    nombre: "Labial",
+    precio: 15000,
+    descripcion: "Labial para complementar tu estilo.",
+    imagen: "imagenes/labial.jpg"
+  },
+
+  {
+    id: "base-peluche",
+    nombre: "Peluche",
+    precio: 25000,
+    descripcion: "Un detalle bonito para regalar o decorar.",
+    imagen: "imagenes/peluche.jpg"
+  },
+
+  {
+    id: "base-jabon-24k",
+    nombre: "Jabón 24k",
+    precio: 7000,
+    descripcion: "Jabón 24k disponible en nuestra tienda.",
+    imagen: "imagenes/karite.jpg"
+  },
+
+  {
+    id: "base-lissia",
+    nombre: "Lissia",
+    precio: 10000,
+    descripcion: "Producto Lissia disponible.",
+    imagen: "imagenes/lissia.jpg"
+  },
+
+  {
+    id: "base-thyms",
+    nombre: "Thyms",
+    precio: 15000,
+    descripcion: "Producto Thyms disponible.",
+    imagen: "imagenes/thyms.jpg"
+  },
+
+  {
+    id: "base-posillo",
+    nombre: "Posillo",
+    precio: 5000,
+    descripcion: "Posillo disponible en nuestra tienda.",
+    imagen: "imagenes/posillo.jpg"
+  },
+
+  {
+    id: "base-globos",
+    nombre: "Globos",
+    precio: 10000,
+    descripcion: "Globos para tus momentos especiales.",
+    imagen: "imagenes/globos.jpg"
+  },
+
+  {
+    id: "base-keraton",
+    nombre: "Keraton",
+    precio: 10000,
+    descripcion: "Producto Keraton disponible.",
+    imagen: "imagenes/keraton.jpg"
+  }
+
 ];
 
-let carrito = cargarLS("karleny_carrito", []);
-let productosFirebase = [];
-let unsubscribePedidos = null;
-let pedidosInicializados = false;
-let pedidosAdmin = [];
-let adminPedidosAbierto = false;
-let deferredInstallPrompt = null;
 
-const $ = id => document.getElementById(id);
-const money = n => `$${Number(n || 0).toLocaleString("es-CO")}`;
-const escapar = s => String(s ?? "").replace(/[&<>\"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
-const normalizar = s => String(s ?? "").toLocaleLowerCase("es-CO").normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
 
-function cargarLS(key, fallback){ try{return JSON.parse(localStorage.getItem(key)) ?? fallback}catch{return fallback} }
-function guardarLS(key,value){try{localStorage.setItem(key,JSON.stringify(value))}catch(e){console.warn(e)}}
+/* =========================================================
+   UTILIDADES
+========================================================= */
 
-function toast(titulo, cuerpo="", tipo="info"){
-  const box=$("toastContainer"); if(!box)return;
-  const el=document.createElement("div"); el.className=`toast toast-${tipo}`; el.innerHTML=`<b>${escapar(titulo)}</b><span>${escapar(cuerpo)}</span>`; box.appendChild(el);
-  requestAnimationFrame(()=>el.classList.add("show")); setTimeout(()=>{el.classList.remove("show");setTimeout(()=>el.remove(),220)},4200);
+function usuarioEsAdmin() {
+
+  const usuario = auth.currentUser;
+
+  return !!usuario &&
+    usuario.uid === UID_DUENO;
+
 }
 
-/* PWA */
-window.addEventListener("beforeinstallprompt", e=>{e.preventDefault();deferredInstallPrompt=e;$("botonInstalarApp").hidden=false});
-window.addEventListener("appinstalled",()=>{deferredInstallPrompt=null;$("botonInstalarApp").hidden=true;toast("📲 App instalada","Ya puedes abrir Karleny desde tu dispositivo.","success")});
-window.instalarApp=async function(){if(!deferredInstallPrompt){toast("Instalación","Usa el menú del navegador y elige Instalar app.");return}deferredInstallPrompt.prompt();await deferredInstallPrompt.userChoice;deferredInstallPrompt=null;$("botonInstalarApp").hidden=true};
-if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(console.warn));
 
-/* Navegación */
-function mostrarSolo(id){["pantallaInicio","pantallaProductos"].forEach(x=>{const e=$(x);if(e)e.hidden=x!==id});window.scrollTo({top:0,behavior:"instant"})}
-window.iniciarPedido=async function(){mostrarSolo("pantallaProductos");await cargarProductos()};
-window.mostrarProductos=window.iniciarPedido;
-window.volverInicio=function(){mostrarSolo("pantallaInicio")};
-window.abrirConsultas=function(){window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent("Hola 👋, tengo una consulta sobre Variedades Karleny.")}`,"_blank")};
+function escaparTexto(valor) {
 
-/* Login */
-window.abrirLogin=function(){$("ventanaLogin").hidden=false;$("mensajeLogin").textContent="";setTimeout(()=>$ ("correoLogin")?.focus(),50)};
-window.cerrarLogin=function(){$("ventanaLogin").hidden=true};
-window.iniciarSesion=async function(){
-  const correo=$("correoLogin").value.trim(), pass=$("contrasenaLogin").value, msg=$("mensajeLogin");
-  if(!correo||!pass){msg.textContent="⚠️ Completa correo y contraseña.";return}
-  msg.textContent="⏳ Iniciando sesión...";
-  try{
-    const cred=await signInWithEmailAndPassword(auth,correo,pass);
-    if(cred.user.uid!==UID_DUENO){await signOut(auth);throw new Error("sin permiso")}
-    cerrarLogin();mostrarSolo("pantallaProductos");await cargarProductos();toast("👑 Sesión iniciada","Panel del dueño activado.","success");
-  }catch(e){console.error(e);msg.textContent="❌ Correo, contraseña o permisos incorrectos."}
+  return String(valor ?? "");
+
+}
+
+
+function formatearPrecio(precio) {
+
+  return new Intl.NumberFormat("es-CO", {
+
+    style: "currency",
+
+    currency: "COP",
+
+    minimumFractionDigits: 0,
+
+    maximumFractionDigits: 0
+
+  }).format(Number(precio) || 0);
+
+}
+
+
+function mostrarToast(
+  mensaje,
+  tipo = "normal"
+) {
+
+  const contenedor =
+    document.getElementById("contenedorToast");
+
+  if (!contenedor) return;
+
+
+  const toast =
+    document.createElement("div");
+
+  toast.className =
+    `toast toast-${tipo}`;
+
+
+  const icono =
+    tipo === "exito"
+      ? "✓"
+      : tipo === "error"
+        ? "!"
+        : "i";
+
+
+  toast.innerHTML = `
+    <span class="toast-icono">${icono}</span>
+    <span class="toast-texto">${escaparTexto(mensaje)}</span>
+    <button class="toast-cerrar">×</button>
+  `;
+
+
+  const botonCerrar =
+    toast.querySelector(".toast-cerrar");
+
+  botonCerrar.addEventListener(
+    "click",
+    () => cerrarToast(toast)
+  );
+
+
+  contenedor.appendChild(toast);
+
+
+  requestAnimationFrame(() => {
+
+    toast.classList.add("mostrar");
+
+  });
+
+
+  setTimeout(() => {
+
+    cerrarToast(toast);
+
+  }, 4000);
+
+}
+
+
+function cerrarToast(toast) {
+
+  if (!toast) return;
+
+  toast.classList.remove("mostrar");
+
+  setTimeout(() => {
+
+    toast.remove();
+
+  }, 300);
+
+}
+
+
+
+/* =========================================================
+   CAMBIAR PANTALLA
+========================================================= */
+
+window.mostrarProductos = function () {
+
+  const inicio =
+    document.getElementById("pantallaInicio");
+
+  const productos =
+    document.getElementById("pantallaProductos");
+
+
+  if (inicio) {
+
+    inicio.classList.add("ocultar");
+
+    setTimeout(() => {
+
+      inicio.style.display = "none";
+
+    }, 350);
+
+  }
+
+
+  if (productos) {
+
+    productos.style.display = "block";
+
+    requestAnimationFrame(() => {
+
+      productos.classList.add("activa");
+
+    });
+
+  }
+
+
+  window.scrollTo({
+
+    top: 0,
+
+    behavior: "smooth"
+
+  });
+
 };
-window.cerrarSesion=async function(){try{await signOut(auth);toast("Sesión cerrada","Hasta luego 👋","success")}catch(e){console.error(e)}};
 
-onAuthStateChanged(auth, async user=>{
-  const esAdmin=!!user&&user.uid===UID_DUENO;
-  $("panelAdmin").hidden=!esAdmin;
-  $("estadoAdmin").textContent=esAdmin?"🟢 Sesión de dueño activa":"";
-  if(esAdmin){iniciarEscuchaPedidos();await cargarProductos()}else detenerEscuchaPedidos();
-});
 
-/* Productos */
-window.alternarFiltros=function(){$("panelFiltros").hidden=!$("panelFiltros").hidden};
-window.cerrarFiltros=function(){$("panelFiltros").hidden=true};
-window.limpiarBusqueda=function(){$("buscadorProductos").value="";aplicarFiltros()};
-window.limpiarFiltros=function(){$("buscadorProductos").value="";$ ("rangoPrecio").value="100000";$ ("valorPrecioFiltro").textContent="$100.000+";aplicarFiltros()};
+window.volverInicio = function () {
 
-function renderProductos(){
-  const cont=$("productos");if(!cont)return;
-  const todos=[...PRODUCTOS_ESTATICOS,...productosFirebase];
-  cont.innerHTML=todos.map(p=>{
-    const id=String(p.id||"");
-    const botonEliminar=id.startsWith("doc-")?`<button class="btn-icon-danger" title="Eliminar producto" onclick="eliminarProducto(${JSON.stringify(id.slice(4))})">🗑️</button>`:"";
-    return `<article class="product-card" data-nombre="${escapar(`${p.nombre} ${p.descripcion||""}`)}" data-precio="${Number(p.precio||0)}">
-      <div class="product-image"><img src="${escapar(p.imagen||"")}" alt="${escapar(p.nombre)}" loading="lazy" decoding="async" onerror="this.parentElement.classList.add('image-error')"><span class="image-fallback">🛍️</span></div>
-      <div class="product-info"><h3>${escapar(p.nombre)}</h3><strong class="price">${money(p.precio)}</strong><p>${escapar(p.descripcion||"")}</p>
-      <div class="product-actions"><button class="btn btn-primary btn-small" onclick="agregarAlCarrito(${JSON.stringify(String(p.nombre))},${Number(p.precio||0)},${JSON.stringify(String(p.imagen||""))})">🛒 Agregar</button>${botonEliminar}</div></div>
-    </article>`;
-  }).join("");
+  const inicio =
+    document.getElementById("pantallaInicio");
+
+  const productos =
+    document.getElementById("pantallaProductos");
+
+
+  if (productos) {
+
+    productos.classList.remove("activa");
+
+    setTimeout(() => {
+
+      productos.style.display = "none";
+
+    }, 300);
+
+  }
+
+
+  if (inicio) {
+
+    inicio.style.display = "flex";
+
+    requestAnimationFrame(() => {
+
+      inicio.classList.remove("ocultar");
+
+    });
+
+  }
+
+
+  window.scrollTo({
+
+    top: 0,
+
+    behavior: "smooth"
+
+  });
+
+};
+
+
+
+/* =========================================================
+   LOGIN
+========================================================= */
+
+window.abrirLogin = function () {
+
+  const ventana =
+    document.getElementById("ventanaLogin");
+
+  if (!ventana) return;
+
+
+  ventana.classList.add("mostrar");
+
+
+  const correo =
+    document.getElementById("correoLogin");
+
+
+  if (correo) {
+
+    setTimeout(() => {
+
+      correo.focus();
+
+    }, 250);
+
+  }
+
+};
+
+
+window.cerrarLogin = function () {
+
+  const ventana =
+    document.getElementById("ventanaLogin");
+
+  if (ventana) {
+
+    ventana.classList.remove("mostrar");
+
+  }
+
+
+  const mensaje =
+    document.getElementById("mensajeLogin");
+
+  if (mensaje) {
+
+    mensaje.textContent = "";
+
+  }
+
+};
+
+
+window.iniciarSesion = async function () {
+
+  const correo =
+    document.getElementById("correoLogin");
+
+  const password =
+    document.getElementById("passwordLogin");
+
+  const mensaje =
+    document.getElementById("mensajeLogin");
+
+
+  if (!correo || !password) return;
+
+
+  const email =
+    correo.value.trim();
+
+  const clave =
+    password.value;
+
+
+  if (!email || !clave) {
+
+    if (mensaje) {
+
+      mensaje.textContent =
+        "Escribe el correo y la contraseña.";
+
+    }
+
+    return;
+
+  }
+
+
+  try {
+
+    if (mensaje) {
+
+      mensaje.textContent =
+        "Iniciando sesión...";
+
+    }
+
+
+    const resultado =
+      await signInWithEmailAndPassword(
+        auth,
+        email,
+        clave
+      );
+
+
+    if (resultado.user.uid !== UID_DUENO) {
+
+      await signOut(auth);
+
+      if (mensaje) {
+
+        mensaje.textContent =
+          "Este usuario no tiene permisos de administrador.";
+
+      }
+
+      return;
+
+    }
+
+
+    if (mensaje) {
+
+      mensaje.textContent =
+        "✓ ¡Sesión iniciada!";
+
+    }
+
+
+    mostrarToast(
+      "Sesión iniciada correctamente.",
+      "exito"
+    );
+
+
+    setTimeout(() => {
+
+      window.cerrarLogin();
+
+    }, 700);
+
+
+  } catch (error) {
+
+    console.error(error);
+
+
+    let texto =
+      "No se pudo iniciar sesión.";
+
+
+    if (
+      error.code ===
+      "auth/invalid-credential"
+    ) {
+
+      texto =
+        "Correo o contraseña incorrectos.";
+
+    } else if (
+      error.code ===
+      "auth/user-not-found"
+    ) {
+
+      texto =
+        "No existe una cuenta con ese correo.";
+
+    } else if (
+      error.code ===
+      "auth/wrong-password"
+    ) {
+
+      texto =
+        "La contraseña es incorrecta.";
+
+    }
+
+
+    if (mensaje) {
+
+      mensaje.textContent =
+        texto;
+
+    }
+
+  }
+
+};
+
+
+
+/* =========================================================
+   SESIÓN ADMIN
+========================================================= */
+
+window.cerrarSesion = async function () {
+
+  try {
+
+    await signOut(auth);
+
+    mostrarToast(
+      "Sesión cerrada correctamente.",
+      "exito"
+    );
+
+
+    setTimeout(() => {
+
+      window.volverInicio();
+
+    }, 400);
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    mostrarToast(
+      "No se pudo cerrar la sesión.",
+      "error"
+    );
+
+  }
+
+};
+
+
+
+/* =========================================================
+   AUTH STATE
+========================================================= */
+
+onAuthStateChanged(
+  auth,
+  async (usuario) => {
+
+    const panelAdmin =
+      document.getElementById("panelAdmin");
+
+    const estadoSesion =
+      document.getElementById("estadoSesion");
+
+    const estadoMiniAdmin =
+      document.getElementById("estadoMiniAdmin");
+
+
+    if (!usuario) {
+
+      if (panelAdmin) {
+
+        panelAdmin.style.display =
+          "none";
+
+      }
+
+
+      if (estadoMiniAdmin) {
+
+        estadoMiniAdmin.style.display =
+          "none";
+
+      }
+
+
+      cargarProductos();
+
+      return;
+
+    }
+
+
+    if (usuario.uid !== UID_DUENO) {
+
+      await signOut(auth);
+
+      if (panelAdmin) {
+
+        panelAdmin.style.display =
+          "none";
+
+      }
+
+
+      mostrarToast(
+        "No tienes permisos de administrador.",
+        "error"
+      );
+
+
+      return;
+
+    }
+
+
+    if (panelAdmin) {
+
+      panelAdmin.style.display =
+        "block";
+
+    }
+
+
+    if (estadoSesion) {
+
+      estadoSesion.textContent =
+        "Sesión iniciada como administrador";
+
+    }
+
+
+    if (estadoMiniAdmin) {
+
+      estadoMiniAdmin.style.display =
+        "flex";
+
+    }
+
+
+    actualizarBotonesAdministrador();
+
+    window.mostrarProductos();
+
+    cargarProductos();
+
+  }
+);
+
+
+
+/* =========================================================
+   FOTO PREVIA
+========================================================= */
+
+const inputFoto =
+  document.getElementById("fotoProducto");
+
+
+if (inputFoto) {
+
+  inputFoto.addEventListener(
+    "change",
+    function () {
+
+      const archivo =
+        this.files[0];
+
+      const vistaPrevia =
+        document.getElementById("vistaPrevia");
+
+
+      if (!vistaPrevia) return;
+
+
+      vistaPrevia.innerHTML = "";
+
+
+      if (!archivo) return;
+
+
+      if (
+        !archivo.type.startsWith("image/")
+      ) {
+
+        mostrarToast(
+          "Selecciona una imagen válida.",
+          "error"
+        );
+
+        this.value = "";
+
+        return;
+
+      }
+
+
+      const imagen =
+        document.createElement("img");
+
+
+      imagen.src =
+        URL.createObjectURL(archivo);
+
+      imagen.alt =
+        "Vista previa del producto";
+
+
+      vistaPrevia.appendChild(imagen);
+
+
+      vistaPrevia.classList.add("visible");
+
+    }
+  );
+
+}
+
+
+
+/* =========================================================
+   SUBIR CLOUDINARY
+========================================================= */
+
+async function subirImagenCloudinary(
+  archivo
+) {
+
+  const url =
+    `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
+
+
+  const datos =
+    new FormData();
+
+
+  datos.append(
+    "file",
+    archivo
+  );
+
+
+  datos.append(
+    "upload_preset",
+    CLOUDINARY_UPLOAD_PRESET
+  );
+
+
+  const respuesta =
+    await fetch(
+      url,
+      {
+        method: "POST",
+        body: datos
+      }
+    );
+
+
+  if (!respuesta.ok) {
+
+    throw new Error(
+      "No se pudo subir la imagen."
+    );
+
+  }
+
+
+  const resultado =
+    await respuesta.json();
+
+
+  if (!resultado.secure_url) {
+
+    throw new Error(
+      "Cloudinary no devolvió la imagen."
+    );
+
+  }
+
+
+  return resultado.secure_url;
+
+}
+
+
+
+/* =========================================================
+   CREAR PRODUCTO
+========================================================= */
+
+window.agregarProducto = async function () {
+
+  if (!usuarioEsAdmin()) {
+
+    mostrarToast(
+      "No tienes permiso para publicar productos.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  const inputFoto =
+    document.getElementById("fotoProducto");
+
+  const inputNombre =
+    document.getElementById("nombreProducto");
+
+  const inputPrecio =
+    document.getElementById("precioProducto");
+
+  const inputDescripcion =
+    document.getElementById(
+      "descripcionProducto"
+    );
+
+
+  if (
+    !inputFoto ||
+    !inputNombre ||
+    !inputPrecio ||
+    !inputDescripcion
+  ) {
+
+    mostrarToast(
+      "No se encontraron todos los campos.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  const archivo =
+    inputFoto.files[0];
+
+  const nombre =
+    inputNombre.value.trim();
+
+  const precio =
+    Number(inputPrecio.value);
+
+  const descripcion =
+    inputDescripcion.value.trim();
+
+
+  if (!archivo) {
+
+    mostrarToast(
+      "Selecciona una foto del producto.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  if (!nombre) {
+
+    mostrarToast(
+      "Escribe el nombre del producto.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  if (
+    !Number.isFinite(precio) ||
+    precio < 0
+  ) {
+
+    mostrarToast(
+      "Escribe un precio válido.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  if (!descripcion) {
+
+    mostrarToast(
+      "Escribe una descripción.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  const boton =
+    document.querySelector(
+      ".boton-publicar"
+    );
+
+
+  try {
+
+    if (boton) {
+
+      boton.disabled =
+        true;
+
+      boton.innerHTML =
+        `<span class="spinner"></span> Publicando...`;
+
+    }
+
+
+    const urlImagen =
+      await subirImagenCloudinary(
+        archivo
+      );
+
+
+    await addDoc(
+      collection(
+        db,
+        "productos"
+      ),
+      {
+        nombre:
+          nombre,
+
+        precio:
+          precio,
+
+        descripcion:
+          descripcion,
+
+        imagen:
+          urlImagen,
+
+        tipo:
+          "creado",
+
+        creado:
+          new Date()
+      }
+    );
+
+
+    inputFoto.value = "";
+    inputNombre.value = "";
+    inputPrecio.value = "";
+    inputDescripcion.value = "";
+
+
+    const vistaPrevia =
+      document.getElementById(
+        "vistaPrevia"
+      );
+
+
+    if (vistaPrevia) {
+
+      vistaPrevia.innerHTML = "";
+
+      vistaPrevia.classList.remove(
+        "visible"
+      );
+
+    }
+
+
+    mostrarToast(
+      "Producto publicado correctamente.",
+      "exito"
+    );
+
+
+    await cargarProductos();
+
+
+  } catch (error) {
+
+    console.error(
+      "Error publicando:",
+      error
+    );
+
+
+    mostrarToast(
+      "No se pudo publicar el producto.",
+      "error"
+    );
+
+
+  } finally {
+
+    if (boton) {
+
+      boton.disabled =
+        false;
+
+      boton.innerHTML =
+        `<span>🚀</span> Publicar producto`;
+
+    }
+
+  }
+
+};
+
+
+
+/* =========================================================
+   ASEGURAR PRODUCTOS BASE EN FIRESTORE
+========================================================= */
+
+async function asegurarProductosBase() {
+
+  for (
+    const producto of PRODUCTOS_BASE
+  ) {
+
+    try {
+
+      const referencia =
+        doc(
+          db,
+          "productos",
+          producto.id
+        );
+
+
+      const existe =
+        await getDoc(
+          referencia
+        );
+
+
+      if (!existe.exists()) {
+
+        await setDoc(
+          referencia,
+          {
+            nombre:
+              producto.nombre,
+
+            precio:
+              producto.precio,
+
+            descripcion:
+              producto.descripcion,
+
+            imagen:
+              producto.imagen,
+
+            tipo:
+              "base",
+
+            codigoBase:
+              producto.id,
+
+            creado:
+              new Date()
+          }
+        );
+
+      }
+
+    } catch (error) {
+
+      console.error(
+        "Error creando producto base:",
+        error
+      );
+
+    }
+
+  }
+
+}
+
+
+
+/* =========================================================
+   CARGAR PRODUCTOS
+========================================================= */
+
+async function cargarProductos() {
+
+  const contenedor =
+    document.getElementById(
+      "productosDinamicos"
+    );
+
+
+  if (!contenedor) return;
+
+
+  contenedor.innerHTML = `
+    <div class="cargando-productos">
+      <div class="spinner-grande"></div>
+      <p>Cargando productos...</p>
+    </div>
+  `;
+
+
+  try {
+
+    await asegurarProductosBase();
+
+
+    const consulta =
+      await getDocs(
+        collection(
+          db,
+          "productos"
+        )
+      );
+
+
+    contenedor.innerHTML = "";
+
+
+    const productos = [];
+
+
+    consulta.forEach(
+      (documento) => {
+
+        const producto =
+          documento.data();
+
+
+        productos.push({
+
+          id:
+            documento.id,
+
+          ...producto
+
+        });
+
+      }
+    );
+
+
+    productos.sort(
+      (a, b) => {
+
+        if (
+          a.tipo === "base" &&
+          b.tipo !== "base"
+        ) {
+
+          return -1;
+
+        }
+
+        if (
+          a.tipo !== "base" &&
+          b.tipo === "base"
+        ) {
+
+          return 1;
+
+        }
+
+
+        return String(
+          a.nombre || ""
+        ).localeCompare(
+          String(
+            b.nombre || ""
+          )
+        );
+
+      }
+    );
+
+
+    if (productos.length === 0) {
+
+      actualizarTextoResultados(0);
+
+      aplicarFiltros();
+
+      return;
+
+    }
+
+
+    productos.forEach(
+      (producto, indice) => {
+
+        crearTarjetaProducto(
+          contenedor,
+          producto.id,
+          producto,
+          indice
+        );
+
+      }
+    );
+
+
+    actualizarBotonesAdministrador();
+
+    aplicarFiltros();
+
+
+  } catch (error) {
+
+    console.error(
+      "Error cargando productos:",
+      error
+    );
+
+
+    contenedor.innerHTML = `
+      <div class="error-productos">
+        <div>⚠️</div>
+        <h3>No se pudieron cargar los productos</h3>
+        <p>Revisa tu conexión e inténtalo nuevamente.</p>
+        <button onclick="cargarProductos()">
+          Reintentar
+        </button>
+      </div>
+    `;
+
+  }
+
+}
+
+
+
+/* =========================================================
+   CREAR TARJETA
+========================================================= */
+
+function crearTarjetaProducto(
+  contenedor,
+  id,
+  producto,
+  indice
+) {
+
+  const tarjeta =
+    document.createElement(
+      "article"
+    );
+
+
+  tarjeta.className =
+    "producto tarjeta-entrada";
+
+
+  tarjeta.style.setProperty(
+    "--delay",
+    `${Math.min(indice * 0.06, 0.4)}s`
+  );
+
+
+  tarjeta.dataset.nombre =
+    escaparTexto(
+      producto.nombre
+    );
+
+
+  tarjeta.dataset.precio =
+    String(
+      Number(
+        producto.precio
+      ) || 0
+    );
+
+
+  /* IMAGEN */
+
+  const contenedorImagen =
+    document.createElement(
+      "div"
+    );
+
+
+  contenedorImagen.className =
+    "imagen-producto";
+
+
+  const imagen =
+    document.createElement(
+      "img"
+    );
+
+
+  imagen.src =
+    producto.imagen || "";
+
+
+  imagen.alt =
+    producto.nombre ||
+    "Producto";
+
+
+  imagen.loading =
+    "lazy";
+
+
+  imagen.addEventListener(
+    "click",
+    () => {
+
+      if (producto.imagen) {
+
+        abrirVisorImagen(
+          producto.imagen,
+          producto.nombre
+        );
+
+      }
+
+    }
+  );
+
+
+  imagen.addEventListener(
+    "error",
+    function () {
+
+      this.style.display =
+        "none";
+
+      contenedorImagen.classList.add(
+        "imagen-error"
+      );
+
+      contenedorImagen.insertAdjacentHTML(
+        "beforeend",
+        `<span>🖼️</span>`
+      );
+
+    }
+  );
+
+
+  contenedorImagen.appendChild(
+    imagen
+  );
+
+
+  /* ETIQUETA */
+
+  const etiqueta =
+    document.createElement(
+      "span"
+    );
+
+
+  etiqueta.className =
+    "etiqueta-producto";
+
+
+  etiqueta.textContent =
+    producto.tipo === "base"
+      ? "Disponible"
+      : "Nuevo";
+
+
+  contenedorImagen.appendChild(
+    etiqueta
+  );
+
+
+  /* INFO */
+
+  const informacion =
+    document.createElement(
+      "div"
+    );
+
+
+  informacion.className =
+    "informacion-producto";
+
+
+  const titulo =
+    document.createElement(
+      "h3"
+    );
+
+
+  titulo.textContent =
+    producto.nombre ||
+    "Producto";
+
+
+  const descripcion =
+    document.createElement(
+      "p"
+    );
+
+
+  descripcion.className =
+    "descripcion-producto";
+
+
+  descripcion.textContent =
+    producto.descripcion ||
+    "Producto disponible en nuestra tienda.";
+
+
+  const precio =
+    document.createElement(
+      "p"
+    );
+
+
+  precio.className =
+    "precio";
+
+
+  precio.textContent =
+    formatearPrecio(
+      Number(
+        producto.precio
+      ) || 0
+    );
+
+
+  const botonCarrito =
+    document.createElement(
+      "button"
+    );
+
+
+  botonCarrito.className =
+    "boton-agregar";
+
+
+  botonCarrito.innerHTML =
+    `<span>🛒</span> Agregar al carrito`;
+
+
+  botonCarrito.addEventListener(
+    "click",
+    () => {
+
+      window.agregarAlCarrito(
+        producto.nombre,
+        Number(
+          producto.precio
+        ) || 0
+      );
+
+    }
+  );
+
+
+  informacion.appendChild(
+    titulo
+  );
+
+  informacion.appendChild(
+    descripcion
+  );
+
+  informacion.appendChild(
+    precio
+  );
+
+  informacion.appendChild(
+    botonCarrito
+  );
+
+
+  /* BORRAR: SOLO ADMIN */
+
+  if (usuarioEsAdmin()) {
+
+    const botonEliminar =
+      document.createElement(
+        "button"
+      );
+
+
+    botonEliminar.className =
+      "boton-eliminar-producto";
+
+
+    botonEliminar.innerHTML =
+      `<span>🗑️</span> Borrar artículo`;
+
+
+    botonEliminar.dataset.productoId =
+      id;
+
+
+    botonEliminar.addEventListener(
+      "click",
+      () => {
+
+        eliminarProductoFirebase(
+          id,
+          producto.nombre
+        );
+
+      }
+    );
+
+
+    informacion.appendChild(
+      botonEliminar
+    );
+
+  }
+
+
+  tarjeta.appendChild(
+    contenedorImagen
+  );
+
+
+  tarjeta.appendChild(
+    informacion
+  );
+
+
+  contenedor.appendChild(
+    tarjeta
+  );
+
+}
+
+
+
+/* =========================================================
+   MOSTRAR/OCULTAR BORRAR
+========================================================= */
+
+function actualizarBotonesAdministrador() {
+
+  const esAdmin =
+    usuarioEsAdmin();
+
+
+  const botones =
+    document.querySelectorAll(
+      ".boton-eliminar-producto"
+    );
+
+
+  botones.forEach(
+    (boton) => {
+
+      boton.style.display =
+        esAdmin
+          ? "flex"
+          : "none";
+
+    }
+  );
+
+}
+
+
+
+/* =========================================================
+   ELIMINAR PRODUCTO
+========================================================= */
+
+async function eliminarProductoFirebase(
+  id,
+  nombre = "este artículo"
+) {
+
+  if (!usuarioEsAdmin()) {
+
+    mostrarToast(
+      "No tienes permiso para borrar productos.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  const confirmar =
+    window.confirm(
+      `¿Seguro que quieres borrar "${nombre}"?`
+    );
+
+
+  if (!confirmar) return;
+
+
+  try {
+
+    await deleteDoc(
+      doc(
+        db,
+        "productos",
+        id
+      )
+    );
+
+
+    mostrarToast(
+      "Artículo eliminado correctamente.",
+      "exito"
+    );
+
+
+    await cargarProductos();
+
+
+  } catch (error) {
+
+    console.error(
+      "Error eliminando producto:",
+      error
+    );
+
+
+    mostrarToast(
+      "No se pudo eliminar el artículo.",
+      "error"
+    );
+
+  }
+
+}
+
+
+
+/* =========================================================
+   FILTROS
+========================================================= */
+
+const buscador =
+  document.getElementById(
+    "buscadorProductos"
+  );
+
+
+const rangoPrecio =
+  document.getElementById(
+    "rangoPrecio"
+  );
+
+
+const valorPrecio =
+  document.getElementById(
+    "valorPrecio"
+  );
+
+
+if (buscador) {
+
+  buscador.addEventListener(
+    "input",
+    aplicarFiltros
+  );
+
+}
+
+
+if (rangoPrecio) {
+
+  rangoPrecio.addEventListener(
+    "input",
+    function () {
+
+      actualizarTextoPrecio();
+
+      aplicarFiltros();
+
+    }
+  );
+
+}
+
+
+
+function actualizarTextoPrecio() {
+
+  if (
+    !rangoPrecio ||
+    !valorPrecio
+  ) {
+
+    return;
+
+  }
+
+
+  const valor =
+    Number(
+      rangoPrecio.value
+    );
+
+
+  if (
+    valor >= 100000
+  ) {
+
+    valorPrecio.textContent =
+      "$100.000+";
+
+    return;
+
+  }
+
+
+  valorPrecio.textContent =
+    formatearPrecio(
+      valor
+    );
+
+}
+
+
+
+function aplicarFiltros() {
+
+  const texto =
+    buscador
+      ? buscador.value
+        .trim()
+        .toLowerCase()
+      : "";
+
+
+  const maximo =
+    rangoPrecio
+      ? Number(
+          rangoPrecio.value
+        )
+      : 100000;
+
+
+  const productos =
+    document.querySelectorAll(
+      "#contenedorProductos .producto"
+    );
+
+
+  let encontrados =
+    0;
+
+
+  productos.forEach(
+    (producto) => {
+
+      const nombre =
+        (
+          producto.dataset.nombre ||
+          ""
+        )
+        .toLowerCase();
+
+
+      const precio =
+        Number(
+          producto.dataset.precio ||
+          0
+        );
+
+
+      const coincideNombre =
+        !texto ||
+        nombre.includes(texto);
+
+
+      const coincidePrecio =
+        maximo >= 100000
+          ? true
+          : precio <= maximo;
+
+
+      if (
+        coincideNombre &&
+        coincidePrecio
+      ) {
+
+        producto.style.display =
+          "";
+
+        encontrados++;
+
+      } else {
+
+        producto.style.display =
+          "none";
+
+      }
+
+    }
+  );
+
+
+  const sinResultados =
+    document.getElementById(
+      "sinResultados"
+    );
+
+
+  if (sinResultados) {
+
+    sinResultados.style.display =
+      encontrados === 0
+        ? "block"
+        : "none";
+
+  }
+
+
+  actualizarTextoResultados(
+    encontrados
+  );
+
+}
+
+
+
+function actualizarTextoResultados(
+  cantidad
+) {
+
+  const contador =
+    document.getElementById(
+      "contadorResultados"
+    );
+
+
+  if (!contador) return;
+
+
+  if (cantidad === 0) {
+
+    contador.textContent =
+      "Sin productos";
+
+    return;
+
+  }
+
+
+  contador.textContent =
+    cantidad === 1
+      ? "1 producto disponible"
+      : `${cantidad} productos disponibles`;
+
+}
+
+
+
+window.alternarFiltros = function () {
+
+  const panel =
+    document.getElementById(
+      "panelFiltros"
+    );
+
+
+  const icono =
+    document.getElementById(
+      "iconoFiltros"
+    );
+
+
+  if (!panel) return;
+
+
+  panel.classList.toggle(
+    "mostrar"
+  );
+
+
+  if (icono) {
+
+    icono.classList.toggle(
+      "abierto"
+    );
+
+  }
+
+};
+
+
+
+window.limpiarFiltros = function () {
+
+  if (buscador) {
+
+    buscador.value =
+      "";
+
+  }
+
+
+  if (rangoPrecio) {
+
+    rangoPrecio.value =
+      "100000";
+
+  }
+
+
+  actualizarTextoPrecio();
+
   aplicarFiltros();
-}
 
-async function cargarProductos(){
-  try{
-    const snap=await getDocs(collection(db,"productos"));
-    productosFirebase=snap.docs.map(d=>({id:`doc-${d.id}`,...d.data()}));
-  }catch(e){console.error("Productos:",e);productosFirebase=[];toast("Productos","No se pudieron cargar los productos de Firebase.","error")}
-  renderProductos();
-}
-
-function aplicarFiltros(){
-  const q=normalizar($("buscadorProductos")?.value||"");
-  const max=Number($("rangoPrecio")?.value||100000);
-  $("valorPrecioFiltro").textContent=max>=100000?"$100.000+":money(max);
-  const cards=[...document.querySelectorAll("#productos .product-card")];let visibles=0;
-  cards.forEach(card=>{const texto=normalizar(card.dataset.nombre),precio=Number(card.dataset.precio||0);const ok=(!q||texto.includes(q))&&(max>=100000||precio<=max);card.hidden=!ok;if(ok)visibles++});
-  $("sinResultados").hidden=visibles!==0;
-  $("contadorResultados").textContent=visibles===1?"🔎 1 producto encontrado":`🔎 ${visibles} productos encontrados`;
-}
-$("buscadorProductos")?.addEventListener("input",aplicarFiltros);
-$("rangoPrecio")?.addEventListener("input",aplicarFiltros);
-window.aplicarFiltros=aplicarFiltros;
-
-$("fotoProducto")?.addEventListener("change",()=>{const f=$("fotoProducto").files?.[0],img=$("vistaPreviaProducto");if(!f||!img)return;if(f.size>MAX_FILE_MB*1024*1024){toast("Imagen pesada",`Máximo ${MAX_FILE_MB} MB.`,"error");$("fotoProducto").value="";return}const r=new FileReader();r.onload=()=>img.src=String(r.result);r.readAsDataURL(f)});
-
-async function subirCloudinary(file,folder="karleny/productos"){
-  const form=new FormData();form.append("file",file);form.append("upload_preset",CLOUDINARY_UPLOAD_PRESET);form.append("folder",folder);
-  const r=await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,{method:"POST",body:form});const data=await r.json();
-  if(!r.ok||!data.secure_url)throw new Error(data?.error?.message||"Cloudinary falló");return data.secure_url;
-}
-
-window.agregarProducto=async function(){
-  if(!auth.currentUser||auth.currentUser.uid!==UID_DUENO)return toast("Sin permiso","Solo el dueño puede publicar productos.","error");
-  const foto=$("fotoProducto").files?.[0],nombre=$("nombreProducto").value.trim(),precio=Number($("precioProducto").value),descripcion=$("descripcionProducto").value.trim(),msg=$("mensajeProducto");
-  if(!foto||!nombre||!Number.isFinite(precio)||precio<=0){msg.textContent="⚠️ Completa foto, nombre y precio.";return}
-  if(foto.size>MAX_FILE_MB*1024*1024){msg.textContent=`⚠️ Máximo ${MAX_FILE_MB} MB.`;return}
-  try{msg.textContent="📸 Subiendo imagen...";const imagen=await subirCloudinary(foto);msg.textContent="🗄️ Guardando producto...";await addDoc(collection(db,"productos"),{nombre,precio,descripcion,imagen,creado:serverTimestamp()});msg.textContent="✅ Producto publicado.";["fotoProducto","nombreProducto","precioProducto","descripcionProducto"].forEach(id=>$(id).value="");$("vistaPreviaProducto").removeAttribute("src");await cargarProductos();toast("Producto publicado","Ya aparece en la tienda.","success")}catch(e){console.error(e);msg.textContent="❌ No se pudo publicar. Revisa Cloudinary y Firestore."}
-};
-window.eliminarProducto=async function(id){if(!auth.currentUser||auth.currentUser.uid!==UID_DUENO)return;if(!id||!confirm("¿Eliminar este producto?"))return;try{await deleteDoc(doc(db,"productos",id));await cargarProductos();toast("Producto eliminado","Ya no aparece en la tienda.","success")}catch(e){console.error(e);toast("No se pudo eliminar","Revisa las reglas de Firestore.","error")}};
-
-/* Carrito */
-window.agregarAlCarrito=function(nombre,precio,imagen=""){
-  precio=Number(precio);if(!nombre||!Number.isFinite(precio)||precio<0)return toast("No se pudo agregar","Producto inválido.","error");
-  const existente=carrito.find(p=>p.nombre===nombre);
-  if(existente){existente.cantidad=Math.min(99,Number(existente.cantidad||0)+1);if(!existente.imagen&&imagen)existente.imagen=imagen}else carrito.push({nombre:String(nombre),precio,imagen:String(imagen||""),cantidad:1});
-  guardarLS("karleny_carrito",carrito);actualizarCarrito();toast("🛒 Agregado al carrito",`${nombre} está en tu pedido.","success");
-};
-window.abrirCarrito=function(){$("ventanaCarrito").hidden=false;actualizarCarrito()};
-window.cerrarCarrito=function(){$("ventanaCarrito").hidden=true};
-window.vaciarCarrito=function(){if(!carrito.length)return;if(confirm("¿Vaciar el carrito?")){carrito=[];guardarLS("karleny_carrito",carrito);actualizarCarrito()}};
-window.cambiarCantidadCarrito=function(i,delta){if(!carrito[i])return;carrito[i].cantidad=Math.max(1,Math.min(99,Number(carrito[i].cantidad)+delta));guardarLS("karleny_carrito",carrito);actualizarCarrito()};
-window.eliminarDelCarrito=function(i){if(!carrito[i])return;carrito.splice(i,1);guardarLS("karleny_carrito",carrito);actualizarCarrito()};
-function actualizarCarrito(){
-  const items=carrito.reduce((s,p)=>s+Number(p.cantidad||0),0),total=carrito.reduce((s,p)=>s+Number(p.precio||0)*Number(p.cantidad||0),0);$("cantidadCarrito").textContent=String(items);$("totalCarrito").textContent=money(total);
-  $("listaCarrito").innerHTML=carrito.map((p,i)=>`<div class="cart-item"><div class="cart-item-info">${p.imagen?`<img class="cart-thumb" src="${escapar(p.imagen)}" alt="" loading="lazy">`:``}<div><b>${escapar(p.nombre)}</b><span>${money(p.precio)} c/u · ${money(p.precio*p.cantidad)}</span></div></div><div class="cart-controls"><button onclick="cambiarCantidadCarrito(${i},-1)">−</button><b>${p.cantidad}</b><button onclick="cambiarCantidadCarrito(${i},1)">+</button><button class="remove" onclick="eliminarDelCarrito(${i})">🗑️</button></div></div>`).join("");
-  $("carritoVacio").hidden=carrito.length>0;$("resumenCarrito").hidden=carrito.length===0;
-}
-
-/* Enviar pedido -> Firestore. El WhatsApp queda reservado para Consultas. */
-window.enviarPedido=async function(){
-  if(!carrito.length)return toast("🛒 Carrito vacío","Agrega al menos un producto.","error");
-  const nombre=prompt("👤 Escribe tu nombre:")?.trim();if(!nombre||nombre.length<2)return;
-  const telefono=prompt("📱 Escribe tu número de teléfono:")?.trim();if(!telefono||telefono.replace(/\D/g,"").length<7)return;
-  const items=carrito.map(p=>({nombre:p.nombre,precio:Number(p.precio),cantidad:Number(p.cantidad)}));
-  const cantidad=items.reduce((s,p)=>s+p.cantidad,0),total=items.reduce((s,p)=>s+p.precio*p.cantidad,0);
-  const numero=`VK-${Date.now().toString().slice(-8)}`;
-  try{
-    await addDoc(collection(db,"pedidos"),{numeroPedido:numero,tipo:"tienda",estado:"nuevo",cliente:{nombre,telefono},items,cantidad,total,creado:serverTimestamp()});
-    carrito=[];guardarLS("karleny_carrito",carrito);actualizarCarrito();cerrarCarrito();toast("📦 ¡Pedido enviado!",`${numero} fue enviado al administrador.","success");
-  }catch(e){console.error(e);toast("No se pudo enviar","Revisa tu conexión o las reglas de Firestore.","error")}
 };
 
-/* Pedidos del dueño */
-function iniciarEscuchaPedidos(){if(unsubscribePedidos||!auth.currentUser||auth.currentUser.uid!==UID_DUENO)return;unsubscribePedidos=onSnapshot(collection(db,"pedidos"),snap=>{const nuevos=[];snap.docChanges().forEach(c=>{if(c.type==="added"&&pedidosInicializados)nuevos.push({id:c.doc.id,...c.doc.data()})});pedidosInicializados=true;for(const p of nuevos){toast("🔔 Nuevo pedido",`${p.numeroPedido||"Pedido"} · ${p.cliente?.nombre||"Cliente"}`,"pedido");enviarNotificacionNavegador("Nuevo pedido en Variedades Karleny",`${p.numeroPedido||"Pedido"} · ${p.cliente?.nombre||"Cliente"}`)}pedidosAdmin=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.creado?.seconds||0)-(a.creado?.seconds||0));actualizarContadorPedidos();if(adminPedidosAbierto)renderPedidosAdmin()},e=>{console.error(e);toast("Pedidos","No se pudo actualizar la bandeja.","error")})}
-function detenerEscuchaPedidos(){if(unsubscribePedidos)unsubscribePedidos();unsubscribePedidos=null;pedidosInicializados=false;pedidosAdmin=[];actualizarContadorPedidos()}
-async function enviarNotificacionNavegador(titulo,cuerpo){if(!("Notification" in window))return;try{let permiso=Notification.permission;if(permiso==="default")permiso=await Notification.requestPermission();if(permiso==="granted")new Notification(titulo,{body:cuerpo,icon:"icons/icon-192.png",tag:"karleny-pedido"})}catch(e){console.warn(e)}}
-window.activarNotificacionesAdmin=async function(){if(!auth.currentUser||auth.currentUser.uid!==UID_DUENO)return;try{if(!("Notification" in window))throw new Error("no soportado");const p=await Notification.requestPermission();toast(p==="granted"?"🔔 Notificaciones activadas":"Notificaciones no permitidas",p==="granted"?"Te avisaremos de nuevos pedidos mientras el panel esté abierto.":"Puedes permitirlas desde el navegador.",p==="granted"?"success":"error")}catch(e){toast("Notificaciones","Este navegador no las permite.","error")}};
-window.mostrarPedidosAdmin=function(){adminPedidosAbierto=true;$("panelPedidosAdmin").hidden=false;renderPedidosAdmin()};
-window.ocultarPedidosAdmin=function(){adminPedidosAbierto=false;$("panelPedidosAdmin").hidden=true};
-function actualizarContadorPedidos(){const n=pedidosAdmin.filter(p=>(p.estado||"nuevo")==="nuevo").length;if($("contadorPedidosAdmin"))$("contadorPedidosAdmin").textContent=String(n)}
-function renderPedidosAdmin(){
-  const list=$("listaPedidosAdmin");if(!list)return;if(!pedidosAdmin.length){list.innerHTML=`<div class="empty-state compact"><div>📦</div><h3>Aún no hay pedidos</h3><p>Los pedidos enviados desde el carrito aparecerán aquí.</p></div>`;return}
-  list.innerHTML=pedidosAdmin.map(p=>{const total=Number(p.total||0);return `<article class="order-card"><div class="order-head"><div><span class="order-number">${escapar(p.numeroPedido||p.id)}</span><small>${escapar(p.estado||"nuevo")}</small></div><select onchange="actualizarEstadoPedido(${JSON.stringify(p.id)},this.value)"><option value="nuevo" ${p.estado==="nuevo"?"selected":""}>Nuevo</option><option value="preparando" ${p.estado==="preparando"?"selected":""}>Preparando</option><option value="listo" ${p.estado==="listo"?"selected":""}>Listo</option><option value="entregado" ${p.estado==="entregado"?"selected":""}>Entregado</option></select></div><div class="order-client"><div><span>👤 Cliente</span><b>${escapar(p.cliente?.nombre||"—")}</b></div><div><span>📱 Teléfono</span><b>${escapar(p.cliente?.telefono||"—")}</b></div><div><span>📦 Cantidad</span><b>${Number(p.cantidad||0)}</b></div></div><div class="order-items">${(p.items||[]).map(i=>`<div class="order-product"><div><b>${escapar(i.nombre)}</b><span> · ${Number(i.cantidad||0)} unidad(es)</span></div><b>${money(Number(i.precio||0)*Number(i.cantidad||0))}</b></div>`).join("")}</div><div class="order-total"><span>Total</span><b>${money(total)}</b></div><button class="btn btn-small btn-danger" style="margin-top:12px" onclick="eliminarPedidoAdmin(${JSON.stringify(p.id)})">🗑️ Eliminar pedido</button></article>`}).join("")
+
+
+window.limpiarBusqueda = function () {
+
+  if (buscador) {
+
+    buscador.value =
+      "";
+
+    buscador.focus();
+
+  }
+
+
+  aplicarFiltros();
+
+};
+
+
+
+/* =========================================================
+   CARRITO
+========================================================= */
+
+window.agregarAlCarrito =
+  function (
+    nombre,
+    precio
+  ) {
+
+    const productoExistente =
+      carrito.find(
+        producto =>
+          producto.nombre === nombre
+      );
+
+
+    if (productoExistente) {
+
+      productoExistente.cantidad++;
+
+    } else {
+
+      carrito.push({
+
+        nombre:
+          nombre,
+
+        precio:
+          Number(precio) || 0,
+
+        cantidad:
+          1
+
+      });
+
+    }
+
+
+    actualizarCarrito();
+
+    mostrarToast(
+      `${nombre} agregado al carrito.`,
+      "exito"
+    );
+
+
+    setTimeout(() => {
+
+      abrirCarrito();
+
+    }, 180);
+
+  };
+
+
+
+function actualizarCarrito() {
+
+  const lista =
+    document.getElementById(
+      "listaCarrito"
+    );
+
+
+  const total =
+    document.getElementById(
+      "totalCarrito"
+    );
+
+
+  const contador =
+    document.getElementById(
+      "contadorCarrito"
+    );
+
+
+  if (!lista) return;
+
+
+  lista.innerHTML =
+    "";
+
+
+  let cantidadTotal =
+    0;
+
+
+  let precioTotal =
+    0;
+
+
+  if (carrito.length === 0) {
+
+    lista.innerHTML = `
+
+      <div class="carrito-vacio">
+
+        <div class="carrito-vacio-icono">
+          🛒
+        </div>
+
+        <h3>
+          Tu carrito está vacío
+        </h3>
+
+        <p>
+          Agrega algunos productos
+          para comenzar tu pedido.
+        </p>
+
+        <button
+          onclick="cerrarCarrito()"
+        >
+          Seguir comprando
+        </button>
+
+      </div>
+
+    `;
+
+
+    if (total) {
+
+      total.textContent =
+        "Total: $0";
+
+    }
+
+
+    if (contador) {
+
+      contador.textContent =
+        "0";
+
+    }
+
+
+    return;
+
+  }
+
+
+  carrito.forEach(
+    (producto, indice) => {
+
+      const subtotal =
+        producto.precio *
+        producto.cantidad;
+
+
+      cantidadTotal +=
+        producto.cantidad;
+
+
+      precioTotal +=
+        subtotal;
+
+
+      const item =
+        document.createElement(
+          "div"
+        );
+
+
+      item.className =
+        "item-carrito";
+
+
+      const informacion =
+        document.createElement(
+          "div"
+        );
+
+
+      informacion.className =
+        "info-item-carrito";
+
+
+      const nombre =
+        document.createElement(
+          "strong"
+        );
+
+
+      nombre.textContent =
+        producto.nombre;
+
+
+      const precio =
+        document.createElement(
+          "span"
+        );
+
+
+      precio.textContent =
+        formatearPrecio(
+          producto.precio
+        );
+
+
+      informacion.appendChild(
+        nombre
+      );
+
+
+      informacion.appendChild(
+        precio
+      );
+
+
+      const controles =
+        document.createElement(
+          "div"
+        );
+
+
+      controles.className =
+        "controles-carrito";
+
+
+      const menos =
+        document.createElement(
+          "button"
+        );
+
+
+      menos.textContent =
+        "−";
+
+
+      menos.addEventListener(
+        "click",
+        () => {
+
+          cambiarCantidadCarrito(
+            indice,
+            -1
+          );
+
+        }
+      );
+
+
+      const cantidad =
+        document.createElement(
+          "span"
+        );
+
+
+      cantidad.textContent =
+        producto.cantidad;
+
+
+      const mas =
+        document.createElement(
+          "button"
+        );
+
+
+      mas.textContent =
+        "+";
+
+
+      mas.addEventListener(
+        "click",
+        () => {
+
+          cambiarCantidadCarrito(
+            indice,
+            1
+          );
+
+        }
+      );
+
+
+      const eliminar =
+        document.createElement(
+          "button"
+        );
+
+
+      eliminar.textContent =
+        "🗑️";
+
+
+      eliminar.className =
+        "eliminar-item-carrito";
+
+
+      eliminar.addEventListener(
+        "click",
+        () => {
+
+          eliminarDelCarrito(
+            indice
+          );
+
+        }
+      );
+
+
+      controles.appendChild(
+        menos
+      );
+
+      controles.appendChild(
+        cantidad
+      );
+
+      controles.appendChild(
+        mas
+      );
+
+      controles.appendChild(
+        eliminar
+      );
+
+
+      item.appendChild(
+        informacion
+      );
+
+      item.appendChild(
+        controles
+      );
+
+
+      lista.appendChild(
+        item
+      );
+
+    }
+  );
+
+
+  if (total) {
+
+    total.textContent =
+      `Total: ${formatearPrecio(
+        precioTotal
+      )}`;
+
+  }
+
+
+  if (contador) {
+
+    contador.textContent =
+      String(
+        cantidadTotal
+      );
+
+  }
+
 }
-window.actualizarEstadoPedido=async function(id,estado){if(!auth.currentUser||auth.currentUser.uid!==UID_DUENO)return;try{await updateDoc(doc(db,"pedidos",id),{estado,actualizado:serverTimestamp()});toast("Estado actualizado",estado,"success")}catch(e){console.error(e);toast("No se pudo actualizar","Revisa Firestore.","error")}};
-window.eliminarPedidoAdmin=async function(id){if(!auth.currentUser||auth.currentUser.uid!==UID_DUENO)return;if(!confirm("¿Eliminar este pedido?"))return;try{await deleteDoc(doc(db,"pedidos",id));toast("Pedido eliminado","Se quitó de la bandeja.","success")}catch(e){console.error(e);toast("No se pudo eliminar","Revisa Firestore.","error")}};
+
+
+
+function cambiarCantidadCarrito(
+  indice,
+  cambio
+) {
+
+  if (!carrito[indice]) return;
+
+
+  carrito[indice].cantidad +=
+    cambio;
+
+
+  if (
+    carrito[indice].cantidad <= 0
+  ) {
+
+    carrito.splice(
+      indice,
+      1
+    );
+
+  }
+
+
+  actualizarCarrito();
+
+}
+
+
+
+function eliminarDelCarrito(
+  indice
+) {
+
+  if (!carrito[indice]) return;
+
+
+  carrito.splice(
+    indice,
+    1
+  );
+
+
+  actualizarCarrito();
+
+}
+
+
+
+window.abrirCarrito = function () {
+
+  const ventana =
+    document.getElementById(
+      "ventanaCarrito"
+    );
+
+
+  if (!ventana) return;
+
+
+  actualizarCarrito();
+
+  ventana.classList.add(
+    "mostrar"
+  );
+
+};
+
+
+window.cerrarCarrito = function () {
+
+  const ventana =
+    document.getElementById(
+      "ventanaCarrito"
+    );
+
+
+  if (ventana) {
+
+    ventana.classList.remove(
+      "mostrar"
+    );
+
+  }
+
+};
+
+
+
+/* =========================================================
+   WHATSAPP
+========================================================= */
+
+window.comprarPorWhatsApp =
+  function () {
+
+    if (
+      carrito.length === 0
+    ) {
+
+      mostrarToast(
+        "Tu carrito está vacío.",
+        "error"
+      );
+
+      return;
+
+    }
+
+
+    let mensaje =
+      "Hola, quiero realizar este pedido:%0A%0A";
+
+
+    let total =
+      0;
+
+
+    carrito.forEach(
+      producto => {
+
+        const subtotal =
+          producto.precio *
+          producto.cantidad;
+
+
+        total +=
+          subtotal;
+
+
+        mensaje +=
+          `• ${encodeURIComponent(
+            producto.nombre
+          )} x${producto.cantidad} - ${encodeURIComponent(
+            formatearPrecio(subtotal)
+          )}%0A`;
+
+      }
+    );
+
+
+    mensaje +=
+      `%0A*Total: ${encodeURIComponent(
+        formatearPrecio(total)
+      )}*`;
+
+
+    const url =
+      `https://wa.me/${NUMERO_WHATSAPP}?text=${mensaje}`;
+
+
+    window.open(
+      url,
+      "_blank"
+    );
+
+  };
+
+
+
+/* =========================================================
+   VISOR DE IMÁGENES
+========================================================= */
+
+window.abrirVisorImagen =
+  function (
+    url,
+    nombre = "Producto"
+  ) {
+
+    const visor =
+      document.getElementById(
+        "visorImagen"
+      );
+
+
+    const imagen =
+      document.getElementById(
+        "imagenGrande"
+      );
+
+
+    if (
+      !visor ||
+      !imagen
+    ) return;
+
+
+    imagen.src =
+      url;
+
+
+    imagen.alt =
+      nombre;
+
+
+    visor.classList.add(
+      "mostrar"
+    );
+
+
+    document.body.classList.add(
+      "sin-scroll"
+    );
+
+  };
+
+
+window.cerrarVisorImagen =
+  function () {
+
+    const visor =
+      document.getElementById(
+        "visorImagen"
+      );
+
+
+    if (visor) {
+
+      visor.classList.remove(
+        "mostrar"
+      );
+
+    }
+
+
+    document.body.classList.remove(
+      "sin-scroll"
+    );
+
+  };
+
+
+
+/* =========================================================
+   CERRAR MODALES
+========================================================= */
+
+window.addEventListener(
+  "click",
+  function (event) {
+
+    const login =
+      document.getElementById(
+        "ventanaLogin"
+      );
+
+
+    const carritoVentana =
+      document.getElementById(
+        "ventanaCarrito"
+      );
+
+
+    if (
+      event.target ===
+      login
+    ) {
+
+      cerrarLogin();
+
+    }
+
+
+    if (
+      event.target ===
+      carritoVentana
+    ) {
+
+      cerrarCarrito();
+
+    }
+
+  }
+);
+
+
+
+/* =========================================================
+   ESC
+========================================================= */
+
+window.addEventListener(
+  "keydown",
+  function (event) {
+
+    if (
+      event.key ===
+      "Escape"
+    ) {
+
+      cerrarLogin();
+
+      cerrarCarrito();
+
+      cerrarVisorImagen();
+
+    }
+
+  }
+);
+
+
+
+/* =========================================================
+   ENTER LOGIN
+========================================================= */
+
+const passwordLogin =
+  document.getElementById(
+    "passwordLogin"
+  );
+
+
+if (passwordLogin) {
+
+  passwordLogin.addEventListener(
+    "keydown",
+    function (event) {
+
+      if (
+        event.key ===
+        "Enter"
+      ) {
+
+        iniciarSesion();
+
+      }
+
+    }
+  );
+
+}
+
+
+
+/* =========================================================
+   INICIO
+========================================================= */
+
+actualizarTextoPrecio();
 
 actualizarCarrito();
+
+cargarProductos();
