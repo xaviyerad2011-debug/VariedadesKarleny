@@ -208,13 +208,85 @@
 
         </div>
 
-        <button
-          class="boton-cerrar-sesion"
-          onclick="cerrarSesion()"
-        >
-          <span>↪</span>
-          Cerrar sesión
-        </button>
+        <div class="admin-acciones">
+
+          <button
+            id="botonPedidosAdmin"
+            class="boton-pedidos-admin"
+            onclick="alternarPedidosAdmin()"
+          >
+            <span>🔔</span>
+            Pedidos
+            <span
+              id="contadorPedidosAdmin"
+              class="contador-pedidos-admin"
+            >
+              0
+            </span>
+          </button>
+
+          <button
+            id="botonNotificacionesAdmin"
+            class="boton-notificaciones-admin"
+            onclick="activarNotificacionesAdmin()"
+          >
+            <span>🔔</span>
+            Activar avisos
+          </button>
+
+          <button
+            class="boton-cerrar-sesion"
+            onclick="cerrarSesion()"
+          >
+            <span>↪</span>
+            Cerrar sesión
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- =========================================
+           BANDEJA DE PEDIDOS
+      ========================================== -->
+      <div
+        id="panelPedidosAdmin"
+        class="panel-pedidos-admin"
+        style="display:none;"
+      >
+
+        <div class="cabecera-pedidos-admin">
+
+          <div>
+            <span class="admin-etiqueta">
+              📦 PEDIDOS RECIBIDOS
+            </span>
+
+            <h3>
+              Bandeja de pedidos
+            </h3>
+
+            <p>
+              Los pedidos enviados desde el carrito aparecerán aquí.
+            </p>
+          </div>
+
+          <button
+            class="boton-cerrar-pedidos"
+            onclick="cerrarPedidosAdmin()"
+            aria-label="Cerrar pedidos"
+          >
+            ×
+          </button>
+
+        </div>
+
+
+        <div
+          id="listaPedidosAdmin"
+          class="lista-pedidos-admin"
+        ></div>
 
       </div>
 
@@ -711,12 +783,24 @@
       </div>
 
 
+      <!-- NUEVO: ENVIAR PEDIDO -->
+      <button
+        id="botonEnviarPedido"
+        class="boton-enviar-pedido"
+        onclick="enviarPedido()"
+      >
+        <span>📦</span>
+        Enviar pedido
+      </button>
+
+
+      <!-- WHATSAPP -->
       <button
         class="boton-whatsapp"
-        onclick="comprarPorWhatsApp()"
+        onclick="consultarPorWhatsApp()"
       >
         <span>💬</span>
-        Comprar por WhatsApp
+        Consultar por WhatsApp
       </button>
 
     </div>
