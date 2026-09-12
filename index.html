@@ -1,128 +1,769 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#d90070">
-  <meta name="description" content="Variedades Karleny — tienda de productos y pedidos.">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="Karleny">
-  <link rel="manifest" href="manifest.json">
-  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
-  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta
+    name="description"
+    content="Variedades Karleny - Productos, novedades y variedades para todos."
+  >
+
+  <meta name="theme-color" content="#ff5c9a">
+
+  <title>Variedades Karleny</title>
+
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
-  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
 
-  <section id="pantallaInicio" class="pantalla pantalla-inicio">
-    <div class="inicio-card">
-      <span class="eyebrow">✨ BIENVENIDO</span>
-      <div class="brand-mark">🛍️</div>
-      <h1>Variedades <span>Karleny</span></h1>
-      <p>Encuentra nuestros productos, arma tu carrito y envía tu pedido de forma rápida y sencilla.</p>
-      <div class="inicio-actions">
-        <button class="btn btn-primary" onclick="iniciarPedido()">🛍️ Iniciar pedido</button>
-        <button class="btn btn-whatsapp" onclick="abrirConsultas()">💬 Consultas · 320 210 4423</button>
-        <button class="btn btn-ghost" onclick="abrirLogin()">🔐 Entrar como dueño</button>
-        <button id="botonInstalarApp" class="btn btn-install" type="button" onclick="instalarApp()" hidden>📲 Instalar app</button>
+<body>
+
+  <!-- =========================================
+       FONDO DECORATIVO
+  ========================================== -->
+  <div class="fondo-glow fondo-glow-1"></div>
+  <div class="fondo-glow fondo-glow-2"></div>
+  <div class="fondo-glow fondo-glow-3"></div>
+
+
+  <!-- =========================================
+       PANTALLA DE INICIO
+  ========================================== -->
+  <section id="pantallaInicio" class="pantalla-inicio">
+
+    <div class="decoracion decoracion-1"></div>
+    <div class="decoracion decoracion-2"></div>
+    <div class="decoracion decoracion-3"></div>
+    <div class="decoracion decoracion-4"></div>
+
+    <div class="contenido-inicio">
+
+      <div class="badge-bienvenida">
+        <span class="badge-punto"></span>
+        ✨ BIENVENIDO
       </div>
-      <div class="trust-row"><span>🛒 Carrito fácil</span><span>📦 Pedido directo</span><span>📱 Hecho para celular</span></div>
+
+      <div class="icono-tienda">
+        🛍️
+      </div>
+
+      <span class="texto-mini-inicio">
+        TU TIENDA DE CONFIANZA
+      </span>
+
+      <h1>
+        Variedades
+        <span>Karleny</span>
+      </h1>
+
+      <p>
+        Descubre productos increíbles, novedades y variedades
+        seleccionadas especialmente para ti.
+      </p>
+
+      <div class="botones-inicio">
+
+        <button
+          class="boton-principal"
+          onclick="mostrarProductos()"
+        >
+          <span>🛍️</span>
+          Ver productos
+          <span class="flecha-boton">→</span>
+        </button>
+
+        <button
+          class="boton-secundario"
+          onclick="abrirLogin()"
+        >
+          <span>🔐</span>
+          Entrar
+        </button>
+
+      </div>
+
+      <div class="detalles-inicio">
+
+        <div class="detalle-inicio">
+          <span>✨</span>
+          <p>Productos seleccionados</p>
+        </div>
+
+        <div class="detalle-inicio">
+          <span>💖</span>
+          <p>Atención cercana</p>
+        </div>
+
+        <div class="detalle-inicio">
+          <span>🛒</span>
+          <p>Compra fácil</p>
+        </div>
+
+      </div>
+
     </div>
+
+    <div class="scroll-indicador">
+      <span>Explora nuestra tienda</span>
+      <div class="scroll-linea"></div>
+    </div>
+
   </section>
 
-  <section id="pantallaProductos" class="pantalla pantalla-productos" hidden>
-    <header class="topbar">
-      <button class="icon-btn" onclick="volverInicio()" aria-label="Volver">←</button>
-      <div class="logo">🛍️ Variedades <span>Karleny</span></div>
-      <button class="cart-btn" onclick="abrirCarrito()" aria-label="Abrir carrito">🛒 <span id="cantidadCarrito">0</span></button>
+
+
+  <!-- =========================================
+       PANTALLA DE PRODUCTOS
+  ========================================== -->
+  <section
+    id="pantallaProductos"
+    class="pantalla-productos"
+  >
+
+    <!-- HEADER -->
+    <header class="barra">
+
+      <div class="barra-izquierda">
+
+        <button
+          class="boton-volver"
+          onclick="volverInicio()"
+          aria-label="Volver al inicio"
+        >
+          ←
+        </button>
+
+        <div class="logo">
+          <span class="logo-icono">🛍️</span>
+          <div>
+            <strong>Variedades</strong>
+            <span>Karleny</span>
+          </div>
+        </div>
+
+      </div>
+
+
+      <div class="barra-derecha">
+
+        <div
+          id="estadoMiniAdmin"
+          class="estado-mini-admin"
+          style="display:none;"
+        >
+          <span class="estado-punto"></span>
+          Admin
+        </div>
+
+        <button
+          class="boton-carrito"
+          onclick="abrirCarrito()"
+          aria-label="Abrir carrito"
+        >
+          <span>🛒</span>
+          <span
+            id="contadorCarrito"
+            class="contador-carrito"
+          >
+            0
+          </span>
+        </button>
+
+      </div>
+
     </header>
 
-    <main class="store-shell">
-      <section id="panelAdmin" class="admin-panel" hidden>
-        <div class="admin-head">
-          <div><span class="eyebrow pink">👑 ADMINISTRADOR</span><h2>Panel del dueño</h2><p id="estadoAdmin">Sesión no activa.</p></div>
-          <div class="admin-actions">
-            <button class="btn btn-small" onclick="mostrarPedidosAdmin()">🔔 Pedidos <span id="contadorPedidosAdmin">0</span></button>
-            <button class="btn btn-small btn-outline" onclick="activarNotificacionesAdmin()">🔔 Activar notificaciones</button>
-            <button class="btn btn-small btn-danger" onclick="cerrarSesion()">🚪 Salir</button>
+
+
+    <!-- =========================================
+         PANEL ADMIN
+    ========================================== -->
+    <section
+      id="panelAdmin"
+      class="panel-admin"
+      style="display:none;"
+    >
+
+      <div class="admin-cabecera">
+
+        <div class="admin-titulo">
+
+          <div class="admin-icono">
+            ⚙️
           </div>
-        </div>
 
-        <div id="panelPedidosAdmin" class="orders-panel" hidden>
-          <div class="orders-head"><div><span class="eyebrow pink">📦 BANDEJA</span><h3>Pedidos recibidos</h3><p>Solo visible para la cuenta del dueño.</p></div><button class="icon-btn" onclick="ocultarPedidosAdmin()">✕</button></div>
-          <div id="listaPedidosAdmin" class="orders-list"></div>
-        </div>
+          <div>
+            <span class="admin-etiqueta">
+              MODO ADMINISTRADOR
+            </span>
 
-        <div class="admin-form card">
-          <div class="admin-grid">
-            <label>📷 Foto del producto<input id="fotoProducto" type="file" accept="image/*"><span id="previewProductoWrap" class="upload-preview"><img id="vistaPreviaProducto" alt="Vista previa"></span></label>
-            <label>🏷️ Nombre<input id="nombreProducto" maxlength="100" placeholder="Ej: Labial rojo"></label>
-            <label>💰 Precio<input id="precioProducto" type="number" min="0" step="1" inputmode="numeric" placeholder="15000"></label>
-            <label class="full">📝 Descripción<textarea id="descripcionProducto" maxlength="300" placeholder="Describe el producto..."></textarea></label>
+            <h2>
+              Panel de administración
+            </h2>
+
+            <p id="estadoSesion">
+              Sesión no iniciada
+            </p>
           </div>
-          <button class="btn btn-primary" onclick="agregarProducto()">➕ Publicar producto</button>
-          <p id="mensajeProducto" class="status-text"></p>
+
         </div>
-      </section>
 
-      <section class="store-hero">
-        <div><span class="eyebrow pink">🛍️ NUESTRA TIENDA</span><h2>Productos</h2><p>Elige lo que quieras y agrégalo al carrito.</p></div>
-        <button class="btn btn-outline" onclick="alternarFiltros()">🔎 Buscar / Filtrar</button>
-      </section>
+        <button
+          class="boton-cerrar-sesion"
+          onclick="cerrarSesion()"
+        >
+          <span>↪</span>
+          Cerrar sesión
+        </button>
 
-      <section id="panelFiltros" class="filter-panel" hidden>
-        <div class="filter-head"><div><b>🔎 Buscar productos</b><small>Busca por nombre o descripción</small></div><button class="icon-btn" onclick="cerrarFiltros()">✕</button></div>
-        <div class="search-row"><input id="buscadorProductos" type="search" placeholder="Ej: labial, peluche..." autocomplete="off"><button class="icon-btn" onclick="limpiarBusqueda()">✕</button></div>
-        <div class="price-row"><b>💰 Precio máximo</b><b id="valorPrecioFiltro">$100.000+</b></div>
-        <input id="rangoPrecio" type="range" min="0" max="100000" step="5000" value="100000" aria-label="Precio máximo">
-        <div class="range-labels"><span>$0</span><span>$100.000+</span></div>
-        <button class="btn btn-small btn-outline" onclick="limpiarFiltros()">🔄 Mostrar todos</button>
-      </section>
+      </div>
 
-      <div id="contadorResultados" class="result-count">Mostrando productos</div>
-      <div id="productos" class="product-grid"></div>
-      <div id="sinResultados" class="empty-state" hidden><div>🔍</div><h3>No encontramos productos</h3><p>Prueba otra búsqueda o un rango de precio diferente.</p><button class="btn btn-outline" onclick="limpiarFiltros()">Ver todos</button></div>
+
+      <div class="admin-formulario">
+
+        <div class="campo-admin campo-foto-admin">
+
+          <label for="fotoProducto">
+            📷 Foto del producto
+          </label>
+
+          <div class="selector-foto">
+
+            <input
+              type="file"
+              id="fotoProducto"
+              accept="image/*"
+              capture="environment"
+            >
+
+            <div class="selector-foto-texto">
+              <span class="selector-foto-icono">
+                📸
+              </span>
+
+              <strong>
+                Toca para elegir una foto
+              </strong>
+
+              <small>
+                JPG, PNG, WEBP
+              </small>
+            </div>
+
+          </div>
+
+          <div
+            id="vistaPrevia"
+            class="vista-previa"
+          ></div>
+
+        </div>
+
+
+        <div class="campo-admin">
+
+          <label for="nombreProducto">
+            🏷️ Nombre del producto
+          </label>
+
+          <input
+            type="text"
+            id="nombreProducto"
+            placeholder="Ej: Labial rojo"
+            autocomplete="off"
+          >
+
+        </div>
+
+
+        <div class="campo-admin">
+
+          <label for="precioProducto">
+            💰 Precio
+          </label>
+
+          <div class="input-precio">
+
+            <span>$</span>
+
+            <input
+              type="number"
+              id="precioProducto"
+              placeholder="15000"
+              min="0"
+              inputmode="numeric"
+            >
+
+          </div>
+
+        </div>
+
+
+        <div class="campo-admin">
+
+          <label for="descripcionProducto">
+            📝 Descripción
+          </label>
+
+          <textarea
+            id="descripcionProducto"
+            placeholder="Escribe una descripción del producto..."
+            rows="4"
+          ></textarea>
+
+        </div>
+
+
+        <button
+          class="boton-publicar"
+          onclick="agregarProducto()"
+        >
+          <span>🚀</span>
+          Publicar producto
+        </button>
+
+      </div>
+
+    </section>
+
+
+
+    <!-- =========================================
+         TIENDA
+    ========================================== -->
+    <main
+      id="seccionProductos"
+      class="seccion-productos"
+    >
+
+      <div class="encabezado-productos">
+
+        <div class="encabezado-texto">
+
+          <span class="mini-titulo">
+            ✨ NUESTRA TIENDA
+          </span>
+
+          <h2>
+            Productos
+            <span>para ti</span>
+          </h2>
+
+          <p>
+            Explora nuestras variedades disponibles.
+          </p>
+
+        </div>
+
+
+        <button
+          class="boton-filtros"
+          onclick="alternarFiltros()"
+        >
+          <span>🔎</span>
+          Buscar / Filtrar
+          <span
+            id="iconoFiltros"
+            class="icono-filtros"
+          >
+            ⌄
+          </span>
+        </button>
+
+      </div>
+
+
+
+      <!-- FILTROS -->
+      <div
+        id="panelFiltros"
+        class="panel-filtros"
+      >
+
+        <div class="filtro-top">
+
+          <div class="campo-busqueda">
+
+            <label for="buscadorProductos">
+              🔎 Buscar producto
+            </label>
+
+            <div class="busqueda-input">
+
+              <span>⌕</span>
+
+              <input
+                type="text"
+                id="buscadorProductos"
+                placeholder="¿Qué estás buscando?"
+                autocomplete="off"
+              >
+
+              <button
+                id="limpiarBusqueda"
+                class="limpiar-busqueda"
+                onclick="limpiarBusqueda()"
+                aria-label="Limpiar búsqueda"
+              >
+                ×
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="filtro-precio">
+
+          <div class="encabezado-precio">
+
+            <div>
+              <span class="titulo-filtro-precio">
+                💰 Precio máximo
+              </span>
+
+              <small>
+                Mueve el control para filtrar
+              </small>
+            </div>
+
+            <strong
+              id="valorPrecio"
+            >
+              $100.000+
+            </strong>
+
+          </div>
+
+
+          <div class="linea-precio">
+
+            <span>$0</span>
+
+            <input
+              type="range"
+              id="rangoPrecio"
+              min="0"
+              max="100000"
+              step="5000"
+              value="100000"
+            >
+
+            <span>$100.000+</span>
+
+          </div>
+
+        </div>
+
+
+        <button
+          class="boton-limpiar-filtros"
+          onclick="limpiarFiltros()"
+        >
+          ↻
+          Limpiar filtros
+        </button>
+
+      </div>
+
+
+
+      <!-- CONTADOR -->
+      <div
+        id="contadorResultados"
+        class="contador-resultados"
+      >
+        Mostrando productos
+      </div>
+
+
+
+      <!-- PRODUCTOS -->
+      <div
+        id="contenedorProductos"
+        class="contenedor-productos"
+      >
+
+        <div
+          id="productosDinamicos"
+          class="productos-dinamicos"
+        ></div>
+
+        <div
+          id="sinResultados"
+          class="sin-resultados"
+          style="display:none;"
+        >
+
+          <div class="icono-sin-resultados">
+            🔍
+          </div>
+
+          <h3>
+            No encontramos productos
+          </h3>
+
+          <p>
+            Prueba con otro nombre o cambia el filtro de precio.
+          </p>
+
+          <button
+            onclick="limpiarFiltros()"
+          >
+            Limpiar filtros
+          </button>
+
+        </div>
+
+      </div>
+
     </main>
-    <footer class="footer">© 2026 Variedades Karleny · Todos los derechos reservados.</footer>
+
+
+
+    <!-- =========================================
+         FOOTER
+    ========================================== -->
+    <footer class="footer">
+
+      <div class="footer-contenido">
+
+        <div class="footer-marca">
+
+          <div class="footer-logo">
+            🛍️
+          </div>
+
+          <div>
+            <strong>
+              Variedades Karleny
+            </strong>
+
+            <p>
+              Productos y variedades para todos.
+            </p>
+          </div>
+
+        </div>
+
+
+        <div class="footer-derecha">
+
+          <span>
+            Hecho con 💖
+          </span>
+
+          <span>
+            © 2026
+          </span>
+
+        </div>
+
+      </div>
+
+    </footer>
+
   </section>
 
-  <!-- LOGIN -->
-  <div id="ventanaLogin" class="modal" hidden>
-    <div class="modal-card">
-      <button class="modal-close" onclick="cerrarLogin()">✕</button>
-      <div class="modal-icon">👑</div>
-      <h2>Acceso del dueño</h2>
-      <p>Inicia sesión para publicar productos y recibir pedidos.</p>
-      <label>Correo<input id="correoLogin" type="email" placeholder="Tu correo" autocomplete="email"></label>
-      <label>Contraseña<input id="contrasenaLogin" type="password" placeholder="Tu contraseña" autocomplete="current-password"></label>
-      <button class="btn btn-primary full-btn" onclick="iniciarSesion()">🔐 Entrar</button>
-      <p id="mensajeLogin" class="status-text"></p>
-    </div>
-  </div>
 
-  <!-- CARRITO -->
-  <div id="ventanaCarrito" class="modal" hidden>
-    <div class="modal-card cart-modal">
-      <button class="modal-close" onclick="cerrarCarrito()">✕</button>
-      <div class="modal-icon">🛒</div>
-      <h2>Mi carrito</h2>
-      <p>Revisa las cantidades y luego envía el pedido.</p>
-      <div id="listaCarrito"></div>
-      <div id="carritoVacio" class="empty-state compact" hidden>🛒 Tu carrito está vacío.</div>
-      <div id="resumenCarrito" class="cart-summary" hidden>
-        <div><span>Total:</span><b id="totalCarrito">$0</b></div>
-        <div class="cart-actions">
-          <button class="btn btn-outline" onclick="vaciarCarrito()">🗑️ Vaciar</button>
-          <button class="btn btn-primary" onclick="enviarPedido()">📦 Enviar pedido</button>
-        </div>
+
+  <!-- =========================================
+       MODAL LOGIN
+  ========================================== -->
+  <div
+    id="ventanaLogin"
+    class="modal"
+  >
+
+    <div
+      class="modal-contenido modal-login"
+    >
+
+      <button
+        class="cerrar-modal"
+        onclick="cerrarLogin()"
+        aria-label="Cerrar"
+      >
+        ×
+      </button>
+
+      <div class="icono-login">
+        🔐
       </div>
+
+      <span class="modal-etiqueta">
+        ACCESO PRIVADO
+      </span>
+
+      <h2>
+        Iniciar sesión
+      </h2>
+
+      <p>
+        Acceso exclusivo para el administrador.
+      </p>
+
+
+      <div class="campo-login">
+
+        <label for="correoLogin">
+          Correo
+        </label>
+
+        <input
+          type="email"
+          id="correoLogin"
+          placeholder="Correo electrónico"
+          autocomplete="email"
+        >
+
+      </div>
+
+
+      <div class="campo-login">
+
+        <label for="passwordLogin">
+          Contraseña
+        </label>
+
+        <input
+          type="password"
+          id="passwordLogin"
+          placeholder="Contraseña"
+          autocomplete="current-password"
+        >
+
+      </div>
+
+
+      <button
+        class="boton-login"
+        onclick="iniciarSesion()"
+      >
+        Entrar
+        <span>→</span>
+      </button>
+
+
+      <p
+        id="mensajeLogin"
+        class="mensaje-login"
+      ></p>
+
     </div>
+
   </div>
 
-  <footer class="site-footer">Variedades Karleny · Gracias por tu compra 💗</footer>
 
-  <script type="module" src="script.js"></script>
+
+  <!-- =========================================
+       MODAL CARRITO
+  ========================================== -->
+  <div
+    id="ventanaCarrito"
+    class="modal"
+  >
+
+    <div
+      class="modal-contenido modal-carrito"
+    >
+
+      <button
+        class="cerrar-modal"
+        onclick="cerrarCarrito()"
+        aria-label="Cerrar"
+      >
+        ×
+      </button>
+
+      <div class="encabezado-carrito">
+
+        <div class="icono-carrito-modal">
+          🛒
+        </div>
+
+        <div>
+          <span class="modal-etiqueta">
+            TU PEDIDO
+          </span>
+
+          <h2>
+            Mi carrito
+          </h2>
+        </div>
+
+      </div>
+
+
+      <div
+        id="listaCarrito"
+        class="lista-carrito"
+      ></div>
+
+
+      <div
+        id="totalCarrito"
+        class="total-carrito"
+      >
+        Total: $0
+      </div>
+
+
+      <button
+        class="boton-whatsapp"
+        onclick="comprarPorWhatsApp()"
+      >
+        <span>💬</span>
+        Comprar por WhatsApp
+      </button>
+
+    </div>
+
+  </div>
+
+
+
+  <!-- =========================================
+       VISOR DE IMAGEN
+  ========================================== -->
+  <div
+    id="visorImagen"
+    class="visor-imagen"
+    onclick="cerrarVisorImagen()"
+  >
+
+    <button
+      class="cerrar-visor"
+      onclick="cerrarVisorImagen()"
+      aria-label="Cerrar imagen"
+    >
+      ×
+    </button>
+
+    <img
+      id="imagenGrande"
+      src=""
+      alt="Imagen ampliada"
+      onclick="event.stopPropagation()"
+    >
+
+  </div>
+
+
+
+  <!-- TOASTS -->
+  <div
+    id="contenedorToast"
+    class="contenedor-toast"
+  ></div>
+
+
+  <script
+    type="module"
+    src="script.js"
+  ></script>
+
 </body>
 </html>
