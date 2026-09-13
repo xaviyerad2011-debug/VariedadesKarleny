@@ -6811,3 +6811,55 @@ img {
   }
 
 }
+/* =====================================================
+   BOTÓN CAMISAS
+===================================================== */
+
+.boton-camisas {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  padding: 14px 22px;
+
+  border-radius: 14px;
+
+  background: #111;
+  color: #fff;
+
+  text-decoration: none;
+
+  font-weight: 800;
+  font-size: 15px;
+
+  border: 2px solid #111;
+
+  box-shadow:
+    0 10px 25px
+    rgba(0, 0, 0, 0.16);
+
+  transition:
+    transform 0.25s,
+    box-shadow 0.25s,
+    background 0.25s;
+}
+
+.boton-camisas:hover {
+  transform: translateY(-3px);
+
+  background: #222;
+
+  box-shadow:
+    0 15px 30px
+    rgba(0, 0, 0, 0.23);
+}
+
+.boton-camisas span:first-child {
+  font-size: 19px;
+}
+
+.boton-camisas .flecha-boton {
+  font-size: 18px;
+}
