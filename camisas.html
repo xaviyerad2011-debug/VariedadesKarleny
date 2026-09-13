@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#ff4fa0">
+  <title>Edición de Camisa | Variedades Karleny</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <main class="app-shell">
+
+    <!-- PASO 1 -->
+    <section id="pantallaDatos" class="pantalla activa">
+      <div class="topbar">
+        <button class="btn-secundario" id="btnSalirDatos">← Inicio</button>
+        <div class="brand-mini">
+          <div class="brand-logo">K</div>
+          <div>
+            <strong>Variedades Karleny</strong>
+            <span>Edición de camisa</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-edicion">
+        <div class="hero-copy">
+          <span class="etiqueta">PERSONALIZA TU CAMISA</span>
+          <h1>Hazla a tu manera 👕</h1>
+          <p>Primero cuéntanos tus datos y después podrás elegir la talla, color y diseño.</p>
+        </div>
+        <div class="hero-shirt">
+          <svg viewBox="0 0 300 300" aria-hidden="true">
+            <path class="camisa-svg" d="M108 52 58 74 22 116l58 50 20-26v122h200V140l20 26 58-50-36-42-50-22c-10 20-28 32-62 32s-52-12-62-32Z"/>
+            <path class="cuello-svg" d="M108 52c10 20 28 32 62 32s52-12 62-32" />
+          </svg>
+        </div>
+      </div>
+
+      <form id="formDatos" class="card-form">
+        <div class="section-title">
+          <span>01</span>
+          <div>
+            <h2>Datos del cliente</h2>
+            <p>Los usaremos para identificar la personalización.</p>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <label>
+            <span>Nombre completo</span>
+            <input id="nombreCliente" type="text" placeholder="Ej. Carlos Pérez" autocomplete="name" required>
+          </label>
+
+          <label>
+            <span>Teléfono</span>
+            <input id="telefonoCliente" type="tel" placeholder="Ej. 320 000 0000" autocomplete="tel" required>
+          </label>
+
+          <label class="campo-ancho">
+            <span>Día de entrega</span>
+            <input id="fechaEntrega" type="date" required>
+          </label>
+        </div>
+
+        <button class="btn-principal btn-grande" type="submit">
+          Empezar personalización →
+        </button>
+      </form>
+    </section>
+
+
+    <!-- PASO 2 -->
+    <section id="pantallaTalla" class="pantalla">
+      <div class="topbar">
+        <button class="btn-secundario" id="btnVolverDatos">← Volver</button>
+        <div class="progreso">
+          <span class="activo">1</span>
+          <i></i>
+          <span class="activo">2</span>
+          <i></i>
+          <span>3</span>
+        </div>
+      </div>
+
+      <div class="centrado">
+        <span class="etiqueta">PASO 2</span>
+        <h1>¿Qué talla necesitas?</h1>
+        <p class="subtitulo">La talla quedará guardada con tu diseño para que el pedido llegue bien identificado.</p>
+
+        <div id="tallas" class="tallas-grid">
+          <button type="button" class="talla" data-talla="XS">XS</button>
+          <button type="button" class="talla" data-talla="S">S</button>
+          <button type="button" class="talla" data-talla="M">M</button>
+          <button type="button" class="talla" data-talla="L">L</button>
+          <button type="button" class="talla" data-talla="XL">XL</button>
+          <button type="button" class="talla" data-talla="XXL">XXL</button>
+        </div>
+
+        <div class="resumen-datos" id="resumenDatos"></div>
+
+        <button id="btnIrEditor" class="btn-principal btn-grande" disabled>
+          Continuar al editor →
+        </button>
+      </div>
+    </section>
+
+
+    <!-- PASO 3 -->
+    <section id="pantallaEditor" class="pantalla pantalla-editor">
+      <div class="topbar editor-topbar">
+        <button class="btn-secundario" id="btnVolverTalla">← Talla</button>
+
+        <div class="editor-title">
+          <strong>Editor de camisa</strong>
+          <span id="ladoActualTexto">Frente</span>
+        </div>
+
+        <button class="btn-secundario" id="btnInicioEditor">⌂ Inicio</button>
+      </div>
+
+      <div class="editor-layout">
+
+        <aside class="panel-control">
+          <div class="control-section">
+            <span class="control-kicker">LADO DE LA CAMISA</span>
+            <div class="lado-switch">
+              <button id="btnFrente" class="lado-btn activo">Frente</button>
+              <button id="btnEspalda" class="lado-btn">Espalda</button>
+            </div>
+          </div>
+
+          <div class="control-section">
+            <span class="control-kicker">COLOR</span>
+            <div class="paleta" id="paletaColores">
+              <button class="color-btn" data-color="#ffffff" style="--color:#ffffff" aria-label="Blanco"></button>
+              <button class="color-btn" data-color="#f3f4f6" style="--color:#f3f4f6" aria-label="Gris claro"></button>
+              <button class="color-btn" data-color="#111111" style="--color:#111111" aria-label="Negro"></button>
+              <button class="color-btn" data-color="#ef4444" style="--color:#ef4444" aria-label="Rojo"></button>
+              <button class="color-btn" data-color="#f97316" style="--color:#f97316" aria-label="Naranja"></button>
+              <button class="color-btn" data-color="#facc15" style="--color:#facc15" aria-label="Amarillo"></button>
+              <button class="color-btn" data-color="#16a34a" style="--color:#16a34a" aria-label="Verde"></button>
+              <button class="color-btn" data-color="#2563eb" style="--color:#2563eb" aria-label="Azul"></button>
+              <button class="color-btn" data-color="#8b5cf6" style="--color:#8b5cf6" aria-label="Morado"></button>
+            </div>
+          </div>
+
+          <div class="control-section">
+            <span class="control-kicker">DISEÑO</span>
+            <label class="upload-box">
+              <input id="inputImagen" type="file" accept="image/png,image/jpeg,image/webp">
+              <span class="upload-icon">＋</span>
+              <strong>Traer imagen de la galería</strong>
+              <small>PNG, JPG o WEBP</small>
+            </label>
+
+            <button id="btnQuitarImagen" class="btn-danger-soft" type="button">
+              Quitar imagen de este lado
+            </button>
+          </div>
+
+          <div class="control-section ajustes">
+            <span class="control-kicker">AJUSTES DE LA IMAGEN</span>
+
+            <label class="rango">
+              <div>
+                <span>Tamaño</span>
+                <b id="textoTamano">45%</b>
+              </div>
+              <input id="rangoTamano" type="range" min="15" max="85" value="45">
+            </label>
+
+            <label class="rango">
+              <div>
+                <span>Altura</span>
+                <b id="textoAltura">50%</b>
+              </div>
+              <input id="rangoAltura" type="range" min="10" max="90" value="50">
+            </label>
+
+            <button id="btnCentrarImagen" class="btn-secundario ancho" type="button">
+              ↺ Centrar imagen
+            </button>
+          </div>
+
+          <div class="mini-ayuda">
+            <strong>Tip</strong>
+            <p>También puedes arrastrar la imagen directamente sobre la camisa para acomodarla.</p>
+          </div>
+        </aside>
+
+        <section class="zona-canvas">
+          <div class="canvas-header">
+            <div>
+              <span class="etiqueta">VISTA PREVIA</span>
+              <h2 id="tituloVista">Frente de la camisa</h2>
+            </div>
+            <span id="estadoDiseno" class="estado-pill">Sin diseño</span>
+          </div>
+
+          <div class="camisa-workspace" id="camisaWorkspace">
+            <svg class="camisa-svg-grande" viewBox="0 0 600 650" preserveAspectRatio="xMidYMid meet">
+              <path id="camisaCuerpo" class="camisa-cuerpo" d="M214 92 132 124 58 188l78 72 38-38v264h252V222l38 38 78-72-74-64-82-32c-15 31-40 48-86 48s-71-17-86-48Z"/>
+              <path class="cuello-linea" d="M214 92c15 31 40 48 86 48s71-17 86-48"/>
+              <path class="costura" d="M136 260 136 620M464 260 464 620"/>
+            </svg>
+
+            <div id="zonaDiseno" class="zona-diseno">
+              <img id="imagenDiseno" class="imagen-diseno" alt="Diseño de la camisa">
+              <div id="marcoSeleccion" class="marco-seleccion" aria-hidden="true">
+                <span></span><span></span><span></span><span></span>
+              </div>
+            </div>
+
+            <div id="sinDiseno" class="sin-diseno">
+              <span>＋</span>
+              <strong>Sube una imagen</strong>
+              <small>Tu diseño aparecerá aquí</small>
+            </div>
+          </div>
+
+          <div class="canvas-footer">
+            <span>Desliza o arrastra para acomodar el diseño.</span>
+            <button id="btnTerminar" class="btn-principal">Terminar edición →</button>
+          </div>
+        </section>
+      </div>
+    </section>
+
+
+    <!-- PASO 4 -->
+    <section id="pantallaResumen" class="pantalla">
+      <div class="topbar">
+        <button id="btnVolverEditor" class="btn-secundario">← Editor</button>
+        <button id="btnInicioResumen" class="btn-secundario">⌂ Inicio</button>
+      </div>
+
+      <div class="resumen-page">
+        <span class="etiqueta">ÚLTIMO PASO</span>
+        <h1>Revisa tu camisa 👕</h1>
+        <p class="subtitulo">Comprueba los datos antes de confirmar la personalización.</p>
+
+        <div class="resumen-layout">
+          <div class="preview-final">
+            <div class="preview-side">
+              <span>Frente</span>
+              <div class="mini-camisa" id="miniFrente"></div>
+            </div>
+            <div class="preview-side">
+              <span>Espalda</span>
+              <div class="mini-camisa" id="miniEspalda"></div>
+            </div>
+          </div>
+
+          <div class="datos-finales" id="datosFinales"></div>
+        </div>
+
+        <div class="confirmar-box">
+          <div>
+            <strong>¿Todo está correcto?</strong>
+            <span>Al confirmar, esta información quedará lista para conectarla con el carrito y los pedidos.</span>
+          </div>
+          <button id="btnConfirmar" class="btn-principal btn-grande">Confirmar camisa ✓</button>
+        </div>
+
+        <div id="confirmacionExitosa" class="confirmacion-exitosa oculto">
+          <div class="check-grande">✓</div>
+          <h2>¡Camisa preparada!</h2>
+          <p>La personalización de prueba quedó registrada en esta demo.</p>
+          <div id="codigoDemo" class="codigo-demo"></div>
+          <button id="btnReiniciar" class="btn-principal">Crear otra camisa</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <div id="toast" class="toast"></div>
+  <script src="script.js"></script>
+</body>
+</html>
